@@ -57,6 +57,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   const [glossaryTerm, setGlossaryTerm] = useState(null)
   const [audioPlaying, setAudioPlaying] = useState(false)
   const [clinicalOpen, setClinicalOpen] = useState(false)
+  const [fontSize, setFontSize] = useState(14)
 
   const q = QUESTIONS[currentQ]
   const answered = answers[q?.id] !== undefined
@@ -169,7 +170,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         <div style={{ padding: '4px 16px 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
           <button onClick={() => isReviewMode ? navigate('result') : setShowExitConfirm(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T1, fontSize: 20, lineHeight: 1, display: 'flex', alignItems: 'center', fontWeight: 700 }}>✕</button>
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: 'white', background: P, borderRadius: 7, padding: '3px 11px', letterSpacing: '0.08em' }}>E5</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: T1, letterSpacing: '0.04em' }}>E5</div>
           </div>
           <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T2 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -218,7 +219,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         </div>
 
         {/* Question text */}
-        <div style={{ background: BG2, borderRadius: 12, padding: '14px', marginBottom: 14, fontSize: 14, color: T1, lineHeight: 1.6, fontWeight: 500 }}>{q?.text}</div>
+        <div style={{ background: BG2, borderRadius: 12, padding: '14px', marginBottom: 14, fontSize, color: T1, lineHeight: 1.6, fontWeight: 500 }}>{q?.text}</div>
 
         {/* Options */}
         <div style={{ marginBottom: timedOut || answered ? 12 : 0 }}>
@@ -431,6 +432,21 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
                   ))}
                 </div>
               </div>
+              {/* Font size */}
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: T2, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Question font size</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[{ label: 'A', size: 12 }, { label: 'A', size: 14 }, { label: 'A', size: 16 }, { label: 'A', size: 18 }].map(({ label, size }) => (
+                    <button key={size} onClick={() => setFontSize(size)} style={{ flex: 1, padding: '9px 0', borderRadius: 10, border: `2px solid ${fontSize === size ? P : BD}`, background: fontSize === size ? PL : 'white', cursor: 'pointer', fontWeight: 600, color: fontSize === size ? PD : T2, fontSize: size - 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, padding: '0 2px' }}>
+                  {['12px', '14px', '16px', '18px'].map(s => <span key={s} style={{ flex: 1, textAlign: 'center', fontSize: 9, color: T3 }}>{s}</span>)}
+                </div>
+              </div>
+
               {/* Auto advance */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
