@@ -133,19 +133,17 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
           </button>
         </div>
 
-        {/* Question dots */}
+        {/* Question dots — fills full width, no scroll */}
         <div style={{ padding: '0 16px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ flex: 1, minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <div style={{ display: 'inline-flex', gap: 5 }}>
-              {QUESTIONS.map((_, i) => {
-                const dc = getDotColor(i)
-                return (
-                  <button key={i} onClick={() => setCurrentQ(i)} style={{ width: 30, height: 30, borderRadius: '50%', border: `1.5px solid ${dc.border}`, background: dc.bg, color: dc.c, fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {i + 1}
-                  </button>
-                )
-              })}
-            </div>
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {QUESTIONS.map((_, i) => {
+              const dc = getDotColor(i)
+              return (
+                <button key={i} onClick={() => setCurrentQ(i)} style={{ width: 32, height: 32, borderRadius: '50%', border: `1.5px solid ${dc.border}`, background: dc.bg, color: dc.c, fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {i + 1}
+                </button>
+              )
+            })}
           </div>
           <button onClick={() => setShowGrid(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T2, marginLeft: 4, flexShrink: 0 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -154,7 +152,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
       </div>
 
       {/* Scrollable question content */}
-      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 100px' }}>
+      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 76px' }}>
 
         {/* Question header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
@@ -196,12 +194,12 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         </div>
 
         {/* Feedback banner */}
-        {timedOut && !answered && (
-          <div style={{ background: '#FFF3E0', border: '1px solid #FFB74D', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 13, fontWeight: 600, color: '#E65100', textAlign: 'center' }}>⏱ Oops! You ran out of time.</div>
+        {selected === 'timeout' && (
+          <div style={{ background: '#FFF3E0', border: '1px solid #FFB74D', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 13, fontWeight: 600, color: '#E65100', textAlign: 'center' }}>Oops you ran out of time.</div>
         )}
         {answered && selected !== 'timeout' && (
           <div style={{ background: isCorrect ? '#EAF3DE' : '#FCEBEB', border: `1px solid ${isCorrect ? '#97C459' : '#F09595'}`, borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, fontWeight: 600, color: isCorrect ? '#27500A' : '#791F1F', textAlign: 'center' }}>
-            {isCorrect ? '✓ Wonderful! You got this right.' : '✗ Incorrect. Check the explanation below.'}
+            {isCorrect ? 'Wonderful, you got this question right.' : 'Sorry this time it was not correct. Check explanation to learn more.'}
           </div>
         )}
 

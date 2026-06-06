@@ -182,7 +182,7 @@ export default function Home({ navigate, savedQs, bannerDismissed, setBannerDism
               {displaySubjects.map((s, i) => {
                 const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0
                 return (
-                  <button key={s.id} onClick={() => { setShowSubjectIdx(false); navigate('subject') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', borderBottom: `1px solid ${BD}`, background: 'none', border: 'none', borderBottom: `1px solid ${BD}`, cursor: 'pointer', textAlign: 'left' }}>
+                  <button key={s.id} onClick={() => { setShowSubjectIdx(false); navigate('subject') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', background: 'none', border: 'none', borderBottom: `1px solid ${BD}`, cursor: 'pointer', textAlign: 'left' }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: T3, minWidth: 22 }}>{String(i + 1).padStart(2, '0')}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: T1, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
