@@ -54,6 +54,8 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   const [visualScale, setVisualScale] = useState(1)
   const [touchStartDist, setTouchStartDist] = useState(0)
   const [touchStartScale, setTouchStartScale] = useState(1)
+  const [glossaryTerm, setGlossaryTerm] = useState(null)
+  const [audioPlaying, setAudioPlaying] = useState(false)
 
   const q = QUESTIONS[currentQ]
   const answered = answers[q?.id] !== undefined
@@ -120,6 +122,41 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   const showGuideContent = isReviewMode || (answered && mode === 'guide')
   const showPYQtag = q?.isPYQ && (mode === 'guide' || isReviewMode)
 
+  // Reset per-question UI when navigating
+  useEffect(() => {
+    setAudioPlaying(false)
+    setGlossaryTerm(null)
+  }, [currentQ])
+
+  const renderExplanationText = (text, glossary) => {
+    if (!text) return null
+    if (!glossary || Object.keys(glossary).length === 0) return text
+    const terms = Object.keys(glossary).sort((a, b) => b.length - a.length)
+    const parts = []
+    let remaining = text
+    let k = 0
+    while (remaining.length > 0) {
+      let earliestIdx = Infinity
+      let matchedTerm = null
+      for (const term of terms) {
+        const idx = remaining.toLowerCase().indexOf(term.toLowerCase())
+        if (idx !== -1 && idx < earliestIdx) { earliestIdx = idx; matchedTerm = term }
+      }
+      if (!matchedTerm) { parts.push(<span key={k++}>{remaining}</span>); break }
+      if (earliestIdx > 0) parts.push(<span key={k++}>{remaining.slice(0, earliestIdx)}</span>)
+      const matched = remaining.slice(earliestIdx, earliestIdx + matchedTerm.length)
+      parts.push(
+        <span key={k++}
+          onClick={(e) => { e.stopPropagation(); setGlossaryTerm({ term: matchedTerm, def: glossary[matchedTerm] }) }}
+          style={{ color: P, fontWeight: 700, background: PL, borderRadius: 3, padding: '0 2px', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
+          {matched}
+        </span>
+      )
+      remaining = remaining.slice(earliestIdx + matchedTerm.length)
+    }
+    return <>{parts}</>
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white' }}>
       {/* Header */}
@@ -171,15 +208,9 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
               <TimerRing timeLeft={timeLeft} timerPerQ={timerPerQ} />
             )}
             {(answered || timedOut || isReviewMode) && (
-              <>
-                <button style={{ background: 'none', border: `1px solid ${BD}`, borderRadius: 6, padding: '4px 6px', cursor: 'pointer', color: T3, display: 'flex', alignItems: 'center' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                </button>
-                <button onClick={() => { setSaveTag(alreadySaved?.tag || ''); setShowSaveModal(true) }} style={{ background: alreadySaved ? PL : 'none', border: `1px solid ${alreadySaved ? PB : BD}`, borderRadius: 6, padding: '4px 6px', cursor: 'pointer', color: alreadySaved ? P : T3, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill={alreadySaved ? P : 'none'} stroke={alreadySaved ? P : 'currentColor'} strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
-                  <span style={{ fontSize: 10, fontWeight: 600 }}>Save</span>
-                </button>
-              </>
+              <button style={{ background: 'none', border: `1px solid ${BD}`, borderRadius: 6, padding: '4px 6px', cursor: 'pointer', color: T3, display: 'flex', alignItems: 'center' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              </button>
             )}
           </div>
         </div>
@@ -229,8 +260,19 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
 
             {/* Explanation */}
             <div style={{ marginBottom: 18 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Explanation</div>
-              <div style={{ fontSize: 13, color: T1, lineHeight: 1.7, padding: '14px', background: BG2, borderRadius: 12, border: `1px solid ${BD}` }}>{q?.explanation}</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Explanation</div>
+                <button onClick={() => setAudioPlaying(a => !a)} title="Audio explanation" style={{ width: 26, height: 26, borderRadius: '50%', background: audioPlaying ? P : BG2, border: `1px solid ${audioPlaying ? PB : BD}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={audioPlaying ? 'white' : T2} strokeWidth="2.2" strokeLinecap="round">
+                    <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/>
+                    <path d="M15.54 8.46a5 5 0 010 7.07"/>
+                    {audioPlaying && <path d="M19.07 4.93a10 10 0 010 14.14"/>}
+                  </svg>
+                </button>
+              </div>
+              <div style={{ fontSize: 13, color: T1, lineHeight: 1.7, padding: '14px', background: BG2, borderRadius: 12, border: `1px solid ${BD}` }}>
+                {renderExplanationText(q?.explanation, q?.glossary)}
+              </div>
             </div>
 
             {/* Why other options were wrong */}
@@ -559,6 +601,22 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
               <button onClick={() => setShowSubmitConfirm(false)} className="btn-outline" style={{ flex: 1 }}>Review</button>
               <button onClick={handleSubmit} className="btn-primary" style={{ flex: 1 }}>Submit</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Glossary term popup */}
+      {glossaryTerm && (
+        <div className="popup-overlay" onClick={() => setGlossaryTerm(null)}>
+          <div className="popup" onClick={e => e.stopPropagation()} style={{ maxWidth: 286 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: P, flexShrink: 0, marginTop: 3 }} />
+                <span style={{ fontSize: 14, fontWeight: 800, color: P, lineHeight: 1.3 }}>{glossaryTerm.term}</span>
+              </div>
+              <button onClick={() => setGlossaryTerm(null)} style={{ background: 'none', border: 'none', fontSize: 20, color: T3, cursor: 'pointer', lineHeight: 1, marginLeft: 10, marginTop: -2 }}>×</button>
+            </div>
+            <div style={{ fontSize: 13, color: T2, lineHeight: 1.6 }}>{glossaryTerm.def}</div>
           </div>
         </div>
       )}

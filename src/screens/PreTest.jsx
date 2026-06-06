@@ -44,7 +44,6 @@ export default function PreTest({ navigate, startAttempt, mode, setMode }) {
                 <button key={m.id} onClick={() => setLocalMode(m.id)} style={{ flex: 1, padding: '12px 10px', borderRadius: 12, border: `2px solid ${localMode === m.id ? P : BD}`, background: localMode === m.id ? PL : 'white', cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: localMode === m.id ? PD : T1, marginBottom: 5 }}>{m.label}</div>
                   <div style={{ fontSize: 11, color: localMode === m.id ? P : T3, lineHeight: 1.4 }}>{m.desc}</div>
-                  {localMode === m.id && <div style={{ marginTop: 8 }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: P }} /></div>}
                 </button>
               ))}
             </div>
