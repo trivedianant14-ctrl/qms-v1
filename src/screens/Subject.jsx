@@ -24,15 +24,11 @@ const NavBar = ({ navigate }) => {
   )
 }
 
-const DIFF_MAP = { easy: { bg: '#EAF3DE', c: '#27500A', b: '#C0DD97', l: 'Easy' }, moderate: { bg: '#FAEEDA', c: '#633806', b: '#FAC775', l: 'Moderate' }, difficult: { bg: '#FCEBEB', c: '#791F1F', b: '#F7C1C1', l: 'Difficult' } }
 const IDX_CHAPTERS = ['Anatomical Terms', 'Skeletal System', 'Muscular System', 'Nervous System', 'Cardiovascular System', 'Respiratory System', 'Integumentary System', 'Endocrine System']
 
 export default function Subject({ navigate, isNewUser }) {
   const [filter, setFilter] = useState('all')
-  const [diffOpen, setDiffOpen] = useState({})
   const [showIdx, setShowIdx] = useState(false)
-
-  const toggleDiff = (id) => setDiffOpen(p => ({ ...p, [id]: !p[id] }))
 
   const displayChapters = isNewUser
     ? CHAPTERS.map(c => ({ ...c, state: 'unattempted', prog: undefined, res: undefined }))
@@ -52,20 +48,6 @@ export default function Subject({ navigate, isNewUser }) {
   })
 
   const renderCard = (c) => {
-    const open = !!diffOpen[c.id]
-    const dm = DIFF_MAP[c.difficulty]
-    const toggleBtn = (
-      <button onClick={() => toggleDiff(c.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: T3, padding: 0, display: 'flex', alignItems: 'center', gap: 3 }}>
-        {open ? 'Hide' : 'Show'} difficulty
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">{open ? <path d="M18 15l-6-6-6 6"/> : <path d="M6 9l6 6 6-6"/>}</svg>
-      </button>
-    )
-    const diffPill = open && (
-      <div style={{ marginBottom: 8 }}>
-        <span style={{ background: dm.bg, color: dm.c, border: `1px solid ${dm.b}`, fontSize: 10, fontWeight: 600, padding: '2px 10px', borderRadius: 20 }}>{dm.l}</span>
-      </div>
-    )
-
     if (c.state === 'completed') return (
       <div key={c.id} style={{ border: `1px solid #97C459`, borderRadius: 14, padding: 13, marginBottom: 10, background: 'white' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
@@ -75,40 +57,30 @@ export default function Subject({ navigate, isNewUser }) {
           </div>
           <span style={{ background: '#EAF3DE', color: '#27500A', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 20 }}>✓ Done</span>
         </div>
-        <div style={{ fontSize: 11, color: T2, marginBottom: open ? 7 : 9 }}>{c.res.correct}/{c.res.total} correct · {c.res.pct}th percentile</div>
-        {diffPill}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {toggleBtn}
-          <div style={{ display: 'flex', gap: 6 }}>
-            <button className="btn-sm-outline" onClick={() => navigate('pretest')}>Re-attempt</button>
-            <button className="btn-sm-primary" onClick={() => navigate('result')}>View Analysis →</button>
-          </div>
+        <div style={{ fontSize: 11, color: T2, marginBottom: 9 }}>{c.res.correct}/{c.res.total} correct · {c.res.pct}th percentile</div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+          <button className="btn-sm-outline" onClick={() => navigate('pretest')}>Re-attempt</button>
+          <button className="btn-sm-primary" onClick={() => navigate('result')}>View Analysis →</button>
         </div>
       </div>
     )
 
-    if (c.state === 'paused') {
-      return (
-        <div key={c.id} style={{ border: `1px solid #FAC775`, borderRadius: 14, padding: 13, marginBottom: 10, background: 'white' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round" opacity={0.5}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-              <span style={{ fontSize: 13, fontWeight: 600, color: T1 }}>{c.name}</span>
-            </div>
-            <span style={{ background: '#FAEEDA', color: '#633806', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 20 }}>Paused</span>
+    if (c.state === 'paused') return (
+      <div key={c.id} style={{ border: `1px solid #FAC775`, borderRadius: 14, padding: 13, marginBottom: 10, background: 'white' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round" opacity={0.5}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            <span style={{ fontSize: 13, fontWeight: 600, color: T1 }}>{c.name}</span>
           </div>
-          <div style={{ fontSize: 11, color: T2, marginBottom: open ? 7 : 9 }}>{c.prog.total} Ques @ {c.marks} Marks</div>
-          {diffPill}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            {toggleBtn}
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button className="btn-sm-purple-outline">Learn</button>
-              <button className="btn-sm-primary" onClick={() => navigate('pretest')}>Resume →</button>
-            </div>
-          </div>
+          <span style={{ background: '#FAEEDA', color: '#633806', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 20 }}>Paused</span>
         </div>
-      )
-    }
+        <div style={{ fontSize: 11, color: T2, marginBottom: 9 }}>{c.prog.total} Ques</div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+          <button className="btn-sm-purple-outline">Learn</button>
+          <button className="btn-sm-primary" onClick={() => navigate('pretest')}>Resume →</button>
+        </div>
+      </div>
+    )
 
     return (
       <div key={c.id} style={{ border: `1px solid ${BD}`, borderRadius: 14, padding: 13, marginBottom: 10, background: 'white' }}>
@@ -116,17 +88,13 @@ export default function Subject({ navigate, isNewUser }) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round" opacity={0.5}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
           <span style={{ fontSize: 13, fontWeight: 600, color: T1 }}>{c.name}</span>
         </div>
-        <div style={{ fontSize: 11, color: T3, marginBottom: open ? 7 : 9 }}>{c.qs} Ques @ {c.marks} Marks</div>
-        {diffPill}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {toggleBtn}
-          <div style={{ display: 'flex', gap: 6 }}>
-            {c.vid
-              ? <button className="btn-sm-purple-outline">Learn</button>
-              : <button className="btn-sm-outline" disabled style={{ opacity: 0.4 }}>No video</button>
-            }
-            <button className="btn-sm-primary" onClick={() => navigate('pretest')}>Attempt Now</button>
-          </div>
+        <div style={{ fontSize: 11, color: T3, marginBottom: 9 }}>{c.qs} Ques</div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+          {c.vid
+            ? <button className="btn-sm-purple-outline">Learn</button>
+            : <button className="btn-sm-outline" disabled style={{ opacity: 0.4 }}>No video</button>
+          }
+          <button className="btn-sm-primary" onClick={() => navigate('pretest')}>Attempt Now</button>
         </div>
       </div>
     )

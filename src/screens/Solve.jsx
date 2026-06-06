@@ -26,7 +26,6 @@ function TimerRing({ timeLeft, timerPerQ }) {
           strokeLinecap="round"
           style={{ transform: `rotate(-90deg)`, transformOrigin: `${cx}px ${cx}px`, transition: 'stroke-dashoffset 0.9s linear, stroke 0.3s' }}
         />
-        <text x={cx} y={cx + 3.5} textAnchor="middle" fontSize="8" fontWeight="700" fill={color}>{timeLeft}</text>
       </svg>
       <span style={{ fontSize: 11, fontWeight: 700, color, minWidth: 30 }}>
         {String(Math.floor(timeLeft / 60)).padStart(2,'0')}:{String(timeLeft % 60).padStart(2,'0')}
@@ -127,8 +126,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         <div style={{ padding: '4px 16px 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
           <button onClick={() => isReviewMode ? navigate('result') : setShowExitConfirm(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T1, fontSize: 20, lineHeight: 1, display: 'flex', alignItems: 'center', fontWeight: 700 }}>✕</button>
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: T1 }}>Anatomical Terms</div>
-            <div style={{ fontSize: 10, color: P, fontWeight: 600 }}>{isReviewMode ? 'Review Mode' : mode === 'guide' ? 'Guide Mode' : 'Exam Mode'}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: T1 }}>E5</div>
           </div>
           <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T2 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -236,10 +234,12 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
 
       {/* Bottom navigation */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'white', borderTop: `1px solid ${BD}`, padding: '12px 16px', display: 'flex', gap: 10 }}>
-        <button onClick={() => currentQ > 0 && setCurrentQ(c => c - 1)} className="btn-outline" style={{ flex: 1 }} disabled={currentQ === 0}>Previous</button>
+        {currentQ > 0 && (
+          <button onClick={() => setCurrentQ(c => c - 1)} className="btn-outline" style={{ flex: 1 }}>Previous</button>
+        )}
         {isLastQ
           ? <button onClick={() => isReviewMode ? navigate('result') : setShowSubmitConfirm(true)} className="btn-primary" style={{ flex: 2 }}>{isReviewMode ? 'Done' : 'Submit'}</button>
-          : <button onClick={() => setCurrentQ(c => c + 1)} className="btn-primary" style={{ flex: 2 }}>Next →</button>
+          : <button onClick={() => setCurrentQ(c => c + 1)} className="btn-primary" style={{ flex: currentQ === 0 ? 1 : 2 }}>Next →</button>
         }
       </div>
 
