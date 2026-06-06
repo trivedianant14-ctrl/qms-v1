@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { SUBJECTS, SAVE_TAGS, TOPPER } from '../data'
 
 const P = '#534AB7', PL = '#EEEDFE', PB = '#AFA9EC', PD = '#3C3489'
@@ -25,6 +26,7 @@ const NavBar = ({ navigate }) => {
 
 export default function Home({ navigate, savedQs, bannerDismissed, setBannerDismissed, unsaveQuestion }) {
   const todayQs = 12, overallAcc = 71
+  const [continueDismissed, setContinueDismissed] = useState(false)
 
   const recentSaves = savedQs.slice(-3).reverse()
 
@@ -58,6 +60,23 @@ export default function Home({ navigate, savedQs, bannerDismissed, setBannerDism
         </div>
       </div>
 
+      {/* Today's Questions — sticky strip */}
+      <div style={{ flexShrink: 0, padding: '10px 16px', borderBottom: `1px solid ${BD}`, background: 'white' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', border: `1px solid ${BD}`, borderRadius: 14, padding: 14 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, color: T3, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Today's Questions</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ fontSize: 26, fontWeight: 700, color: T1 }}>{todayQs}</span>
+              <span style={{ fontSize: 13, color: T2 }}>solved today</span>
+            </div>
+          </div>
+          <div style={{ marginLeft: 14, textAlign: 'center', background: BG2, borderRadius: 10, padding: '8px 14px' }}>
+            <div style={{ fontSize: 11, color: T3, marginBottom: 2 }}>Overall Accuracy</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: overallAcc >= 70 ? '#3B6D11' : overallAcc >= 50 ? P : '#A32D2D' }}>{overallAcc}%</div>
+          </div>
+        </div>
+      </div>
+
       {/* Scrollable content */}
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 88 }}>
 
@@ -77,23 +96,6 @@ export default function Home({ navigate, savedQs, bannerDismissed, setBannerDism
             </div>
           </div>
         )}
-
-        {/* Today's Questions Card */}
-        <div style={{ margin: '12px 16px 0', background: 'white', border: `1px solid ${BD}`, borderRadius: 14, padding: 14 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: T3, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Today's Questions</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontSize: 26, fontWeight: 700, color: T1 }}>{todayQs}</span>
-                <span style={{ fontSize: 13, color: T2 }}>solved today</span>
-              </div>
-            </div>
-            <div style={{ marginLeft: 14, textAlign: 'center', background: BG2, borderRadius: 10, padding: '8px 14px' }}>
-              <div style={{ fontSize: 11, color: T3, marginBottom: 2 }}>Overall Accuracy</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: overallAcc >= 70 ? '#3B6D11' : overallAcc >= 50 ? P : '#A32D2D' }}>{overallAcc}%</div>
-            </div>
-          </div>
-        </div>
 
         {/* Saved Questions Card */}
         <div style={{ margin: '10px 16px 0', background: 'white', border: `1px solid ${BD}`, borderRadius: 14, padding: 14 }}>
@@ -175,16 +177,21 @@ export default function Home({ navigate, savedQs, bannerDismissed, setBannerDism
 
       {/* Sticky continue + nav */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'white' }}>
-        <div style={{ padding: '8px 16px 6px', borderTop: `1px solid ${BD}` }}>
-          <button onClick={() => navigate('pretest')} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, background: PL, border: `1px solid ${PB}`, borderRadius: 10, padding: '10px 12px', cursor: 'pointer' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill={P}><polygon points="5,3 19,12 5,21"/></svg>
-            <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-              <div style={{ fontSize: 10, color: P, marginBottom: 1 }}>Continue where you left off</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: PD, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Applied Anatomy · Anatomical Terms</div>
+        {!continueDismissed && (
+          <div style={{ padding: '8px 16px 6px', borderTop: `1px solid ${BD}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', background: PL, border: `1px solid ${PB}`, borderRadius: 10, overflow: 'hidden' }}>
+              <button onClick={() => navigate('pretest')} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', minWidth: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill={P} style={{ flexShrink: 0 }}><polygon points="5,3 19,12 5,21"/></svg>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 10, color: P, marginBottom: 1 }}>Continue where you left off</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: PD, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Applied Anatomy · Anatomical Terms</div>
+                </div>
+                <span style={{ background: P, borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: 600, color: 'white', whiteSpace: 'nowrap', flexShrink: 0 }}>Resume →</span>
+              </button>
+              <button onClick={() => setContinueDismissed(true)} style={{ padding: '0 12px', background: 'none', border: 'none', cursor: 'pointer', color: PB, fontSize: 18, display: 'flex', alignItems: 'center', flexShrink: 0, alignSelf: 'stretch' }}>×</button>
             </div>
-            <span style={{ background: P, borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: 600, color: 'white', whiteSpace: 'nowrap' }}>Resume →</span>
-          </button>
-        </div>
+          </div>
+        )}
         <NavBar navigate={navigate} />
       </div>
     </div>
