@@ -49,7 +49,11 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [timeLeft, setTimeLeft] = useState(timerPerQ)
   const [timedOut, setTimedOut] = useState(false)
-  const [expandedSection, setExpandedSection] = useState('explanation')
+  const [expandedSection, setExpandedSection] = useState('')
+  const [showVisual, setShowVisual] = useState(false)
+  const [visualScale, setVisualScale] = useState(1)
+  const [touchStartDist, setTouchStartDist] = useState(0)
+  const [touchStartScale, setTouchStartScale] = useState(1)
 
   const q = QUESTIONS[currentQ]
   const answered = answers[q?.id] !== undefined
@@ -205,22 +209,80 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
 
         {/* Guide mode content */}
         {showGuideContent && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              { id: 'explanation', label: 'Explanation', content: q?.explanation },
-              { id: 'references', label: 'References', content: q?.references },
-              { id: 'learn', label: 'Learn More', content: `Topic: ${q?.learnTopic} — Click to open related video content.` },
-            ].map(sec => (
-              <div key={sec.id} style={{ border: `1px solid ${BD}`, borderRadius: 10, overflow: 'hidden' }}>
-                <button onClick={() => setExpandedSection(expandedSection === sec.id ? '' : sec.id)} style={{ width: '100%', padding: '11px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: expandedSection === sec.id ? BG2 : 'white', border: 'none', cursor: 'pointer' }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: T1 }}>{sec.label}</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5">{expandedSection === sec.id ? <path d="M18 15l-6-6-6 6"/> : <path d="M6 9l6 6 6-6"/>}</svg>
+          <div>
+
+            {/* Explanation */}
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Explanation</div>
+              <div style={{ fontSize: 13, color: T1, lineHeight: 1.7, padding: '14px', background: BG2, borderRadius: 12, border: `1px solid ${BD}` }}>{q?.explanation}</div>
+            </div>
+
+            {/* Why other options were wrong */}
+            {q?.distractors?.length > 0 && (
+              <div style={{ marginBottom: 18 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Why Other Options Were Wrong</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  {q.distractors.map(d => (
+                    <div key={d.optId} style={{ display: 'flex', gap: 10, padding: '11px 12px', background: '#FDF4F4', border: '1px solid #F0BABA', borderRadius: 10, alignItems: 'flex-start' }}>
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#F09595', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: 'white' }}>{d.optId.toUpperCase()}</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: '#5a1f1f', lineHeight: 1.55 }}>{d.reason}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Related visual */}
+            {q?.visual && (
+              <div style={{ marginBottom: 18 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Related Visual</div>
+                <div onClick={() => setShowVisual(true)} style={{ borderRadius: 12, overflow: 'hidden', cursor: 'zoom-in', border: `1px solid ${BD}`, background: '#F8F7FF' }}>
+                  <img src={q.visual} alt="Anatomy reference diagram" style={{ width: '100%', display: 'block' }} />
+                </div>
+                <div style={{ fontSize: 10, color: T3, marginTop: 5, textAlign: 'center' }}>Tap to zoom · Pinch to magnify</div>
+              </div>
+            )}
+
+            {/* How to approach — collapsed dropdown */}
+            {q?.approach && (
+              <div style={{ marginBottom: 18, border: `1px solid ${BD}`, borderRadius: 12, overflow: 'hidden' }}>
+                <button onClick={() => setExpandedSection(expandedSection === 'approach' ? '' : 'approach')} style={{ width: '100%', padding: '13px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: expandedSection === 'approach' ? BG2 : 'white', border: 'none', cursor: 'pointer' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: T1 }}>How to Approach this Question</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5">
+                    {expandedSection === 'approach' ? <path d="M18 15l-6-6-6 6"/> : <path d="M6 9l6 6 6-6"/>}
+                  </svg>
                 </button>
-                {expandedSection === sec.id && (
-                  <div style={{ padding: '12px 14px', fontSize: 13, color: T2, lineHeight: 1.6, borderTop: `1px solid ${BD}` }}>{sec.content}</div>
+                {expandedSection === 'approach' && (
+                  <div style={{ padding: '12px 14px 14px', fontSize: 13, color: T2, lineHeight: 1.65, borderTop: `1px solid ${BD}` }}>{q.approach}</div>
                 )}
               </div>
-            ))}
+            )}
+
+            {/* Reference book */}
+            {q?.referenceBook && (
+              <div style={{ marginBottom: 18 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Reference Book</div>
+                <div style={{ display: 'flex', gap: 12, padding: '13px 14px', border: `1px solid ${BD}`, borderRadius: 12, alignItems: 'center', background: 'white' }}>
+                  <div style={{ width: 38, height: 50, background: PL, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${PB}` }}>
+                    <svg width="18" height="22" viewBox="0 0 18 22" fill="none">
+                      <rect x="2" y="1" width="14" height="20" rx="2" fill={P} opacity="0.15"/>
+                      <rect x="2" y="1" width="14" height="20" rx="2" stroke={P} strokeWidth="1.5"/>
+                      <line x1="5" y1="7" x2="13" y2="7" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
+                      <line x1="5" y1="11" x2="13" y2="11" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
+                      <line x1="5" y1="15" x2="10" y2="15" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 2 }}>{q.referenceBook.name}</div>
+                    <div style={{ fontSize: 11, color: T2 }}>{q.referenceBook.edition}</div>
+                    <div style={{ fontSize: 11, color: T3, marginTop: 1 }}>Page {q.referenceBook.page}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         )}
 
@@ -468,6 +530,46 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
               <button onClick={handleSubmit} className="btn-primary" style={{ flex: 1 }}>Submit</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Visual lightbox */}
+      {showVisual && q?.visual && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.93)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <button onClick={() => { setShowVisual(false); setVisualScale(1) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', fontSize: 22, lineHeight: 1 }}>✕</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button onClick={() => setVisualScale(s => Math.max(1, parseFloat((s - 0.5).toFixed(1))))} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', color: 'white', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>−</button>
+              <span style={{ color: 'white', fontSize: 12, minWidth: 38, textAlign: 'center' }}>{Math.round(visualScale * 100)}%</span>
+              <button onClick={() => setVisualScale(s => Math.min(5, parseFloat((s + 0.5).toFixed(1))))} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', color: 'white', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>+</button>
+            </div>
+          </div>
+          <div
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+            onWheel={(e) => { e.stopPropagation(); setVisualScale(s => Math.max(1, Math.min(5, s - e.deltaY * 0.005))) }}
+            onClick={() => { setShowVisual(false); setVisualScale(1) }}
+          >
+            <img
+              src={q.visual}
+              alt="Anatomy reference"
+              onClick={e => e.stopPropagation()}
+              style={{ maxWidth: '100%', transform: `scale(${visualScale})`, transformOrigin: 'center center', transition: visualScale === 1 ? 'transform 0.2s' : 'none', userSelect: 'none', touchAction: 'none', cursor: visualScale > 1 ? 'grab' : 'zoom-in' }}
+              onTouchStart={(e) => {
+                if (e.touches.length === 2) {
+                  const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY)
+                  setTouchStartDist(dist)
+                  setTouchStartScale(visualScale)
+                }
+              }}
+              onTouchMove={(e) => {
+                if (e.touches.length === 2 && touchStartDist > 0) {
+                  const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY)
+                  setVisualScale(Math.max(1, Math.min(5, touchStartScale * (dist / touchStartDist))))
+                }
+              }}
+            />
+          </div>
+          <div style={{ padding: '12px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 11, flexShrink: 0 }}>Scroll or +/− to zoom · Pinch on mobile · Tap outside to close</div>
         </div>
       )}
 
