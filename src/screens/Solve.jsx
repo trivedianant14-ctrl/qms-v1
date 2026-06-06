@@ -114,7 +114,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
 
   const unattempted = QUESTIONS.filter(q => !answers[q.id]).length
 
-  const showGuideContent = answered && (mode === 'guide' || isReviewMode)
+  const showGuideContent = isReviewMode || (answered && mode === 'guide')
   const showPYQtag = q?.isPYQ && (mode === 'guide' || isReviewMode)
 
   return (
@@ -137,15 +137,17 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
 
         {/* Question dots */}
         <div style={{ padding: '0 16px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ display: 'flex', gap: 5, overflowX: 'auto', flex: 1 }}>
-            {QUESTIONS.map((_, i) => {
-              const dc = getDotColor(i)
-              return (
-                <button key={i} onClick={() => setCurrentQ(i)} style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid ${dc.border}`, background: dc.bg, color: dc.c, fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {i + 1}
-                </button>
-              )
-            })}
+          <div style={{ flex: 1, minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div style={{ display: 'inline-flex', gap: 5 }}>
+              {QUESTIONS.map((_, i) => {
+                const dc = getDotColor(i)
+                return (
+                  <button key={i} onClick={() => setCurrentQ(i)} style={{ width: 30, height: 30, borderRadius: '50%', border: `1.5px solid ${dc.border}`, background: dc.bg, color: dc.c, fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {i + 1}
+                  </button>
+                )
+              })}
+            </div>
           </div>
           <button onClick={() => setShowGrid(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T2, marginLeft: 4, flexShrink: 0 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -168,7 +170,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
             {!isReviewMode && !answered && !timedOut && (
               <TimerRing timeLeft={timeLeft} timerPerQ={timerPerQ} />
             )}
-            {(answered || timedOut) && (
+            {(answered || timedOut || isReviewMode) && (
               <>
                 <button style={{ background: 'none', border: `1px solid ${BD}`, borderRadius: 6, padding: '4px 6px', cursor: 'pointer', color: T3, display: 'flex', alignItems: 'center' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -190,7 +192,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
           {q?.options.map(opt => (
             <button key={opt.id} onClick={() => handleAnswer(opt.id)} style={getOptStyle(opt.id)}>
               <span><span style={{ fontWeight: 700, marginRight: 8 }}>{opt.id.toUpperCase()}.</span>{opt.text}</span>
-              {(answered || timedOut) && <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.7, marginLeft: 8, flexShrink: 0 }}>{opt.pct}%</span>}
+              {(answered || timedOut || isReviewMode) && <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.7, marginLeft: 8, flexShrink: 0 }}>{opt.pct}%</span>}
             </button>
           ))}
         </div>
