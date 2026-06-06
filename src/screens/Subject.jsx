@@ -67,10 +67,16 @@ export default function Subject({ navigate }) {
           </div>
           <span style={{ background: '#EAF3DE', color: '#27500A', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 20 }}>✓ Done</span>
         </div>
-        <div style={{ fontSize: 11, color: T2, marginBottom: 7 }}>{c.res.correct}/{c.res.total} correct · {c.res.pct}th percentile</div>
-        <div style={{ background: '#EAF3DE', borderRadius: 10, padding: '7px 10px', marginBottom: open ? 7 : 9, display: 'flex', alignItems: 'center', gap: 7 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" strokeWidth="2" strokeLinecap="round"><polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/><polyline points="17,6 23,6 23,12"/></svg>
-          <span style={{ fontSize: 11, color: '#27500A' }}>You are ahead of <strong>{c.res.ahead}</strong> students who attempted this chapter</span>
+        <div style={{ fontSize: 11, color: T2, marginBottom: 7 }}>{c.res.correct}/{c.res.total} correct</div>
+        <div style={{ background: '#EAF3DE', borderRadius: 10, padding: '10px 12px', marginBottom: open ? 7 : 9 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#3B6D11', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Rank</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#1F4A07' }}>{c.res.pct}th percentile</span>
+          </div>
+          <div style={{ height: 5, background: 'rgba(0,0,0,0.1)', borderRadius: 3, marginBottom: 5 }}>
+            <div style={{ height: 5, width: `${c.res.pct}%`, background: '#3B6D11', borderRadius: 3 }} />
+          </div>
+          <div style={{ fontSize: 10, color: '#3B6D11' }}>Top <strong>{100 - c.res.pct}%</strong> of students who attempted this chapter</div>
         </div>
         {diffPill}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
