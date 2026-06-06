@@ -23,7 +23,7 @@ const NavBar = ({ navigate }) => {
   )
 }
 
-export default function Home({ navigate, savedQs, bannerDismissed, setBannerDismissed }) {
+export default function Home({ navigate, savedQs, bannerDismissed, setBannerDismissed, unsaveQuestion }) {
   const todayQs = 12, overallAcc = 71
 
   const recentSaves = savedQs.slice(-3).reverse()
@@ -107,7 +107,7 @@ export default function Home({ navigate, savedQs, bannerDismissed, setBannerDism
                 <div style={{ fontSize: 11, color: T3 }}>{savedQs.length > 0 ? `${savedQs.length} saved` : 'None saved yet'}</div>
               </div>
             </div>
-            <button style={{ fontSize: 11, color: P, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>View all →</button>
+            <button onClick={() => navigate('saved')} style={{ fontSize: 11, color: P, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>View all →</button>
           </div>
           {savedQs.length === 0 ? (
             <div style={{ background: BG2, borderRadius: 10, padding: '12px', textAlign: 'center' }}>

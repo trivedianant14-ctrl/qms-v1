@@ -4,6 +4,7 @@ import Subject from './screens/Subject'
 import PreTest from './screens/PreTest'
 import Solve from './screens/Solve'
 import Result from './screens/Result'
+import Saved from './screens/Saved'
 
 export default function App() {
   const [screen, setScreen] = useState('home')
@@ -35,6 +36,10 @@ export default function App() {
     })
   }
 
+  const unsaveQuestion = (qId) => {
+    setSavedQs(prev => prev.filter(s => s.qId !== qId))
+  }
+
   const submitTest = () => {
     setScreen('result')
   }
@@ -60,7 +65,7 @@ export default function App() {
     timerPerQ, setTimerPerQ,
     autoAdvance, setAutoAdvance,
     isReviewMode,
-    savedQs, saveQuestion,
+    savedQs, saveQuestion, unsaveQuestion,
     bannerDismissed, setBannerDismissed,
     startAttempt, submitTest,
     showReattemptConfirm, setShowReattemptConfirm,
@@ -74,6 +79,7 @@ export default function App() {
       {screen === 'pretest' && <PreTest {...sharedProps} />}
       {screen === 'solve' && <Solve {...sharedProps} />}
       {screen === 'result' && <Result {...sharedProps} />}
+      {screen === 'saved' && <Saved {...sharedProps} />}
     </div>
   )
 }
