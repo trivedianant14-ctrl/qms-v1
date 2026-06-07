@@ -72,7 +72,6 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   const [showSkipSurvey, setShowSkipSurvey] = useState(false)
   const [skipReason, setSkipReason] = useState(null)
   const [skipNote, setSkipNote] = useState('')
-  const [pendingNavNext, setPendingNavNext] = useState(false)
 
   const q = QUESTIONS[currentQ]
   const answered = answers[q?.id] !== undefined
@@ -147,16 +146,12 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
     setShowSkipSurvey(false)
     setSkipReason(null)
     setSkipNote('')
-    setPendingNavNext(false)
   }, [currentQ])
 
   const dismissSkipSurvey = () => {
-    const doNav = pendingNavNext
     setShowSkipSurvey(false)
     setSkipReason(null)
     setSkipNote('')
-    setPendingNavNext(false)
-    if (doNav) setCurrentQ(c => c + 1)
   }
 
   const renderExplanationText = (text, glossary) => {
@@ -469,14 +464,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         )}
         {isLastQ
           ? <button onClick={() => isReviewMode ? navigate('result') : setShowSubmitConfirm(true)} className="btn-primary" style={{ flex: 2 }}>{isReviewMode ? 'Done' : 'Submit'}</button>
-          : <button onClick={() => {
-              if (!answered && !timedOut && !isReviewMode) {
-                setPendingNavNext(true)
-                setShowSkipSurvey(true)
-                return
-              }
-              setCurrentQ(c => c + 1)
-            }} className="btn-primary" style={{ flex: currentQ === 0 ? 1 : 2 }}>Next →</button>
+          : <button onClick={() => setCurrentQ(c => c + 1)} className="btn-primary" style={{ flex: currentQ === 0 ? 1 : 2 }}>Next →</button>
         }
       </div>
 
@@ -661,10 +649,10 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
 
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={dismissSkipSurvey} style={{ flex: 1, padding: '10px', borderRadius: 10, border: `1px solid ${BD}`, background: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: T2 }}>
-                  {pendingNavNext ? 'Skip & Next' : 'Dismiss'}
+                  Dismiss
                 </button>
                 <button onClick={dismissSkipSurvey} className="btn-primary" style={{ flex: 2 }}>
-                  {pendingNavNext ? 'Submit & Next →' : 'Done'}
+                  Done
                 </button>
               </div>
             </div>
