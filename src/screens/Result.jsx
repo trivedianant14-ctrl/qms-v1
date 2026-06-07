@@ -5,13 +5,24 @@ const P='#534AB7',PL='#EEEDFE',PD='#3C3489'
 const T1='#1a1a2e',T2='#5a5a78',T3='#9898b0',BD='#e8e8f2',BG2='#f5f5fb'
 const GREEN='#3B6D11',RED='#A32D2D'
 
-const RATING_LABELS = ['', 'Too easy', 'A bit easy', 'Just right', 'Challenging', 'Very tough']
+const RATING_LABELS = ['', 'Poor', 'Okay', 'Good', 'Great', 'Excellent']
+
+const SKIP_REASONS_QUICK = [
+  { id: 'time',      label: 'Ran out of time' },
+  { id: 'blank',     label: 'Mind went blank' },
+  { id: 'unknown',   label: "Didn't know the topic" },
+  { id: 'exploring', label: 'Just exploring' },
+  { id: 'strategic', label: 'Strategic skip' },
+  { id: 'confusing', label: 'Confusing wording' },
+]
 
 export default function Result({ navigate, answers, mode, viewSolution, setShowReattemptConfirm, showReattemptConfirm, handleReattempt }) {
   const [showAllWrong, setShowAllWrong] = useState(false)
   const [rating, setRating] = useState(0)
   const [feedbackNote, setFeedbackNote] = useState('')
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
+  const [skipReasonsByQ, setSkipReasonsByQ] = useState({})
+  const [expandedSkipQ, setExpandedSkipQ] = useState(null)
 
   const correct = QUESTIONS.filter(q => answers[q.id] === q.correct).length
   const incorrect = QUESTIONS.filter(q => answers[q.id] && answers[q.id] !== q.correct && answers[q.id] !== 'timeout').length
@@ -163,30 +174,64 @@ export default function Result({ navigate, answers, mode, viewSolution, setShowR
                 const a = answers[q.id]
                 const isSkipped = !a || a === 'timeout'
                 const qIdx = QUESTIONS.indexOf(q)
+                const mySkipReason = skipReasonsByQ[q.id]
+                const isExpanded = expandedSkipQ === q.id
                 return (
-                  <button key={q.id} onClick={viewSolution} style={{ background: BG2, border: `1px solid ${BD}`, borderRadius: 10, padding: '10px 12px', cursor: 'pointer', textAlign: 'left', display: 'block', width: '100%' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'white', border: `1.5px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <span style={{ fontSize: 9, fontWeight: 700, color: T2 }}>{qIdx + 1}</span>
+                  <div key={q.id} style={{ background: BG2, border: `1px solid ${BD}`, borderRadius: 10, overflow: 'hidden' }}>
+                    {/* Tappable area → view solution */}
+                    <button onClick={viewSolution} style={{ padding: '10px 12px', cursor: 'pointer', textAlign: 'left', display: 'block', width: '100%', background: 'transparent', border: 'none' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'white', border: `1.5px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: T2 }}>{qIdx + 1}</span>
+                          </div>
+                          <span style={{ fontSize: 10, fontWeight: 600, color: T2 }}>{isSkipped ? 'Skipped' : 'Wrong answer'}</span>
+                          {q.isPYQ && (
+                            <span style={{ fontSize: 9, background: 'white', border: `1px solid ${BD}`, color: T3, borderRadius: 4, padding: '1px 5px', fontWeight: 600 }}>PYQ</span>
+                          )}
                         </div>
-                        <span style={{ fontSize: 10, fontWeight: 600, color: T2 }}>{isSkipped ? 'Skipped' : 'Wrong answer'}</span>
-                        {q.isPYQ && (
-                          <span style={{ fontSize: 9, background: 'white', border: `1px solid ${BD}`, color: T3, borderRadius: 4, padding: '1px 5px', fontWeight: 600 }}>PYQ</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                      </div>
+                      <div style={{ fontSize: 12, color: T1, lineHeight: 1.45, marginBottom: isSkipped ? 0 : 6 }}>
+                        {q.text.slice(0, 85)}{q.text.length > 85 ? '…' : ''}
+                      </div>
+                      {!isSkipped && (
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <span style={{ fontSize: 11, color: RED, fontWeight: 500 }}>✗ You: {a?.toUpperCase()}</span>
+                          <span style={{ fontSize: 11, color: GREEN, fontWeight: 500 }}>✓ Correct: {q.correct?.toUpperCase()}</span>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Inline skip-reason prompt — only for skipped questions */}
+                    {isSkipped && (
+                      <div style={{ borderTop: `1px solid ${BD}`, padding: '9px 12px', background: 'white' }}>
+                        {mySkipReason ? (
+                          <div style={{ fontSize: 11, color: T2 }}>
+                            Skipped because: <span style={{ fontWeight: 700, color: P }}>{SKIP_REASONS_QUICK.find(r => r.id === mySkipReason)?.label}</span>
+                            <button onClick={() => setSkipReasonsByQ(prev => { const n = {...prev}; delete n[q.id]; return n })} style={{ marginLeft: 8, background: 'none', border: 'none', fontSize: 10, color: T3, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>Change</button>
+                          </div>
+                        ) : (
+                          <>
+                            <button onClick={() => setExpandedSkipQ(isExpanded ? null : q.id)} style={{ background: 'none', border: 'none', fontSize: 11, color: T3, cursor: 'pointer', padding: 0 }}>
+                              Why did you skip this? {isExpanded ? '↑' : '→'}
+                            </button>
+                            {isExpanded && (
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 8 }}>
+                                {SKIP_REASONS_QUICK.map(r => (
+                                  <button key={r.id}
+                                    onClick={() => { setSkipReasonsByQ(prev => ({ ...prev, [q.id]: r.id })); setExpandedSkipQ(null) }}
+                                    style={{ padding: '7px 10px', borderRadius: 8, border: `1.5px solid ${BD}`, background: BG2, cursor: 'pointer', fontSize: 11, fontWeight: 500, color: T1, textAlign: 'left' }}>
+                                    {r.label}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-                    </div>
-                    <div style={{ fontSize: 12, color: T1, lineHeight: 1.45, marginBottom: isSkipped ? 0 : 6 }}>
-                      {q.text.slice(0, 85)}{q.text.length > 85 ? '…' : ''}
-                    </div>
-                    {!isSkipped && (
-                      <div style={{ display: 'flex', gap: 10 }}>
-                        <span style={{ fontSize: 11, color: RED, fontWeight: 500 }}>✗ You: {a?.toUpperCase()}</span>
-                        <span style={{ fontSize: 11, color: GREEN, fontWeight: 500 }}>✓ Correct: {q.correct?.toUpperCase()}</span>
-                      </div>
                     )}
-                  </button>
+                  </div>
                 )
               })}
             </div>
@@ -208,8 +253,8 @@ export default function Result({ navigate, answers, mode, viewSolution, setShowR
             </div>
           ) : (
             <>
-              <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 3 }}>How was this test?</div>
-              <div style={{ fontSize: 12, color: T3, marginBottom: 14 }}>Rate the difficulty level of this question set</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 3 }}>How was your experience?</div>
+              <div style={{ fontSize: 12, color: T3, marginBottom: 14 }}>How did this question set feel overall — quality, clarity, usefulness?</div>
 
               {/* 5-star row */}
               <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
