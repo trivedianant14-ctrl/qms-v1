@@ -8,7 +8,7 @@ const GREEN='#3B6D11',RED='#A32D2D'
 const RATING_LABELS = ['', 'Poor', 'Okay', 'Good', 'Great', 'Excellent']
 
 
-export default function Result({ navigate, answers, mode, viewSolution, setShowReattemptConfirm, showReattemptConfirm, handleReattempt }) {
+export default function Result({ navigate, answers, mode, viewSolution, setShowReattemptConfirm, showReattemptConfirm, handleReattempt, isReattempt }) {
   const [showAllWrong, setShowAllWrong] = useState(false)
   const [rating, setRating] = useState(0)
   const [feedbackNote, setFeedbackNote] = useState('')
@@ -70,6 +70,13 @@ export default function Result({ navigate, answers, mode, viewSolution, setShowR
       </div>
 
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 100px' }}>
+
+        {/* Reattempt notice */}
+        {isReattempt && (
+          <div style={{ background: '#FFF8E7', border: '1px solid #FFE082', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 12, color: '#5D4037', lineHeight: 1.5 }}>
+            <span style={{ fontWeight: 700 }}>This is a reattempt.</span> Only your first attempt score is saved for analysis.
+          </div>
+        )}
 
         {/* Score header */}
         <div style={{ background: 'white', border: `1px solid ${BD}`, borderLeft: `4px solid ${accuracy >= 70 ? GREEN : accuracy >= 50 ? P : RED}`, borderRadius: 14, padding: '16px', marginBottom: 12 }}>

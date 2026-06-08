@@ -31,6 +31,7 @@ export default function App() {
   const [showReattemptConfirm, setShowReattemptConfirm] = useState(false)
   const [currentVideo, setCurrentVideo] = useState(null)
   const [sessions, setSessions] = useState([])
+  const [isReattempt, setIsReattempt] = useState(false)
 
   const toggleUserMode = () => {
     const switchingToExisting = isNewUser
@@ -65,18 +66,31 @@ export default function App() {
     const correct = QUESTIONS.filter(q => answers[q.id] === q.correct).length
     const total = QUESTIONS.length
     const accuracy = Math.round((correct / total) * 100)
-    setSessions(prev => [...prev, {
-      id: Date.now(),
-      chapterId: 1,
-      chapterName: 'Anatomical Terms',
-      subjectName: 'Applied Anatomy',
-      mode,
-      answers: { ...answers },
-      correct,
-      total,
-      accuracy,
-      completedAt: Date.now(),
-    }])
+    const hasFirstAttempt = sessions.some(s => s.chapterId === 1)
+    if (!hasFirstAttempt) {
+      setSessions(prev => [...prev, {
+        id: Date.now(),
+        chapterId: 1,
+        chapterName: 'Anatomical Terms',
+        subjectName: 'Applied Anatomy',
+        mode,
+        answers: { ...answers },
+        correct,
+        total,
+        accuracy,
+        completedAt: Date.now(),
+      }])
+      setIsReattempt(false)
+    } else {
+      setIsReattempt(true)
+    }
+    setScreen('result')
+  }
+
+  const viewAnalysis = () => {
+    const firstSession = sessions.find(s => s.chapterId === 1)
+    if (firstSession) setAnswers(firstSession.answers)
+    setIsReattempt(false)
     setScreen('result')
   }
 
@@ -118,6 +132,7 @@ export default function App() {
     showReattemptConfirm, setShowReattemptConfirm,
     handleReattempt, viewSolution,
     sessions, todayQs, overallAcc, lastSession,
+    isReattempt, viewAnalysis,
   }
 
   return (

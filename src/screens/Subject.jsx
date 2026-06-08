@@ -26,7 +26,7 @@ const NavBar = ({ navigate }) => {
 
 const IDX_CHAPTERS = ['Anatomical Terms', 'Skeletal System', 'Muscular System', 'Nervous System', 'Cardiovascular System', 'Respiratory System', 'Integumentary System', 'Endocrine System']
 
-export default function Subject({ navigate, isNewUser, sessions, viewSolution }) {
+export default function Subject({ navigate, isNewUser, sessions, viewSolution, viewAnalysis }) {
   const [filter, setFilter] = useState('all')
   const [showIdx, setShowIdx] = useState(false)
 
@@ -74,7 +74,7 @@ export default function Subject({ navigate, isNewUser, sessions, viewSolution })
         <div style={{ fontSize: 11, color: T2, marginBottom: 9 }}>{c.res.correct}/{c.res.total} correct · {c.res.pct}% accuracy</div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
           <button className="btn-sm-outline" onClick={viewSolution}>Solutions</button>
-          <button className="btn-sm-primary" onClick={() => navigate('result')}>View Analysis →</button>
+          <button className="btn-sm-primary" onClick={viewAnalysis}>View Analysis →</button>
         </div>
       </div>
     )
