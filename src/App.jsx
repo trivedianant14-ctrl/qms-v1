@@ -87,7 +87,7 @@ export default function App() {
     } else {
       setIsReattempt(true)
     }
-    setScreen('summary')
+    setScreen('result')
   }
 
   const viewAnalysis = () => {
