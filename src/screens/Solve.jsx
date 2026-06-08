@@ -442,15 +442,6 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
           </div>
         )}
 
-        {/* Skip survey CTA — exam mode, unanswered */}
-        {mode === 'exam' && !answered && !timedOut && !isReviewMode && (
-          <div style={{ textAlign: 'center', marginBottom: 4 }}>
-            <button onClick={() => setShowSkipSurvey(true)} style={{ background: 'none', border: 'none', fontSize: 12, color: T3, cursor: 'pointer', padding: '2px 0' }}>
-              Why did you leave this unattempted? →
-            </button>
-          </div>
-        )}
-
         {/* Report */}
         <div style={{ textAlign: 'center', marginTop: 8 }}>
           <button onClick={() => setShowReport(true)} style={{ background: 'none', border: 'none', color: '#A32D2D', fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}>Having trouble? Report</button>
@@ -458,14 +449,23 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
       </div>
 
       {/* Bottom navigation */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'white', borderTop: `1px solid ${BD}`, padding: '12px 16px', display: 'flex', gap: 10 }}>
-        {currentQ > 0 && (
-          <button onClick={() => setCurrentQ(c => c - 1)} className="btn-outline" style={{ flex: 1 }}>Previous</button>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'white', borderTop: `1px solid ${BD}`, padding: '12px 16px' }}>
+        {mode === 'exam' && !answered && !timedOut && !isReviewMode && (
+          <div style={{ textAlign: 'center', marginBottom: 8 }}>
+            <button onClick={() => setShowSkipSurvey(true)} style={{ background: 'none', border: 'none', fontSize: 12, color: T3, cursor: 'pointer', padding: '2px 0' }}>
+              Why did you leave this unattempted? →
+            </button>
+          </div>
         )}
-        {isLastQ
-          ? <button onClick={() => isReviewMode ? navigate('result') : setShowSubmitConfirm(true)} className="btn-primary" style={{ flex: 2 }}>{isReviewMode ? 'Done' : 'Submit'}</button>
-          : <button onClick={() => setCurrentQ(c => c + 1)} className="btn-primary" style={{ flex: currentQ === 0 ? 1 : 2 }}>Next →</button>
-        }
+        <div style={{ display: 'flex', gap: 10 }}>
+          {currentQ > 0 && (
+            <button onClick={() => setCurrentQ(c => c - 1)} className="btn-outline" style={{ flex: 1 }}>Previous</button>
+          )}
+          {isLastQ
+            ? <button onClick={() => isReviewMode ? navigate('result') : setShowSubmitConfirm(true)} className="btn-primary" style={{ flex: 2 }}>{isReviewMode ? 'Done' : 'Submit'}</button>
+            : <button onClick={() => setCurrentQ(c => c + 1)} className="btn-primary" style={{ flex: currentQ === 0 ? 1 : 2 }}>Next →</button>
+          }
+        </div>
       </div>
 
       {/* ---- OVERLAYS ---- */}
