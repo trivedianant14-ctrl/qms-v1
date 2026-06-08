@@ -88,6 +88,7 @@ export default function VideoPlayer({ navigate, currentVideo }) {
   const [subtitles, setSubtitles] = useState(true)
   const [darkMode, setDarkMode] = useState(false)
   const [inQueue, setInQueue] = useState(true)
+  const [queueExpanded, setQueueExpanded] = useState(true)
   const [showTimestamp, setShowTimestamp] = useState(false)
   const [timestampNote, setTimestampNote] = useState('')
 
@@ -190,13 +191,14 @@ export default function VideoPlayer({ navigate, currentVideo }) {
 
         {/* ── IN QUEUE ── */}
         <div style={{ padding: '12px 16px', borderBottom: `1px solid ${BD}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: inQueue ? 10 : 0 }}>
+          <button onClick={() => setQueueExpanded(e => !e)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: queueExpanded ? 10 : 0 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: T1 }}>In Queue</span>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
-          {inQueue ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5" strokeLinecap="round"
+              style={{ transition: 'transform 0.2s', transform: queueExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+          {queueExpanded && (inQueue ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: BG2, borderRadius: 10, border: `1px solid ${BD}` }}>
               <div style={{ width: 36, height: 26, background: '#1a1a2e', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
@@ -205,11 +207,11 @@ export default function VideoPlayer({ navigate, currentVideo }) {
                 <div style={{ fontSize: 12, fontWeight: 600, color: T1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Directional Terminology</div>
                 <div style={{ fontSize: 11, color: T3, marginTop: 1 }}>10:45 · Up next</div>
               </div>
-              <button onClick={() => setInQueue(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 4, fontSize: 16, lineHeight: 1 }}>×</button>
+              <button onClick={e => { e.stopPropagation(); setInQueue(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 4, fontSize: 16, lineHeight: 1 }}>×</button>
             </div>
           ) : (
             <div style={{ fontSize: 12, color: T3, paddingTop: 4 }}>Queue is empty</div>
-          )}
+          ))}
         </div>
 
         {/* ── CONTINUE WHERE YOU LEFT OFF ── */}
