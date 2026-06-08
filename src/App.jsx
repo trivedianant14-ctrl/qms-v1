@@ -149,7 +149,7 @@ export default function App() {
       {screen === 'summary' && <Summary {...sharedProps} />}
       {screen === 'result' && <Result {...sharedProps} />}
       {screen === 'saved' && <Saved {...sharedProps} />}
-      {screen === 'videos' && <Videos navigate={navigate} />}
+      {screen === 'videos' && <Videos navigate={navigate} isNewUser={isNewUser} toggleUserMode={toggleUserMode} />}
       {screen === 'videosubject' && <VideoSubject navigate={navigate} setCurrentVideo={setCurrentVideo} />}
       {screen === 'videoplayer' && <VideoPlayer navigate={navigate} currentVideo={currentVideo} />}
     </div>

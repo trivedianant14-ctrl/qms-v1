@@ -32,12 +32,16 @@ const NavBar = ({ navigate }) => {
   )
 }
 
-export default function Videos({ navigate }) {
+export default function Videos({ navigate, isNewUser, toggleUserMode }) {
   const [yearFilter, setYearFilter] = useState('all')
 
+  const subjects = isNewUser
+    ? VIDEO_SUBJECTS.map(s => ({ ...s, watched: 0 }))
+    : VIDEO_SUBJECTS
+
   const filtered = yearFilter === 'all'
-    ? VIDEO_SUBJECTS
-    : VIDEO_SUBJECTS.filter(s => s.year === yearFilter)
+    ? subjects
+    : subjects.filter(s => s.year === yearFilter)
 
   const countFor = (y) => y === 'all' ? VIDEO_SUBJECTS.length : VIDEO_SUBJECTS.filter(s => s.year === y).length
 
@@ -50,6 +54,14 @@ export default function Videos({ navigate }) {
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', color: T2 }}>
           <svg width="16" height="11" viewBox="0 0 30 20" fill="currentColor"><rect x="0" y="8" width="4" height="12" rx="1" opacity="0.4"/><rect x="7" y="5" width="4" height="15" rx="1" opacity="0.6"/><rect x="14" y="2" width="4" height="18" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="20" rx="1"/></svg>
           <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="2" stroke="currentColor"/><rect x="22" y="3.5" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="1.5" width="15" height="9" rx="1.5" fill="currentColor"/></svg>
+        </div>
+      </div>
+
+      {/* Prototype toggle strip */}
+      <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', padding: '6px 16px', background: BG2, borderBottom: `1px solid ${BD}` }}>
+        <div style={{ display: 'inline-flex', background: 'white', border: `1px solid ${BD}`, borderRadius: 20, padding: 3, gap: 2 }}>
+          <button onClick={() => !isNewUser && toggleUserMode()} style={{ padding: '4px 16px', borderRadius: 16, fontSize: 11, fontWeight: 600, background: isNewUser ? P : 'transparent', color: isNewUser ? 'white' : T3, border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}>New User</button>
+          <button onClick={() => isNewUser && toggleUserMode()} style={{ padding: '4px 16px', borderRadius: 16, fontSize: 11, fontWeight: 600, background: !isNewUser ? P : 'transparent', color: !isNewUser ? 'white' : T3, border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}>Returning User</button>
         </div>
       </div>
 
@@ -66,8 +78,8 @@ export default function Videos({ navigate }) {
         </div>
       </div>
 
-      {/* Continue Watching — sticky, ~1/5 screen */}
-      <div style={{ flexShrink: 0, background: 'white', borderBottom: `1px solid ${BD}`, padding: '10px 16px 12px' }}>
+      {/* Continue Watching — hidden for new users */}
+      {!isNewUser && <div style={{ flexShrink: 0, background: 'white', borderBottom: `1px solid ${BD}`, padding: '10px 16px 12px' }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: T2, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Continue Watching</div>
         <div onClick={() => navigate('videosubject')} style={{ height: 160, border: `1px solid ${BD}`, borderRadius: 12, overflow: 'hidden', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>
           {/* Thumbnail */}
@@ -89,7 +101,7 @@ export default function Videos({ navigate }) {
             <button className="btn-primary" style={{ padding: '6px 14px', fontSize: 11, whiteSpace: 'nowrap', flexShrink: 0 }}>Resume</button>
           </div>
         </div>
-      </div>
+      </div>}
 
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 70 }}>
 
