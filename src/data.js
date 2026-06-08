@@ -231,6 +231,69 @@ export const TOPPER = {
   strategy: 'QBank every morning, videos every evening. No shortcuts.',
 }
 
+export const VIDEO_SUBJECTS = [
+  { id: 1, name: 'Medical Surgical Nursing', tutor: 'Amar Singhal', year: 2, totalLectures: 8, watched: 5 },
+  { id: 2, name: 'Applied Anatomy', tutor: 'Aman Singhal', year: 1, totalLectures: 5, watched: 2 },
+  { id: 3, name: 'Fundamentals of Nursing', tutor: 'Priya Sharma', year: 1, totalLectures: 6, watched: 0 },
+  { id: 4, name: 'Community Health Nursing', tutor: 'Ravi Kumar', year: 3, totalLectures: 4, watched: 4 },
+  { id: 5, name: 'Obstetric Nursing', tutor: 'Sunita Patel', year: 4, totalLectures: 5, watched: 1 },
+  { id: 6, name: 'Applied Physiology', tutor: 'Dr. Mehta', year: 1, totalLectures: 7, watched: 7 },
+  { id: 7, name: 'Mental Health Nursing', tutor: 'Rekha Iyer', year: 3, totalLectures: 5, watched: 0 },
+  { id: 8, name: 'Pediatric Nursing', tutor: 'Kavita Joshi', year: 3, totalLectures: 6, watched: 2 },
+  { id: 9, name: 'Pharmacology', tutor: 'Dr. Nair', year: 2, totalLectures: 9, watched: 3 },
+  { id: 10, name: 'Biochemistry', tutor: 'Dr. Gupta', year: 1, totalLectures: 5, watched: 0 },
+  { id: 11, name: 'Nutrition & Dietetics', tutor: 'Anita Singh', year: 1, totalLectures: 4, watched: 4 },
+  { id: 12, name: 'Geriatric Nursing', tutor: 'Dr. Patel', year: 4, totalLectures: 3, watched: 0 },
+]
+
+export const VIDEO_CHAPTERS = [
+  {
+    id: 1, subjectId: 2, name: 'Anatomical Terms',
+    videos: [
+      { id: 101, title: 'Introduction to Anatomical Terms', duration: '12:00', watched: true },
+      { id: 102, title: 'Body Planes & Directional Terms', duration: '14:30', watched: false },
+    ]
+  },
+  {
+    id: 2, subjectId: 2, name: 'Skeletal System',
+    videos: [
+      { id: 201, title: 'Overview of Skeletal System', duration: '15:00', watched: true },
+      { id: 202, title: 'Axial Skeleton', duration: '18:30', watched: true },
+      { id: 203, title: 'Appendicular Skeleton', duration: '16:20', watched: false },
+      { id: 204, title: 'Joints & Articulations', duration: '13:45', watched: false },
+      { id: 205, title: 'Bone Markings', duration: '11:10', watched: false },
+      { id: 206, title: 'Clinical Correlations', duration: '8:50', watched: false },
+    ]
+  },
+  {
+    id: 3, subjectId: 2, name: 'Muscular System',
+    videos: [
+      { id: 301, title: 'Types of Muscles', duration: '13:00', watched: false },
+      { id: 302, title: 'Muscle Actions & Groups', duration: '16:20', watched: false },
+      { id: 303, title: 'Clinical Applications', duration: '11:30', watched: false },
+      { id: 304, title: 'Revision & MCQ Strategy', duration: '9:00', watched: false },
+    ]
+  },
+  {
+    id: 4, subjectId: 2, name: 'Nervous System',
+    videos: [
+      { id: 401, title: 'CNS Overview', duration: '14:00', watched: false },
+      { id: 402, title: 'PNS & Reflexes', duration: '17:00', watched: false },
+      { id: 403, title: 'Autonomic Nervous System', duration: '15:30', watched: false },
+      { id: 404, title: 'Cranial Nerves', duration: '22:00', watched: false },
+      { id: 405, title: 'Spinal Cord & Tracts', duration: '19:00', watched: false },
+    ]
+  },
+  {
+    id: 5, subjectId: 2, name: 'Cardiovascular System',
+    videos: [
+      { id: 501, title: 'Heart Anatomy', duration: '16:00', watched: false },
+      { id: 502, title: 'Cardiac Cycle & Conduction', duration: '18:00', watched: false },
+      { id: 503, title: 'Blood Vessels', duration: '14:00', watched: false },
+    ]
+  },
+]
+
 export const SAVE_TAGS = [
   { id: 'wrong', label: 'Got it Wrong', color: '#791F1F', bg: '#FCEBEB', border: '#F09595' },
   { id: 'important', label: 'Important', color: '#3C3489', bg: '#EEEDFE', border: '#AFA9EC' },

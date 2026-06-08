@@ -5,6 +5,9 @@ import PreTest from './screens/PreTest'
 import Solve from './screens/Solve'
 import Result from './screens/Result'
 import Saved from './screens/Saved'
+import Videos from './screens/Videos'
+import VideoSubject from './screens/VideoSubject'
+import VideoPlayer from './screens/VideoPlayer'
 
 const EXISTING_USER_SAVES = [
   { qId: 1, tag: 'wrong' },
@@ -25,6 +28,7 @@ export default function App() {
   const [savedQs, setSavedQs] = useState([])
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const [showReattemptConfirm, setShowReattemptConfirm] = useState(false)
+  const [currentVideo, setCurrentVideo] = useState(null)
 
   const toggleUserMode = () => {
     const switchingToExisting = isNewUser
@@ -96,6 +100,9 @@ export default function App() {
       {screen === 'solve' && <Solve {...sharedProps} />}
       {screen === 'result' && <Result {...sharedProps} />}
       {screen === 'saved' && <Saved {...sharedProps} />}
+      {screen === 'videos' && <Videos navigate={navigate} />}
+      {screen === 'videosubject' && <VideoSubject navigate={navigate} setCurrentVideo={setCurrentVideo} />}
+      {screen === 'videoplayer' && <VideoPlayer navigate={navigate} currentVideo={currentVideo} />}
     </div>
   )
 }

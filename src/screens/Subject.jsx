@@ -15,7 +15,7 @@ const NavBar = ({ navigate }) => {
   return (
     <div style={{ flexShrink: 0, background: 'white', borderTop: `1px solid ${BD}`, display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {tabs.map(t => (
-        <button key={t.id} onClick={() => t.id === 'home' ? navigate('home') : t.id === 'qbank' ? navigate('home') : null} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '8px 0 10px', background: 'none', border: 'none', color: t.active ? P : T3, cursor: 'pointer' }}>
+        <button key={t.id} onClick={() => { if (t.id === 'home') navigate('home'); else if (t.id === 'qbank') navigate('home'); else if (t.id === 'videos') navigate('videos'); }} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '8px 0 10px', background: 'none', border: 'none', color: t.active ? P : T3, cursor: 'pointer' }}>
           {t.icon}
           <span style={{ fontSize: 10, fontWeight: t.active ? 600 : 400 }}>{t.label}</span>
         </button>
@@ -76,7 +76,7 @@ export default function Subject({ navigate, isNewUser }) {
         </div>
         <div style={{ fontSize: 11, color: T2, marginBottom: 9 }}>{c.prog.total} Ques</div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
-          <button className="btn-sm-purple-outline">Learn</button>
+          <button className="btn-sm-purple-outline" onClick={() => navigate('videosubject')}>Learn</button>
           <button className="btn-sm-primary" onClick={() => navigate('pretest')}>Resume →</button>
         </div>
       </div>
@@ -91,7 +91,7 @@ export default function Subject({ navigate, isNewUser }) {
         <div style={{ fontSize: 11, color: T3, marginBottom: 9 }}>{c.qs} Ques</div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
           {c.vid
-            ? <button className="btn-sm-purple-outline">Learn</button>
+            ? <button className="btn-sm-purple-outline" onClick={() => navigate('videosubject')}>Learn</button>
             : <button className="btn-sm-outline" disabled style={{ opacity: 0.4 }}>No video</button>
           }
           <button className="btn-sm-primary" onClick={() => navigate('pretest')}>Attempt</button>
