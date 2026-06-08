@@ -58,14 +58,13 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [timeLeft, setTimeLeft] = useState(timerPerQ)
   const [timedOut, setTimedOut] = useState(false)
-  const [expandedSection, setExpandedSection] = useState('')
+  const [activeTab, setActiveTab] = useState('explanation')
   const [showVisual, setShowVisual] = useState(false)
   const [visualScale, setVisualScale] = useState(1)
   const [touchStartDist, setTouchStartDist] = useState(0)
   const [touchStartScale, setTouchStartScale] = useState(1)
   const [glossaryTerm, setGlossaryTerm] = useState(null)
   const [audioPlaying, setAudioPlaying] = useState(false)
-  const [clinicalOpen, setClinicalOpen] = useState(false)
   const [fontSize, setFontSize] = useState(14)
   const [showSkipSurvey, setShowSkipSurvey] = useState(false)
   const [skipReason, setSkipReason] = useState(null)
@@ -140,7 +139,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   useEffect(() => {
     setAudioPlaying(false)
     setGlossaryTerm(null)
-    setClinicalOpen(false)
+    setActiveTab('explanation')
     setShowSkipSurvey(false)
     setSkipReason(null)
     setSkipNote('')
@@ -327,24 +326,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         {showGuideContent && (
           <div>
 
-            {/* Explanation */}
-            <div style={{ marginBottom: 18 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Explanation</div>
-                <button onClick={() => setAudioPlaying(a => !a)} title="Audio explanation" style={{ width: 26, height: 26, borderRadius: '50%', background: audioPlaying ? P : BG2, border: `1px solid ${audioPlaying ? PB : BD}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={audioPlaying ? 'white' : T2} strokeWidth="2.2" strokeLinecap="round">
-                    <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/>
-                    <path d="M15.54 8.46a5 5 0 010 7.07"/>
-                    {audioPlaying && <path d="M19.07 4.93a10 10 0 010 14.14"/>}
-                  </svg>
-                </button>
-              </div>
-              <div style={{ fontSize: 13, color: T1, lineHeight: 1.7, padding: '14px', background: BG2, borderRadius: 12, border: `1px solid ${BD}` }}>
-                {renderExplanationText(q?.explanation, q?.glossary)}
-              </div>
-            </div>
-
-            {/* Why other options were wrong */}
+            {/* Why other options were wrong — always visible */}
             {q?.distractors?.length > 0 && (
               <div style={{ marginBottom: 18 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Why Other Options Were Wrong</div>
@@ -361,7 +343,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
               </div>
             )}
 
-            {/* Related visual */}
+            {/* Related visual — always visible */}
             {q?.visual && (
               <div style={{ marginBottom: 18 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Related Visual</div>
@@ -372,88 +354,103 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
               </div>
             )}
 
-            {/* Clinical Relevance — pill toggle */}
-            {q?.clinical && (
-              <div style={{ marginBottom: 18 }}>
-                <button
-                  onClick={() => setClinicalOpen(o => !o)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px 6px 10px', borderRadius: 999, border: `1.5px solid ${clinicalOpen ? '#FFB74D' : '#FFD54F'}`, background: clinicalOpen ? '#FFE082' : '#FFF8E7', cursor: 'pointer' }}
-                >
-                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: clinicalOpen ? '#FFB74D' : '#FFE082', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E65100" strokeWidth="2.5" strokeLinecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            {/* Pill tab row */}
+            {(() => {
+              const tabs = [
+                { id: 'explanation', label: 'Explanation', show: !!q?.explanation },
+                { id: 'clinical', label: 'Clinical Relevance', show: !!q?.clinical },
+                { id: 'approach', label: 'How to Approach', show: !!q?.approach },
+                { id: 'reference', label: 'Reference Book', show: !!q?.referenceBook },
+                { id: 'video', label: 'Watch Video', show: true },
+              ].filter(t => t.show)
+              return (
+                <div>
+                  <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 14, paddingBottom: 2, WebkitOverflowScrolling: 'touch' }}>
+                    {tabs.map(tab => (
+                      <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                        style={{ flexShrink: 0, padding: '7px 16px', borderRadius: 999, border: `1.5px solid ${activeTab === tab.id ? T1 : BD}`, background: activeTab === tab.id ? T1 : 'white', color: activeTab === tab.id ? 'white' : T2, fontSize: 12, fontWeight: activeTab === tab.id ? 700 : 500, cursor: 'pointer', transition: 'all 0.15s' }}>
+                        {tab.label}
+                      </button>
+                    ))}
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#B45309' }}>Clinical Relevance</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="2.5">
-                    {clinicalOpen ? <path d="M18 15l-6-6-6 6"/> : <path d="M6 9l6 6 6-6"/>}
-                  </svg>
-                </button>
-                {clinicalOpen && (
-                  <div style={{ marginTop: 10, background: '#FFF8E7', border: '1px solid #FFD54F', borderRadius: 14, padding: '13px 14px', fontSize: 13, color: '#5D4037', lineHeight: 1.65 }}>
-                    {q.clinical}
-                  </div>
-                )}
-              </div>
-            )}
 
-            {/* How to Approach — pill toggle */}
-            {q?.approach && (
-              <div style={{ marginBottom: 18 }}>
-                <button
-                  onClick={() => setExpandedSection(expandedSection === 'approach' ? '' : 'approach')}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px 6px 10px', borderRadius: 999, border: `1.5px solid ${expandedSection === 'approach' ? PB : BD}`, background: expandedSection === 'approach' ? PL : BG2, cursor: 'pointer' }}
-                >
-                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: expandedSection === 'approach' ? PB : BD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={expandedSection === 'approach' ? PD : T2} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: expandedSection === 'approach' ? PD : T2 }}>How to Approach</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={expandedSection === 'approach' ? P : T3} strokeWidth="2.5">
-                    {expandedSection === 'approach' ? <path d="M18 15l-6-6-6 6"/> : <path d="M6 9l6 6 6-6"/>}
-                  </svg>
-                </button>
-                {expandedSection === 'approach' && (
-                  <div style={{ marginTop: 10, background: PL, border: `1px solid ${PB}`, borderRadius: 14, padding: '13px 14px', fontSize: 13, color: PD, lineHeight: 1.65 }}>
-                    {q.approach}
-                  </div>
-                )}
-              </div>
-            )}
+                  {/* Tab content card */}
+                  <div style={{ background: BG2, border: `1px solid ${BD}`, borderLeft: `4px solid ${P}`, borderRadius: 14, padding: '14px', marginBottom: 18 }}>
 
-            {/* Reference book */}
-            {q?.referenceBook && (
-              <div style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Reference Book</div>
-                <div style={{ display: 'flex', gap: 12, padding: '13px 14px', border: `1px solid ${BD}`, borderRadius: 12, alignItems: 'center', background: 'white' }}>
-                  <div style={{ width: 38, height: 50, background: PL, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${PB}` }}>
-                    <svg width="18" height="22" viewBox="0 0 18 22" fill="none">
-                      <rect x="2" y="1" width="14" height="20" rx="2" fill={P} opacity="0.15"/>
-                      <rect x="2" y="1" width="14" height="20" rx="2" stroke={P} strokeWidth="1.5"/>
-                      <line x1="5" y1="7" x2="13" y2="7" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
-                      <line x1="5" y1="11" x2="13" y2="11" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
-                      <line x1="5" y1="15" x2="10" y2="15" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 2 }}>{q.referenceBook.name}</div>
-                    <div style={{ fontSize: 11, color: T2 }}>{q.referenceBook.edition}</div>
-                    <div style={{ fontSize: 11, color: T3, marginTop: 1 }}>Page {q.referenceBook.page}</div>
+                    {activeTab === 'explanation' && (
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, color: P, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Explanation</div>
+                          <button onClick={() => setAudioPlaying(a => !a)} title="Audio explanation" style={{ width: 26, height: 26, borderRadius: '50%', background: audioPlaying ? P : 'white', border: `1px solid ${audioPlaying ? PB : BD}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={audioPlaying ? 'white' : T2} strokeWidth="2.2" strokeLinecap="round">
+                              <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/>
+                              <path d="M15.54 8.46a5 5 0 010 7.07"/>
+                              {audioPlaying && <path d="M19.07 4.93a10 10 0 010 14.14"/>}
+                            </svg>
+                          </button>
+                        </div>
+                        <div style={{ fontSize: 13, color: T1, lineHeight: 1.7 }}>
+                          {renderExplanationText(q?.explanation, q?.glossary)}
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'clinical' && q?.clinical && (
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: '#B45309', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 10 }}>Clinical Relevance</div>
+                        <div style={{ fontSize: 13, color: '#5D4037', lineHeight: 1.65 }}>{q.clinical}</div>
+                      </div>
+                    )}
+
+                    {activeTab === 'approach' && q?.approach && (
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: PD, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 10 }}>How to Approach</div>
+                        <div style={{ fontSize: 13, color: T2, lineHeight: 1.65 }}>{q.approach}</div>
+                      </div>
+                    )}
+
+                    {activeTab === 'reference' && q?.referenceBook && (
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 12 }}>Reference Book</div>
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                          <div style={{ width: 38, height: 50, background: PL, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${PB}` }}>
+                            <svg width="18" height="22" viewBox="0 0 18 22" fill="none">
+                              <rect x="2" y="1" width="14" height="20" rx="2" fill={P} opacity="0.15"/>
+                              <rect x="2" y="1" width="14" height="20" rx="2" stroke={P} strokeWidth="1.5"/>
+                              <line x1="5" y1="7" x2="13" y2="7" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
+                              <line x1="5" y1="11" x2="13" y2="11" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
+                              <line x1="5" y1="15" x2="10" y2="15" stroke={P} strokeWidth="1.2" strokeLinecap="round"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 2 }}>{q.referenceBook.name}</div>
+                            <div style={{ fontSize: 11, color: T2 }}>{q.referenceBook.edition}</div>
+                            <div style={{ fontSize: 11, color: T3, marginTop: 1 }}>Page {q.referenceBook.page}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'video' && (
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: '#E65100', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 12 }}>Watch Chapter Video</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                          <div style={{ width: 40, height: 40, borderRadius: 10, background: '#FFE082', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#E65100"><polygon points="5,3 19,12 5,21"/></svg>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: '#5D4037' }}>Want to learn more? Watch the chapter video.</div>
+                            <div style={{ fontSize: 11, color: '#8D6E63', marginTop: 2 }}>{q?.learnTopic} · Chapter overview · 12 min</div>
+                          </div>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E65100" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Learn video CTA */}
-            <div style={{ background: '#FFF8E7', border: '1px solid #FFE082', borderRadius: 12, padding: '12px 14px', marginBottom: 8, cursor: 'pointer' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: '#FFE082', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#E65100"><polygon points="5,3 19,12 5,21"/></svg>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#5D4037' }}>Want to learn more? Watch the chapter video.</div>
-                  <div style={{ fontSize: 11, color: '#8D6E63', marginTop: 2 }}>{q?.learnTopic} · Chapter overview · 12 min</div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E65100" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg>
-              </div>
-            </div>
+              )
+            })()}
 
           </div>
         )}
