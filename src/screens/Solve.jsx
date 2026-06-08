@@ -326,34 +326,6 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         {showGuideContent && (
           <div>
 
-            {/* Why other options were wrong — always visible */}
-            {q?.distractors?.length > 0 && (
-              <div style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Why Other Options Were Wrong</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  {q.distractors.map(d => (
-                    <div key={d.optId} style={{ display: 'flex', gap: 10, padding: '11px 12px', background: '#FDF4F4', border: '1px solid #F0BABA', borderRadius: 10, alignItems: 'flex-start' }}>
-                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#F09595', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                        <span style={{ fontSize: 10, fontWeight: 800, color: 'white' }}>{d.optId.toUpperCase()}</span>
-                      </div>
-                      <div style={{ fontSize: 12, color: '#5a1f1f', lineHeight: 1.55 }}>{d.reason}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Related visual — always visible */}
-            {q?.visual && (
-              <div style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Related Visual</div>
-                <div onClick={() => setShowVisual(true)} style={{ borderRadius: 12, overflow: 'hidden', cursor: 'zoom-in', border: `1px solid ${BD}`, background: '#F8F7FF' }}>
-                  <img src={q.visual} alt="Anatomy reference diagram" style={{ width: '100%', display: 'block' }} />
-                </div>
-                <div style={{ fontSize: 10, color: T3, marginTop: 5, textAlign: 'center' }}>Tap to zoom · Pinch to magnify</div>
-              </div>
-            )}
-
             {/* Pill tab row */}
             {(() => {
               const tabs = [
@@ -389,9 +361,37 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
                             </svg>
                           </button>
                         </div>
-                        <div style={{ fontSize: 13, color: T1, lineHeight: 1.7 }}>
+                        <div style={{ fontSize: 13, color: T1, lineHeight: 1.7, marginBottom: q?.distractors?.length > 0 || q?.visual ? 16 : 0 }}>
                           {renderExplanationText(q?.explanation, q?.glossary)}
                         </div>
+
+                        {/* Why other options were wrong */}
+                        {q?.distractors?.length > 0 && (
+                          <div style={{ marginTop: 16 }}>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Why Other Options Were Wrong</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                              {q.distractors.map(d => (
+                                <div key={d.optId} style={{ display: 'flex', gap: 10, padding: '11px 12px', background: '#FDF4F4', border: '1px solid #F0BABA', borderRadius: 10, alignItems: 'flex-start' }}>
+                                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#F09595', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                                    <span style={{ fontSize: 10, fontWeight: 800, color: 'white' }}>{d.optId.toUpperCase()}</span>
+                                  </div>
+                                  <div style={{ fontSize: 12, color: '#5a1f1f', lineHeight: 1.55 }}>{d.reason}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Related visual */}
+                        {q?.visual && (
+                          <div style={{ marginTop: 16 }}>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>Related Visual</div>
+                            <div onClick={() => setShowVisual(true)} style={{ borderRadius: 12, overflow: 'hidden', cursor: 'zoom-in', border: `1px solid ${BD}`, background: '#F8F7FF' }}>
+                              <img src={q.visual} alt="Anatomy reference diagram" style={{ width: '100%', display: 'block' }} />
+                            </div>
+                            <div style={{ fontSize: 10, color: T3, marginTop: 5, textAlign: 'center' }}>Tap to zoom · Pinch to magnify</div>
+                          </div>
+                        )}
                       </div>
                     )}
 
