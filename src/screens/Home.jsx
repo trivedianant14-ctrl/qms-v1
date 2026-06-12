@@ -97,7 +97,7 @@ export default function Home({ navigate, savedQs, bannerDismissed, setBannerDism
       </div>
 
       {/* Scrollable content */}
-      <div className="scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 88 }}>
+      <div className="scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: !isFirstTime && !continueDismissed ? 128 : 80 }}>
 
         {/* AIR Banner */}
         {!bannerDismissed && (
