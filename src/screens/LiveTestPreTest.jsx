@@ -11,50 +11,64 @@ const FALLBACK_TEST = {
   name: 'NORCET 8 Grand Test – Session 1',
   questions: 200,
   duration: 120,
+  durationLabel: '120 min',
   totalMarks: 200,
   correctMarks: 1,
   wrongMarks: -0.25,
 }
 
-const INSTRUCTIONS = [
-  'This test has 200 questions to be answered in 120 minutes. Manage your time carefully.',
-  'Each question carries 1 mark. A penalty of 0.25 marks applies for every wrong answer.',
-  'Unattempted questions carry no marks and no negative marking.',
-  'Once the test begins, it cannot be paused. Do not close or refresh the screen.',
-  'Each question has exactly one correct answer out of four options.',
-  'You can navigate freely between questions using the question grid or Previous / Next buttons.',
-  'Use "Mark for Review" to flag a question and return to it later.',
-  'Click "Submit" only when you are done — the test will end and results will be generated immediately.',
-  'Your screen will auto-submit if the timer reaches zero.',
-  'Your responses are saved automatically. You may exit and return anytime within the live test window. However, we strongly advise completing the test in one uninterrupted sitting for the best experience.',
-]
-
 const QUESTION_STATUSES = [
-  { color: T3,       bg: BG2,  border: BD,  label: 'Not Visited',                  desc: 'You have not opened this question yet.' },
-  { color: R,        bg: RL,   border: RB,  label: 'Not Answered',                 desc: 'Opened but no option selected.' },
-  { color: G,        bg: GL,   border: GB,  label: 'Answered',                     desc: 'An option has been selected and saved.' },
-  { color: PD,       bg: PL,   border: PB,  label: 'Marked for Review',            desc: 'Flagged for later — no answer saved.' },
-  { color: PD,       bg: PL,   border: GB,  label: 'Answered & Marked for Review', desc: 'Answer saved and also flagged to revisit.' },
+  { bg: BG2, border: BD,  label: 'Not Visited',          desc: 'You have not opened this question yet.' },
+  { bg: RL,  border: RB,  label: 'Not Answered',          desc: 'Opened but no option selected.' },
+  { bg: GL,  border: GB,  label: 'Answered',              desc: 'An option has been selected and saved.' },
+  { bg: PL,  border: PB,  label: 'Marked for Review',     desc: 'Flagged for later — no answer saved.' },
+  { bg: PL,  border: GB,  label: 'Answered & Marked',     desc: 'Answer saved and also flagged to revisit.' },
 ]
 
-const BUTTONS = [
-  { label: 'Save & Next',        desc: 'Saves your selected answer and moves to the next question.' },
-  { label: 'Mark for Review',    desc: 'Flags the question for later review and moves forward.' },
-  { label: 'Clear Response',     desc: 'Removes your selected option without saving.' },
-  { label: 'Previous',           desc: 'Goes back to the previous question without changing your answer.' },
-]
+// ── helpers ──────────────────────────────────────────────────────────────────
 
-function SectionHeader({ children }) {
+function SectionTitle({ children }) {
   return (
-    <div style={{ fontSize:13, fontWeight:700, color:T1, marginBottom:10, marginTop:20 }}>
+    <div style={{ fontSize:13, fontWeight:700, color:T1, borderTop:`1.5px solid ${BD}`, marginTop:18, paddingTop:14, marginBottom:10 }}>
       {children}
     </div>
   )
 }
 
-export default function LiveTestPreTest({ navigate, test, onStartTest }) {
+function Item({ num, children }) {
+  return (
+    <div style={{ display:'flex', gap:9, marginBottom:10 }}>
+      <span style={{ fontSize:13, color:P, fontWeight:700, flexShrink:0, minWidth:20, paddingTop:1 }}>{num}.</span>
+      <div style={{ fontSize:13, color:T1, lineHeight:1.7, flex:1 }}>{children}</div>
+    </div>
+  )
+}
+
+function SubList({ items }) {
+  const alpha = ['a', 'b', 'c', 'd', 'e']
+  return (
+    <div style={{ marginTop:8, display:'flex', flexDirection:'column', gap:6, paddingLeft:4 }}>
+      {items.map((item, i) => (
+        <div key={i} style={{ display:'flex', gap:8 }}>
+          <span style={{ fontSize:12, color:T3, fontWeight:600, flexShrink:0, minWidth:14 }}>{alpha[i]}.</span>
+          <span style={{ fontSize:12, color:T2, lineHeight:1.65 }}>{item}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function B({ children }) {
+  return <span style={{ fontWeight:700, color:T1 }}>{children}</span>
+}
+
+// ── main ─────────────────────────────────────────────────────────────────────
+
+export default function LiveTestPreTest({ navigate, test }) {
   const [agreed, setAgreed] = useState(false)
   const t = test || FALLBACK_TEST
+  const cm = t.correctMarks ?? 1
+  const wm = t.wrongMarks ?? -0.25
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100%', background:'white' }}>
@@ -68,91 +82,171 @@ export default function LiveTestPreTest({ navigate, test, onStartTest }) {
         </div>
       </div>
 
-      {/* Nav header */}
-      <div style={{ display:'flex', alignItems:'center', gap:12, padding:'8px 20px 12px', borderBottom:`1px solid ${BD}`, flexShrink:0 }}>
+      {/* Nav header — no logo, just back + test name */}
+      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'6px 16px 10px', borderBottom:`1px solid ${BD}`, flexShrink:0 }}>
         <button onClick={() => navigate('livetest')} style={{ background:'none', border:'none', cursor:'pointer', display:'flex', color:T1, padding:0, flexShrink:0 }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
         </button>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:15, fontWeight:700, color:T1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{t.name}</div>
-          <div style={{ fontSize:11, color:T3, marginTop:1 }}>Read instructions carefully before starting</div>
+          <div style={{ fontSize:14, fontWeight:700, color:T1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{t.name}</div>
+          <div style={{ fontSize:10, color:T3, marginTop:1 }}>General Instructions</div>
         </div>
       </div>
 
-      {/* Scrollable body */}
-      <div className="scroll" style={{ flex:1, padding:'0 16px' }}>
-
-        {/* Test summary grid */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:1, background:BD, borderRadius:14, overflow:'hidden', marginTop:16, border:`1px solid ${BD}` }}>
+      {/* Candidate profile + test stats strip */}
+      <div style={{ flexShrink:0, padding:'12px 16px', borderBottom:`1px solid ${BD}`, display:'flex', alignItems:'center', gap:12, background:BG2 }}>
+        {/* Avatar */}
+        <div style={{ width:52, height:52, borderRadius:'50%', background:`linear-gradient(135deg, ${P}, #8B82E0)`, display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontWeight:800, fontSize:20, flexShrink:0 }}>
+          A
+        </div>
+        {/* Name */}
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:T1 }}>Anant Trivedi</div>
+          <div style={{ fontSize:10, color:T3, marginTop:1 }}>Candidate</div>
+        </div>
+        {/* Stats */}
+        <div style={{ display:'flex', gap:1, background:BD, borderRadius:10, overflow:'hidden', flexShrink:0 }}>
           {[
-            { value: t.questions,    unit: 'Questions' },
-            { value: t.durationLabel || `${t.duration} min`, unit: 'Duration' },
-            { value: t.totalMarks,   unit: 'Total Marks' },
-          ].map((cell, i) => (
-            <div key={i} style={{ background:'white', padding:'14px 10px', textAlign:'center' }}>
-              <div style={{ fontSize:18, fontWeight:700, color:P, marginBottom:2 }}>{cell.value}</div>
-              <div style={{ fontSize:10, fontWeight:500, color:T3 }}>{cell.unit}</div>
+            { value: t.questions,   label: 'Qs' },
+            { value: t.durationLabel || `${t.duration} min`, label: 'Time' },
+            { value: t.totalMarks,  label: 'Marks' },
+          ].map((s, i) => (
+            <div key={i} style={{ background:'white', padding:'7px 11px', textAlign:'center' }}>
+              <div style={{ fontSize:13, fontWeight:700, color:P }}>{s.value}</div>
+              <div style={{ fontSize:9, color:T3, marginTop:1 }}>{s.label}</div>
             </div>
           ))}
         </div>
-
-        {/* Marking scheme */}
-        <SectionHeader>Marking Scheme</SectionHeader>
-        <div style={{ display:'flex', gap:8 }}>
-          <div style={{ flex:1, background:GL, border:`1px solid ${GB}`, borderRadius:10, padding:'12px', textAlign:'center' }}>
-            <div style={{ fontSize:18, fontWeight:700, color:G }}>+{t.correctMarks}</div>
-            <div style={{ fontSize:11, color:G, fontWeight:500, marginTop:2 }}>Correct Answer</div>
-          </div>
-          <div style={{ flex:1, background:RL, border:`1px solid ${RB}`, borderRadius:10, padding:'12px', textAlign:'center' }}>
-            <div style={{ fontSize:18, fontWeight:700, color:R }}>{t.wrongMarks}</div>
-            <div style={{ fontSize:11, color:R, fontWeight:500, marginTop:2 }}>Wrong Answer</div>
-          </div>
-          <div style={{ flex:1, background:BG2, border:`1px solid ${BD}`, borderRadius:10, padding:'12px', textAlign:'center' }}>
-            <div style={{ fontSize:18, fontWeight:700, color:T3 }}>0</div>
-            <div style={{ fontSize:11, color:T3, fontWeight:500, marginTop:2 }}>Unattempted</div>
-          </div>
-        </div>
-
-        {/* Instructions */}
-        <SectionHeader>Instructions</SectionHeader>
-        <div style={{ background:BG2, border:`1px solid ${BD}`, borderRadius:12, padding:'4px 4px' }}>
-          {INSTRUCTIONS.map((text, i) => (
-            <div key={i} style={{ display:'flex', gap:10, padding:'10px 12px', borderBottom: i < INSTRUCTIONS.length - 1 ? `1px solid ${BD}` : 'none' }}>
-              <span style={{ width:20, height:20, borderRadius:'50%', background:PL, color:PD, fontSize:10, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>{i + 1}</span>
-              <span style={{ fontSize:12, color:T1, lineHeight:1.55, textDecoration:'none' }}>{text}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Question status legend */}
-        <SectionHeader>Question Status Colors</SectionHeader>
-        <div style={{ background:BG2, border:`1px solid ${BD}`, borderRadius:12, overflow:'hidden' }}>
-          {QUESTION_STATUSES.map((s, i) => (
-            <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'11px 14px', borderBottom: i < QUESTION_STATUSES.length - 1 ? `1px solid ${BD}` : 'none', background:'white' }}>
-              <div style={{ width:28, height:28, borderRadius:6, background:s.bg, border:`2px solid ${s.border}`, flexShrink:0 }} />
-              <div>
-                <div style={{ fontSize:12, fontWeight:600, color:T1, marginBottom:1 }}>{s.label}</div>
-                <div style={{ fontSize:11, color:T3 }}>{s.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Button guide */}
-        <SectionHeader>Test Controls</SectionHeader>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:24 }}>
-          {BUTTONS.map((b, i) => (
-            <div key={i} style={{ padding:'10px 14px', borderRadius:10, background:'white', border:`1px solid ${BD}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <span style={{ fontSize:12, fontWeight:600, color:PD, textAlign:'center', lineHeight:1.4 }}>{b.label}</span>
-            </div>
-          ))}
-        </div>
-
       </div>
 
-      {/* Fixed footer */}
+      {/* ── Scrollable instruction document ── */}
+      <div className="scroll" style={{ flex:1, padding:'16px 16px 0' }}>
+
+        {/* ── Section 1: General Instructions ── */}
+        <div style={{ fontSize:14, fontWeight:700, color:T1, marginBottom:12 }}>General Instructions</div>
+
+        <Item num={1}>
+          The clock is set on the server. The countdown timer shown at the top of the test screen displays
+          the remaining time to complete the examination. When it reaches zero, the test will
+          auto-submit — you do not need to submit manually or take any action.
+        </Item>
+
+        <Item num={2}>
+          <span>
+            The <B>Question Strip</B> at the top of the test screen shows the current status of every
+            question using the following colour indicators:
+          </span>
+          <div style={{ marginTop:10, background:BG2, border:`1px solid ${BD}`, borderRadius:10, padding:'8px 4px' }}>
+            {QUESTION_STATUSES.map((s, i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 10px', borderBottom: i < QUESTION_STATUSES.length - 1 ? `1px solid ${BD}` : 'none' }}>
+                <div style={{ width:26, height:26, borderRadius:5, background:s.bg, border:`2px solid ${s.border}`, flexShrink:0 }} />
+                <div>
+                  <span style={{ fontSize:12, fontWeight:600, color:T1 }}>{s.label}</span>
+                  <span style={{ fontSize:11, color:T3 }}> — {s.desc}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop:10, fontSize:12, color:T2, lineHeight:1.7, background:AL, border:`1px solid ${AB}`, borderRadius:8, padding:'9px 12px' }}>
+            The <B>Mark for Review</B> status simply means you intend to revisit that question later.
+            If a question is answered and then marked for review, the answer will still be evaluated
+            unless you change it before final submission.
+          </div>
+        </Item>
+
+        {/* ── Section 2: Navigation ── */}
+        <SectionTitle>Navigating to a Question</SectionTitle>
+
+        <Item num={3}>
+          <span>To navigate between questions:</span>
+          <SubList items={[
+            <>Tap any question number in the <B>Question Strip</B> to jump to it directly.</>,
+            <>Tap <B>Save &amp; Next</B> to save your current answer and proceed to the next question.</>,
+            <>Tap <B>Mark &amp; Next</B> to save your answer, flag the question for review, and move forward.</>,
+            <>Tap <B>Previous</B> to return to the preceding question without changing your answer.</>,
+          ]} />
+        </Item>
+
+        <Item num={4}>
+          You may navigate freely between <B>all questions at any time</B> — there is no restriction
+          on movement. You may revisit, skip, or re-attempt any question before submitting.
+        </Item>
+
+        {/* ── Section 3: Answering ── */}
+        <SectionTitle>Answering a Question</SectionTitle>
+
+        <Item num={5}>
+          <span>Procedure for a multiple-choice question (MCQ):</span>
+          <SubList items={[
+            <>Tap one option (A, B, C, or D) to select it.</>,
+            <>To deselect, tap the selected option again or tap <B>Clear Response</B>.</>,
+            <>To change your selection, simply tap a different option.</>,
+            <>Tap <B>Save &amp; Next</B> to confirm your answer and move to the next question.</>,
+          ]} />
+        </Item>
+
+        <Item num={6}>
+          Only answers that are <B>saved</B>{' '}
+          <span style={{ display:'inline-flex', alignItems:'center', gap:3, verticalAlign:'middle' }}>
+            <span style={{ display:'inline-block', width:14, height:14, borderRadius:3, background:GL, border:`1.5px solid ${GB}` }} />
+          </span>
+          {' '}or <B>saved and marked for review</B>{' '}
+          <span style={{ display:'inline-flex', alignItems:'center', gap:3, verticalAlign:'middle' }}>
+            <span style={{ display:'inline-block', width:14, height:14, borderRadius:3, background:PL, border:`1.5px solid ${GB}` }} />
+          </span>
+          {' '}will be evaluated. Unattempted questions carry zero marks and no negative marking.
+        </Item>
+
+        <Item num={7}>
+          To modify an already-answered question, navigate back to it and tap a different option.
+          Your previous answer is replaced immediately.
+        </Item>
+
+        {/* ── Section 4: Marking Scheme ── */}
+        <SectionTitle>Marking Scheme</SectionTitle>
+
+        <Item num={8}>
+          <div style={{ display:'flex', gap:8, marginTop:2 }}>
+            <div style={{ flex:1, background:GL, border:`1px solid ${GB}`, borderRadius:8, padding:'10px', textAlign:'center' }}>
+              <div style={{ fontSize:18, fontWeight:800, color:G }}>+{cm}</div>
+              <div style={{ fontSize:10, color:G, fontWeight:600, marginTop:2 }}>Correct Answer</div>
+            </div>
+            <div style={{ flex:1, background:RL, border:`1px solid ${RB}`, borderRadius:8, padding:'10px', textAlign:'center' }}>
+              <div style={{ fontSize:18, fontWeight:800, color:R }}>{wm}</div>
+              <div style={{ fontSize:10, color:R, fontWeight:600, marginTop:2 }}>Wrong Answer</div>
+            </div>
+            <div style={{ flex:1, background:BG2, border:`1px solid ${BD}`, borderRadius:8, padding:'10px', textAlign:'center' }}>
+              <div style={{ fontSize:18, fontWeight:800, color:T3 }}>0</div>
+              <div style={{ fontSize:10, color:T3, fontWeight:600, marginTop:2 }}>Unattempted</div>
+            </div>
+          </div>
+        </Item>
+
+        {/* ── Section 5: Submitting ── */}
+        <SectionTitle>Submitting the Test</SectionTitle>
+
+        <Item num={9}>
+          Tap the <B>Submit</B> button from any question to end the test. Your score and a
+          detailed subject-wise analysis will be available immediately after submission.
+          You cannot undo a submission.
+        </Item>
+
+        <Item num={10}>
+          If you exit the test, your responses are <B>saved automatically</B>. You may return
+          and continue anytime within the live test window. However, we strongly recommend
+          completing the test in one uninterrupted sitting for the best experience.
+        </Item>
+
+        <Item num={11}>
+          The test will <B>auto-submit</B> when the countdown timer reaches zero, with all
+          saved answers counted. No manual action is required.
+        </Item>
+
+        <div style={{ height:24 }} />
+      </div>
+
+      {/* ── Footer: checkbox + button ── */}
       <div style={{ flexShrink:0, padding:'14px 16px', borderTop:`1px solid ${BD}`, background:'white' }}>
-        {/* Checkbox row */}
         <button
           onClick={() => setAgreed(a => !a)}
           style={{ display:'flex', alignItems:'flex-start', gap:10, marginBottom:12, background:'none', border:'none', cursor:'pointer', textAlign:'left', width:'100%', padding:0 }}
@@ -162,6 +256,7 @@ export default function LiveTestPreTest({ navigate, test, onStartTest }) {
             background: agreed ? P : 'white',
             border: `2px solid ${agreed ? P : BD}`,
             display:'flex', alignItems:'center', justifyContent:'center',
+            transition:'background 0.15s, border-color 0.15s',
           }}>
             {agreed && (
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -170,11 +265,10 @@ export default function LiveTestPreTest({ navigate, test, onStartTest }) {
             )}
           </div>
           <span style={{ fontSize:13, color: agreed ? T1 : T2, fontWeight: agreed ? 600 : 400, lineHeight:1.5 }}>
-            I have read and understood all the instructions
+            I have read all the instructions carefully and agree to abide by them during the test.
           </span>
         </button>
 
-        {/* Start button */}
         <button
           disabled={!agreed}
           onClick={() => agreed && navigate('livetestsolve')}
