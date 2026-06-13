@@ -51,7 +51,7 @@ function SectionHeader({ children }) {
   )
 }
 
-export default function LiveTestPreTest({ navigate, test }) {
+export default function LiveTestPreTest({ navigate, test, onStartTest }) {
   const [agreed, setAgreed] = useState(false)
   const t = test || FALLBACK_TEST
 
@@ -176,6 +176,7 @@ export default function LiveTestPreTest({ navigate, test }) {
         {/* Start button */}
         <button
           disabled={!agreed}
+          onClick={() => agreed && navigate('livetestsolve')}
           style={{
             width:'100%', padding:'13px', borderRadius:12,
             background: agreed ? P : BG2,

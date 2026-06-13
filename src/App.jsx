@@ -11,13 +11,14 @@ import VideoSubject from './screens/VideoSubject'
 import VideoPlayer from './screens/VideoPlayer'
 import LiveTest from './screens/LiveTest'
 import LiveTestPreTest from './screens/LiveTestPreTest'
+import LiveTestSolve from './screens/LiveTestSolve'
 import { QUESTIONS } from './data'
 
 const SCREEN_DEPTH = {
   home: 0,
   subject: 1, videos: 1, saved: 1, livetest: 1,
   pretest: 2, videosubject: 2, livetestpretest: 2,
-  solve: 3, videoplayer: 3,
+  solve: 3, videoplayer: 3, livetestsolve: 3,
   summary: 4, result: 4,
 }
 
@@ -190,6 +191,7 @@ export default function App() {
         {screen === 'videoplayer' && <VideoPlayer navigate={navigate} currentVideo={currentVideo} savedVideos={savedVideos} saveVideo={saveVideo} unsaveVideo={unsaveVideo} savedResources={savedResources} saveResource={saveResource} unsaveResource={unsaveResource} />}
         {screen === 'livetest' && <LiveTest navigate={navigate} onJoinNow={(test) => { setCurrentLiveTest(test); navigate('livetestpretest') }} />}
         {screen === 'livetestpretest' && <LiveTestPreTest navigate={navigate} test={currentLiveTest} />}
+        {screen === 'livetestsolve' && <LiveTestSolve navigate={navigate} test={currentLiveTest} />}
       </div>
     </div>
   )
