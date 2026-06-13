@@ -173,6 +173,16 @@ input { font-family: inherit; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
 .popup-overlay {
   position: absolute; inset: 0; z-index: 60;
   background: rgba(0,0,0,0.5);

@@ -4,6 +4,7 @@ import { QUESTIONS } from '../data'
 const P='#534AB7', PL='#EEEDFE', PB='#AFA9EC', PD='#3C3489'
 const G='#3B6D11', GL='#EAF3DE', GB='#97C459'
 const R='#791F1F', RL='#FCEBEB', RB='#F09595'
+const A='#633806', AL='#FAEEDA', AB='#FAC775'
 const T1='#1a1a2e', T2='#5a5a78', T3='#9898b0', BD='#e8e8f2', BG2='#f5f5fb'
 
 const REPORT_OPTIONS = {
@@ -78,11 +79,29 @@ export default function LiveTestSolve({ navigate, test }) {
   const [reportSubmitted, setReportSubmitted] = useState(false)
   const [fontSize, setFontSize]         = useState(14)
   const [imageZoom, setImageZoom]       = useState(1)
+  const [phase, setPhase]               = useState('test')
+  const [finalResults, setFinalResults] = useState(null)
 
   const q        = QUESTIONS[currentQ]
   const selected = answers[q?.id]
   const isMarked = markedIds.has(q?.id)
   const isLastQ  = currentQ === QUESTIONS.length - 1
+
+  const computeAndFinalize = () => {
+    let correct = 0, wrong = 0, unattempted = 0
+    const topicMap = {}
+    QUESTIONS.forEach(q => {
+      if (!topicMap[q.topicName]) topicMap[q.topicName] = { correct:0, wrong:0, unattempted:0 }
+      if (!answers[q.id])                   { unattempted++; topicMap[q.topicName].unattempted++ }
+      else if (answers[q.id] === q.correct) { correct++;    topicMap[q.topicName].correct++ }
+      else                                  { wrong++;      topicMap[q.topicName].wrong++ }
+    })
+    const cm = test?.correctMarks || 1
+    const wm = test?.wrongMarks || -0.25
+    const score = parseFloat((correct * cm + wrong * wm).toFixed(2))
+    setFinalResults({ correct, wrong, unattempted, score, timeTaken: totalSecs - timeLeft, topicMap })
+    setPhase('loading')
+  }
 
   // Global countdown — runs once, auto-submits when done
   useEffect(() => {
@@ -91,8 +110,15 @@ export default function LiveTestSolve({ navigate, test }) {
   }, [])
 
   useEffect(() => {
-    if (timeLeft === 0) navigate('livetest')
+    if (timeLeft === 0) computeAndFinalize()
   }, [timeLeft])
+
+  // Loading → analysis after 2.5 s
+  useEffect(() => {
+    if (phase !== 'loading') return
+    const id = setTimeout(() => setPhase('analysis'), 2500)
+    return () => clearTimeout(id)
+  }, [phase])
 
   // Mark question visited on navigate; reset image zoom
   useEffect(() => {
@@ -131,7 +157,137 @@ export default function LiveTestSolve({ navigate, test }) {
     else setShowSubmitConfirm(true)
   }
 
-  const handleSubmit = () => { setShowSubmitConfirm(false); navigate('livetest') }
+  const handleSubmit = () => { setShowSubmitConfirm(false); computeAndFinalize() }
+
+  // ── Loading phase ──
+  if (phase === 'loading') {
+    return (
+      <div style={{ display:'flex', flexDirection:'column', height:'100%', background:'white', position:'relative' }}>
+        <div style={{ padding:'12px 16px 4px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:T1 }}>9:41</span>
+          <div style={{ display:'flex', gap:6, alignItems:'center', color:T1 }}>
+            <svg width="16" height="11" viewBox="0 0 30 20" fill="currentColor"><rect x="0" y="8" width="4" height="12" rx="1" opacity="0.4"/><rect x="7" y="5" width="4" height="15" rx="1" opacity="0.6"/><rect x="14" y="2" width="4" height="18" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="20" rx="1"/></svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="2" stroke="currentColor"/><rect x="22" y="3.5" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="1.5" width="15" height="9" rx="1.5" fill="currentColor"/></svg>
+          </div>
+        </div>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 32px' }}>
+          <div style={{ width:64, height:64, borderRadius:'50%', border:`5px solid ${PL}`, borderTop:`5px solid ${P}`, animation:'spin 0.85s linear infinite', marginBottom:32 }} />
+          <div style={{ fontSize:20, fontWeight:800, color:T1, marginBottom:8, textAlign:'center' }}>Preparing your analysis</div>
+          <div style={{ fontSize:13, color:T3, textAlign:'center', lineHeight:1.6 }}>Calculating score and subject performance…</div>
+        </div>
+        <div style={{ height:5, background:BG2, flexShrink:0, position:'relative' }}>
+          <div style={{ position:'absolute', left:0, top:0, height:'100%', background:P, borderRadius:3, animation:'progressFill 2.4s ease forwards' }} />
+        </div>
+      </div>
+    )
+  }
+
+  // ── Analysis phase ──
+  if (phase === 'analysis' && finalResults) {
+    const r = finalResults
+    const total = QUESTIONS.length
+    const accuracy = total > 0 ? Math.round((r.correct / total) * 100) : 0
+    const fmtTime = (secs) => {
+      const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60
+      if (h > 0) return `${h}h ${m}m`
+      if (m > 0) return `${m}m ${s}s`
+      return `${s}s`
+    }
+    const accuracyColor  = accuracy >= 60 ? G  : accuracy >= 40 ? A  : R
+    const accuracyBg     = accuracy >= 60 ? GL : accuracy >= 40 ? AL : RL
+    const accuracyBorder = accuracy >= 60 ? GB : accuracy >= 40 ? AB : RB
+    const topics = Object.entries(r.topicMap)
+    const todayFmt = new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+    return (
+      <div style={{ display:'flex', flexDirection:'column', height:'100%', background:BG2 }}>
+        {/* Status bar */}
+        <div style={{ padding:'12px 16px 4px', display:'flex', justifyContent:'space-between', alignItems:'center', flexShrink:0, background:'white' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:T1 }}>9:41</span>
+          <div style={{ display:'flex', gap:6, alignItems:'center', color:T1 }}>
+            <svg width="16" height="11" viewBox="0 0 30 20" fill="currentColor"><rect x="0" y="8" width="4" height="12" rx="1" opacity="0.4"/><rect x="7" y="5" width="4" height="15" rx="1" opacity="0.6"/><rect x="14" y="2" width="4" height="18" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="20" rx="1"/></svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="2" stroke="currentColor"/><rect x="22" y="3.5" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="1.5" width="15" height="9" rx="1.5" fill="currentColor"/></svg>
+          </div>
+        </div>
+        {/* Nav */}
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'8px 16px 12px', borderBottom:`1px solid ${BD}`, flexShrink:0, background:'white' }}>
+          <button onClick={() => navigate('livetest')} style={{ background:'none', border:'none', cursor:'pointer', display:'flex', color:T1, padding:0, flexShrink:0 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
+          </button>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:15, fontWeight:700, color:T1 }}>Test Results</div>
+            <div style={{ fontSize:11, color:T3, marginTop:1 }}>{test?.name || 'Live Test'}</div>
+          </div>
+        </div>
+        {/* Scrollable body */}
+        <div className="scroll" style={{ flex:1, padding:'16px 16px 100px' }}>
+          {/* Score hero */}
+          <div style={{ background:'white', borderRadius:16, padding:'24px 20px 20px', marginBottom:10, textAlign:'center', border:`1px solid ${BD}` }}>
+            <div style={{ fontSize:10, fontWeight:600, color:T3, letterSpacing:'0.05em', textTransform:'uppercase', marginBottom:14 }}>Your Score</div>
+            <div style={{ lineHeight:1 }}>
+              <span style={{ fontSize:56, fontWeight:900, color:P }}>{r.score}</span>
+              <span style={{ fontSize:22, fontWeight:600, color:T3 }}> / {total}</span>
+            </div>
+            <div style={{ marginTop:14, display:'inline-flex', alignItems:'center', gap:5, background:accuracyBg, border:`1px solid ${accuracyBorder}`, borderRadius:20, padding:'5px 16px' }}>
+              <span style={{ fontSize:13, fontWeight:700, color:accuracyColor }}>{accuracy}% Accuracy</span>
+            </div>
+            <div style={{ marginTop:12, display:'flex', alignItems:'center', justifyContent:'center', gap:16 }}>
+              <span style={{ fontSize:11, color:T3 }}>Submitted {todayFmt}</span>
+              <span style={{ width:3, height:3, borderRadius:'50%', background:T3, display:'inline-block' }} />
+              <span style={{ fontSize:11, color:T3 }}>⏱ {fmtTime(r.timeTaken)} taken</span>
+            </div>
+          </div>
+          {/* Stats row */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginBottom:16 }}>
+            {[
+              { label:'Correct',    value:r.correct,    fg:G,  bg:GL,  bd:GB  },
+              { label:'Wrong',      value:r.wrong,      fg:R,  bg:RL,  bd:RB  },
+              { label:'Skipped',    value:r.unattempted,fg:T3, bg:BG2, bd:BD  },
+            ].map(c => (
+              <div key={c.label} style={{ background:'white', border:`1px solid ${c.bd}`, borderRadius:12, padding:'14px 8px', textAlign:'center' }}>
+                <div style={{ fontSize:26, fontWeight:800, color:c.fg }}>{c.value}</div>
+                <div style={{ fontSize:10, color:c.fg, fontWeight:600, marginTop:3 }}>{c.label}</div>
+              </div>
+            ))}
+          </div>
+          {/* Topic breakdown */}
+          <div style={{ fontSize:12, fontWeight:700, color:T2, marginBottom:8, textTransform:'uppercase', letterSpacing:'0.05em' }}>Subject Performance</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {topics.map(([name, t]) => {
+              const tt = t.correct + t.wrong + t.unattempted
+              const pct = tt > 0 ? Math.round((t.correct / tt) * 100) : 0
+              const fg = pct >= 60 ? G : pct >= 40 ? A : R
+              const bar = pct >= 60 ? GB : pct >= 40 ? AB : RB
+              return (
+                <div key={name} style={{ background:'white', borderRadius:12, padding:'14px 16px', border:`1px solid ${BD}` }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                    <span style={{ fontSize:13, fontWeight:600, color:T1 }}>{name}</span>
+                    <span style={{ fontSize:12, fontWeight:700, color:fg }}>{pct}%</span>
+                  </div>
+                  <div style={{ display:'flex', gap:5, marginBottom:10 }}>
+                    <span style={{ fontSize:10, color:G,  background:GL,  padding:'2px 8px', borderRadius:20, border:`1px solid ${GB}` }}>✓ {t.correct}</span>
+                    <span style={{ fontSize:10, color:R,  background:RL,  padding:'2px 8px', borderRadius:20, border:`1px solid ${RB}` }}>✗ {t.wrong}</span>
+                    <span style={{ fontSize:10, color:T3, background:BG2, padding:'2px 8px', borderRadius:20, border:`1px solid ${BD}` }}>— {t.unattempted}</span>
+                  </div>
+                  <div style={{ height:4, background:BG2, borderRadius:2 }}>
+                    <div style={{ height:'100%', width:`${pct}%`, background:bar, borderRadius:2 }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+        {/* Bottom buttons */}
+        <div style={{ flexShrink:0, padding:'12px 16px 20px', borderTop:`1px solid ${BD}`, background:'white', display:'flex', gap:10 }}>
+          <button onClick={() => navigate('livetest')} style={{ flex:1, padding:'12px', borderRadius:10, border:`1px solid ${BD}`, background:'white', fontSize:13, fontWeight:600, color:T2, cursor:'pointer' }}>
+            ← Back
+          </button>
+          <button onClick={() => navigate('livetest')} style={{ flex:2, padding:'12px', borderRadius:10, background:P, color:'white', border:'none', fontSize:13, fontWeight:700, cursor:'pointer' }}>
+            Back to Live Tests
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100%', background:'white' }}>
@@ -377,27 +533,41 @@ export default function LiveTestSolve({ navigate, test }) {
       )}
 
       {/* ── Submit confirm ── */}
-      {showSubmitConfirm && (
-        <div className="popup-overlay">
-          <div className="popup">
-            <div style={{ fontSize:17, fontWeight:700, color:T1, marginBottom:8 }}>Submit Test?</div>
-            <div style={{ fontSize:13, color:T2, lineHeight:1.6, marginBottom: markedCount > 0 ? 8 : 20 }}>
-              {unansweredCount > 0
-                ? `You have ${unansweredCount} unanswered question${unansweredCount > 1 ? 's' : ''}. Unanswered questions carry no marks.`
-                : 'You have answered all questions. Ready to submit?'}
-            </div>
-            {markedCount > 0 && (
-              <div style={{ fontSize:12, color:PD, background:PL, border:`1px solid ${PB}`, borderRadius:8, padding:'8px 12px', marginBottom:20 }}>
-                {markedCount} question{markedCount > 1 ? 's are' : ' is'} still marked for review.
+      {showSubmitConfirm && (() => {
+        const h = Math.floor(timeLeft / 3600)
+        const m = Math.floor((timeLeft % 3600) / 60)
+        const s = timeLeft % 60
+        const timeStr = h > 0
+          ? `${h}h ${String(m).padStart(2,'0')}m remaining`
+          : `${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s remaining`
+        return (
+          <div className="popup-overlay">
+            <div className="popup">
+              <div style={{ fontSize:17, fontWeight:700, color:T1, marginBottom:12 }}>Submit Test?</div>
+              {timeLeft > 0 && (
+                <div style={{ display:'flex', alignItems:'center', gap:7, background:AL, border:`1px solid ${AB}`, borderRadius:8, padding:'9px 12px', marginBottom:12 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={A} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span style={{ fontSize:12, fontWeight:600, color:A }}>You still have {timeStr}. Are you sure?</span>
+                </div>
+              )}
+              <div style={{ fontSize:13, color:T2, lineHeight:1.6, marginBottom: markedCount > 0 ? 10 : 20 }}>
+                {unansweredCount > 0
+                  ? `${unansweredCount} question${unansweredCount > 1 ? 's are' : ' is'} unanswered — no marks will be awarded for those.`
+                  : 'You have answered all questions. Ready to submit?'}
               </div>
-            )}
-            <div style={{ display:'flex', gap:10 }}>
-              <button onClick={() => setShowSubmitConfirm(false)} style={{ flex:1, padding:'11px', borderRadius:10, border:`1px solid ${BD}`, background:'white', fontSize:13, fontWeight:600, color:T2, cursor:'pointer' }}>Review</button>
-              <button onClick={handleSubmit} style={{ flex:1, padding:'11px', borderRadius:10, background:P, color:'white', border:'none', fontSize:13, fontWeight:700, cursor:'pointer' }}>Submit</button>
+              {markedCount > 0 && (
+                <div style={{ fontSize:12, color:PD, background:PL, border:`1px solid ${PB}`, borderRadius:8, padding:'8px 12px', marginBottom:20 }}>
+                  {markedCount} question{markedCount > 1 ? 's are' : ' is'} still marked for review.
+                </div>
+              )}
+              <div style={{ display:'flex', gap:10 }}>
+                <button onClick={() => setShowSubmitConfirm(false)} style={{ flex:1, padding:'11px', borderRadius:10, border:`1px solid ${BD}`, background:'white', fontSize:13, fontWeight:600, color:T2, cursor:'pointer' }}>Review</button>
+                <button onClick={handleSubmit} style={{ flex:1, padding:'11px', borderRadius:10, background:P, color:'white', border:'none', fontSize:13, fontWeight:700, cursor:'pointer' }}>Submit</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* ── Exit confirm ── */}
       {showExitConfirm && (
