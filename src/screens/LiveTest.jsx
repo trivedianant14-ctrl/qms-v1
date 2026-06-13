@@ -47,11 +47,11 @@ const CONFETTI = [
 ]
 
 const UPCOMING = [
-  { id:2, name:'Anatomy Subject Test – Series 4',  date:'Sat, 14 Jun', daysOut:2,  duration:'60 min',  marks:'100', registered:true  },
-  { id:3, name:'Daily Practice Test – Physiology', date:'Mon, 16 Jun', daysOut:4,  duration:'45 min',  marks:'75',  registered:false },
-  { id:4, name:'NORCET 8 Grand Test – Session 2',  date:'Sat, 21 Jun', daysOut:9,  duration:'120 min', marks:'200', registered:false },
-  { id:5, name:'PYQ Revision Test – 2023 Paper',   date:'Mon, 23 Jun', daysOut:11, duration:'90 min',  marks:'150', registered:false },
-  { id:6, name:'Mini Test – Pharmacology Basics',  date:'Wed, 25 Jun', daysOut:13, duration:'30 min',  marks:'50',  registered:false },
+  { id:2, name:'Anatomy Subject Test – Series 4',  date:'Sat, 14 Jun', daysOut:2,  duration:'60 min',  marks:'100', enrolled:1847, registered:true  },
+  { id:3, name:'Daily Practice Test – Physiology', date:'Mon, 16 Jun', daysOut:4,  duration:'45 min',  marks:'75',  enrolled:956,  registered:false },
+  { id:4, name:'NORCET 8 Grand Test – Session 2',  date:'Sat, 21 Jun', daysOut:9,  duration:'120 min', marks:'200', enrolled:3241, registered:false },
+  { id:5, name:'PYQ Revision Test – 2023 Paper',   date:'Mon, 23 Jun', daysOut:11, duration:'90 min',  marks:'150', enrolled:1103, registered:false },
+  { id:6, name:'Mini Test – Pharmacology Basics',  date:'Wed, 25 Jun', daysOut:13, duration:'30 min',  marks:'50',  enrolled:427,  registered:false },
 ]
 
 // f = attempted in "few" scenario, m = attempted in "many" scenario
@@ -225,7 +225,19 @@ function UpcomingCard({ test, isRegistered, onRegisterClick }) {
         </span>
         <span style={{ fontSize: 11, color: T3, fontWeight: 500 }}>{test.date}</span>
       </div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: T1, marginBottom: 10, lineHeight: 1.45 }}>{test.name}</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: T1, marginBottom: 6, lineHeight: 1.45 }}>{test.name}</div>
+      {/* Social proof */}
+      <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:10 }}>
+        <span style={{ color:T3, display:'flex', alignItems:'center' }}><UsersIcon /></span>
+        <span style={{ fontSize:11, color:T3, fontWeight:500 }}>
+          {(isRegistered ? test.enrolled + 1 : test.enrolled).toLocaleString()} students registered
+        </span>
+        {isRegistered && (
+          <span style={{ fontSize:10, fontWeight:700, color:G, background:GL, border:`1px solid ${GB}`, padding:'1px 7px', borderRadius:20 }}>
+            you're in!
+          </span>
+        )}
+      </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <MetaChip icon={<ClockIcon />} label={test.duration} />
         <MetaChip icon={<StarIcon />} label={`${test.marks} Marks`} />
