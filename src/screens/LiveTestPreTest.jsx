@@ -26,6 +26,7 @@ const INSTRUCTIONS = [
   'Use "Mark for Review" to flag a question and return to it later.',
   'Click "Submit" only when you are done — the test will end and results will be generated immediately.',
   'Your screen will auto-submit if the timer reaches zero.',
+  'Your responses are saved automatically. You may exit and return anytime within the live test window. However, we strongly advise completing the test in one uninterrupted sitting for the best experience.',
 ]
 
 const QUESTION_STATUSES = [

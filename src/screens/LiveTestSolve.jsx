@@ -398,8 +398,10 @@ export default function LiveTestSolve({ navigate, test }) {
         <div className="popup-overlay">
           <div className="popup">
             <div style={{ fontSize:17, fontWeight:700, color:T1, marginBottom:8 }}>Exit Test?</div>
-            <div style={{ fontSize:13, color:T2, lineHeight:1.6, marginBottom:20 }}>
-              Exiting will end your test session. Your responses will not be saved.
+            <div style={{ fontSize:13, color:P, lineHeight:1.7, marginBottom:20 }}>
+              Your responses will be saved. You can return and continue anytime within the live test window.
+              <br /><br />
+              <span style={{ color:T2, fontWeight:600 }}>We recommend completing the test in one single sitting for the best experience.</span>
             </div>
             <div style={{ display:'flex', gap:10 }}>
               <button onClick={() => setShowExitConfirm(false)} style={{ flex:1, padding:'11px', borderRadius:10, border:`1px solid ${BD}`, background:'white', fontSize:13, fontWeight:600, color:T2, cursor:'pointer' }}>Continue Test</button>
