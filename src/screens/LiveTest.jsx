@@ -419,13 +419,13 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
   const [manyAttempts, setManyAttempts]       = useState(false)
   const [activeCategory, setActiveCategory]   = useState('Live Test')
   const [showCalendar, setShowCalendar]       = useState(false)
-  const [pastTab, setPastTab]                 = useState('subject_preboard')
+  const [pastTab, setPastTab]                 = useState('full_mock')
   const [upcomingTab, setUpcomingTab]         = useState('full_mock')
   const [upcomingExpanded, setUpcomingExpanded] = useState(false)
   const [pastExpanded, setPastExpanded]       = useState(false)
-  const [hybridUpcomingTab, setHybridUpcomingTab] = useState('subject_preboard')
+  const [hybridUpcomingTab, setHybridUpcomingTab] = useState('full_mock')
   const [hybridPastExpanded, setHybridPastExpanded] = useState(false)
-  const [hybridPastTab, setHybridPastTab]     = useState('subject_preboard')
+  const [hybridPastTab, setHybridPastTab]     = useState('full_mock')
 
   const [registeredIds, setRegisteredIds]     = useState(() => new Set(ALL_UPCOMING.filter(t => t.registered).map(t => t.id)))
   const [activeModal, setActiveModal]         = useState(null)
@@ -557,7 +557,7 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
                     <span style={{ fontSize:13, fontWeight:700, color:T1 }}>Upcoming Tests</span>
                     <div style={{ display:'inline-flex', background:BG2, border:`1px solid ${BD}`, borderRadius:20, padding:3, gap:2 }}>
-                      {[{ id:'subject_preboard', label:'Subject' }, { id:'full_mock', label:'Full Mock' }].map(tab => {
+                      {[{ id:'full_mock', label:'Full Mock' }, { id:'subject_preboard', label:'Subject' }].map(tab => {
                         const isActive = hybridUpcomingTab === tab.id
                         return (
                           <button key={tab.id}
@@ -569,12 +569,12 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
                       })}
                     </div>
                   </div>
-                  {hybridUpcomingTab === 'full_mock' && (
+                  {hybridUpcomingTab === 'full_mock' ? (
                     <div style={{ fontSize:11, color:T3, marginBottom:10, display:'flex', alignItems:'center', gap:5 }}>
                       <span style={{ fontSize:10, fontWeight:600, background:PL, color:PD, border:`1px solid ${PB}`, padding:'2px 7px', borderRadius:20 }}>NASHTA Series</span>
                       Full-length NORCET simulations
                     </div>
-                  )}
+                  ) : null}
                   {hybridList.map(t => (
                     <UpcomingCard key={t.id} test={t} isRegistered={registeredIds.has(t.id)} onRegisterClick={handleRegisterClick} />
                   ))}
@@ -611,7 +611,7 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
                     <span style={{ fontSize:13, fontWeight:700, color:T1 }}>Upcoming Tests</span>
                     <div style={{ display:'inline-flex', background:BG2, border:`1px solid ${BD}`, borderRadius:20, padding:3, gap:2 }}>
-                      {[{ id:'subject_preboard', label:'Subject' }, { id:'full_mock', label:'Full Mock' }].map(tab => {
+                      {[{ id:'full_mock', label:'Full Mock' }, { id:'subject_preboard', label:'Subject' }].map(tab => {
                         const isActive = upcomingTab === tab.id
                         return (
                           <button key={tab.id}
@@ -684,7 +684,7 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
                       </div>
                       {/* Filter pills */}
                       <div style={{ display:'flex', gap:7, marginBottom:14 }}>
-                        {[{ id:'subject_preboard', label:'Subject' }, { id:'full_mock', label:'Full Mock' }].map(f => {
+                        {[{ id:'full_mock', label:'Full Mock' }, { id:'subject_preboard', label:'Subject' }].map(f => {
                           const isActive = hybridPastTab === f.id
                           return (
                             <button key={f.id} onClick={() => setHybridPastTab(f.id)} style={{
@@ -715,7 +715,7 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
                     <span style={{ fontSize:13, fontWeight:700, color:T1 }}>Past Tests</span>
                     <div style={{ display:'inline-flex', background:BG2, border:`1px solid ${BD}`, borderRadius:20, padding:3, gap:2 }}>
-                      {[{ id:'subject_preboard', label:'Subject-level' }, { id:'full_mock', label:'Full-length' }].map(tab => {
+                      {[{ id:'full_mock', label:'Full-length' }, { id:'subject_preboard', label:'Subject-level' }].map(tab => {
                         const isActive = pastTab === tab.id
                         return (
                           <button key={tab.id} onClick={() => setPastTab(tab.id)}
