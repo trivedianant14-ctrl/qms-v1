@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import './App.css'
 import Home from './screens/Home'
 import Subject from './screens/Subject'
 import PreTest from './screens/PreTest'
@@ -13,6 +15,10 @@ import LiveTest from './screens/LiveTest'
 import LiveTestPreTest from './screens/LiveTestPreTest'
 import LiveTestSolve from './screens/LiveTestSolve'
 import { QUESTIONS } from './data'
+import Nav from './components/Nav'
+import FormShell from './components/form/FormShell'
+import Dashboard from './components/dashboard/Dashboard'
+import { QueryProvider } from './context/QueryContext'
 
 const SCREEN_DEPTH = {
   home: 0,
@@ -29,7 +35,7 @@ const EXISTING_USER_SAVES = [
   { qId: 2, tag: 'revision' },
 ]
 
-export default function App() {
+function NprepPrototype() {
   const [screen, setScreen] = useState('livetest')
   const [currentLiveTest, setCurrentLiveTest] = useState(null)
   const [mode, setMode] = useState('guide')
@@ -235,5 +241,28 @@ export default function App() {
         </div>
       )}
     </div>
+  )
+}
+
+function RaiseAQueryLayout({ children }) {
+  return (
+    <div className="raq-app">
+      <Nav />
+      {children}
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <QueryProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<NprepPrototype />} />
+          <Route path="/form" element={<RaiseAQueryLayout><FormShell /></RaiseAQueryLayout>} />
+          <Route path="/dashboard" element={<RaiseAQueryLayout><Dashboard /></RaiseAQueryLayout>} />
+        </Routes>
+      </BrowserRouter>
+    </QueryProvider>
   )
 }
