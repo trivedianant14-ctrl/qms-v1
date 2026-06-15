@@ -8,13 +8,13 @@ const T1 = '#1a1a2e', T2 = '#5a5a78', T3 = '#9898b0'
 const BD = '#e8e8f2', BG2 = '#f5f5fb'
 
 const FALLBACK_TEST = {
-  name: 'NORCET 8 Grand Test – Session 1',
-  questions: 200,
-  duration: 120,
-  durationLabel: '120 min',
-  totalMarks: 200,
+  name: 'NORCET 10 — Stage I',
+  questions: 100,
+  duration: 90,
+  durationLabel: '90 min (5 sections × 18 min)',
+  totalMarks: 100,
   correctMarks: 1,
-  wrongMarks: -0.25,
+  wrongMarks: -0.33,
 }
 
 const QUESTION_STATUSES = [

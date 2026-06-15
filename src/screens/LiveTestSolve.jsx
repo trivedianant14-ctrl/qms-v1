@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { QUESTIONS } from '../data'
+import { NORCET_QUESTIONS as QUESTIONS, NORCET_META } from '../norcetData'
 
 // NORCET navy theme
 const NAVY='#1f3a68', NAVY_D='#162d52', NAVY_L='#dce5f0'
@@ -66,9 +66,9 @@ const fmtSec = s => {
 }
 
 export default function LiveTestSolve({ navigate, test }) {
-  const totalSecs = (test?.duration || 120) * 60
-  const cm = test?.correctMarks || 1
-  const wm = test?.wrongMarks || -0.25
+  const totalSecs = NORCET_META.duration * 60
+  const cm = NORCET_META.correctMarks
+  const wm = NORCET_META.wrongMarks
 
   const initTimers = () => SECTIONS.map(sec => Math.round((sec.qIdxs.length / QUESTIONS.length) * totalSecs))
 
@@ -133,7 +133,7 @@ export default function LiveTestSolve({ navigate, test }) {
       else                                    { wrong++;      topicMap[qi.topicName].wrong++ }
     })
     setFinalResults({ correct, wrong, unattempted, score: parseFloat((correct*cm + wrong*wm).toFixed(2)), timeTaken: totalSecs - totalTimeLeft, topicMap })
-    setPhase('loading')
+    setPhase('submitted')
   }
 
   // Tick current section timer
@@ -184,6 +184,57 @@ export default function LiveTestSolve({ navigate, test }) {
   }
   const handleSaveNext = () => { if (isLastQ) setShowSubmitConfirm(true); else goNext() }
   const handleSubmit   = () => { setShowSubmitConfirm(false); computeAndFinalize() }
+
+  // ── Submitted success screen ─────────────────────────────────────────────
+  if (phase === 'submitted') return (
+    <div style={{ display:'flex', flexDirection:'column', height:'100%', background:'white' }}>
+      {/* Status bar */}
+      <div style={{ padding:'12px 20px 4px', display:'flex', justifyContent:'space-between', alignItems:'center', flexShrink:0 }}>
+        <span style={{ fontSize:13, fontWeight:600, color:T1 }}>9:41</span>
+        <div style={{ display:'flex', gap:6, alignItems:'center', color:T1 }}>
+          <svg width="16" height="11" viewBox="0 0 30 20" fill="currentColor"><rect x="0" y="8" width="4" height="12" rx="1" opacity="0.4"/><rect x="7" y="5" width="4" height="15" rx="1" opacity="0.6"/><rect x="14" y="2" width="4" height="18" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="20" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="2" stroke="currentColor"/><rect x="22" y="3.5" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="1.5" width="15" height="9" rx="1.5" fill="currentColor"/></svg>
+        </div>
+      </div>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 32px', textAlign:'center' }}>
+        {/* Animated checkmark circle */}
+        <div style={{ width:88, height:88, borderRadius:'50%', background:GRUN_L, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:28, boxShadow:`0 0 0 12px ${GRUN_L}66` }}>
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke={GRUN} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation:'checkPop 0.4s ease both' }}>
+            <polyline points="20,6 9,17 4,12"/>
+          </svg>
+        </div>
+        <div style={{ fontSize:22, fontWeight:800, color:T1, marginBottom:12, lineHeight:1.3 }}>
+          Test Submitted Successfully
+        </div>
+        <div style={{ fontSize:13, color:T2, lineHeight:1.75, maxWidth:290, marginBottom:32 }}>
+          Your <span style={{ fontWeight:600, color:NAVY }}>{NORCET_META.name}</span> responses have been recorded. Results will be declared after the examination window closes.
+        </div>
+        {/* Quick summary strip */}
+        {finalResults && (
+          <div style={{ display:'flex', gap:1, background:BD, borderRadius:12, overflow:'hidden', marginBottom:8, width:'100%', maxWidth:280 }}>
+            {[
+              { label:'Attempted', value: finalResults.correct + finalResults.wrong, color: NAVY },
+              { label:'Correct',   value: finalResults.correct,   color: GRUN },
+              { label:'Wrong',     value: finalResults.wrong,     color: DIAM },
+            ].map(s => (
+              <div key={s.label} style={{ flex:1, background:'white', padding:'12px 8px', textAlign:'center' }}>
+                <div style={{ fontSize:20, fontWeight:800, color:s.color }}>{s.value}</div>
+                <div style={{ fontSize:10, color:T3, marginTop:2, fontWeight:600 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div style={{ flexShrink:0, padding:'14px 20px 28px', borderTop:`1px solid ${BD}`, display:'flex', flexDirection:'column', gap:10 }}>
+        <button onClick={() => setPhase('loading')} style={{ ...gPrim({ width:'100%', padding:'14px', fontSize:14, borderRadius:10 }) }}>
+          View Detailed Analysis
+        </button>
+        <button onClick={() => navigate('livetest')} style={{ ...gBtn({ width:'100%', padding:'12px', fontSize:13, borderRadius:10 }) }}>
+          Back to Live Tests
+        </button>
+      </div>
+    </div>
+  )
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (phase === 'loading') return (
@@ -283,7 +334,7 @@ export default function LiveTestSolve({ navigate, test }) {
         <div style={{ padding:'4px 12px 8px', display:'flex', alignItems:'center', gap:8 }}>
           <button onClick={() => setShowExitConfirm(true)} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(255,255,255,0.8)', fontSize:18, lineHeight:1, padding:0, flexShrink:0 }}>✕</button>
           <div style={{ flex:1, textAlign:'center' }}>
-            <div style={{ fontSize:12, fontWeight:700, color:'white' }}>{test?.name||'AIIMS NORCET'}</div>
+            <div style={{ fontSize:12, fontWeight:700, color:'white' }}>{NORCET_META.name}</div>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginTop:1 }}>
               <span style={{ fontSize:10, color:'rgba(255,255,255,0.6)' }}>Total Time Remaining:</span>
               <span style={{ fontSize:14, fontWeight:900, color: totalTimeLeft<=300?'#ff8080':'#ffcc44', letterSpacing:'0.05em', fontVariantNumeric:'tabular-nums' }}>{timerStr}</span>
@@ -298,8 +349,8 @@ export default function LiveTestSolve({ navigate, test }) {
         <div style={{ background:'rgba(0,0,0,0.22)', padding:'6px 14px', display:'flex', alignItems:'center', gap:10 }}>
           <div style={{ width:34, height:40, background:'rgba(255,255,255,0.15)', border:'1px solid rgba(255,255,255,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:17, fontWeight:700, color:'white', flexShrink:0 }}>A</div>
           <div style={{ flex:1 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:'white' }}>Anant Trivedi</div>
-            <div style={{ fontSize:10, color:'rgba(255,255,255,0.6)' }}>Roll No: 10024156 · Nursing Officer</div>
+            <div style={{ fontSize:12, fontWeight:700, color:'white' }}>{NORCET_META.candidate}</div>
+            <div style={{ fontSize:10, color:'rgba(255,255,255,0.6)' }}>Roll No: {NORCET_META.rollNo} · Nursing Officer</div>
           </div>
           <div style={{ fontSize:11, textAlign:'right', flexShrink:0 }}>
             <span style={{ color:'#7fff88', fontWeight:700 }}>+{cm}</span>

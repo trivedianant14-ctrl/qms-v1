@@ -16,10 +16,10 @@ const FORMAT = {
 
 const LIVE_TEST = {
   id: 0,
-  name: 'NORCET 8 Grand Test – Session 1',
-  timeLabel: 'Today, 3:00 PM – 5:00 PM',
-  duration: 120, durationLabel: '120 min', marks: '200', enrolled: 2847,
-  questions: 200, totalMarks: 200, correctMarks: 1, wrongMarks: -0.25,
+  name: 'NORCET 10 — Stage I',
+  timeLabel: 'Today, 3:00 PM – 4:30 PM',
+  duration: 90, durationLabel: '90 min', marks: '100', enrolled: 2847,
+  questions: 100, totalMarks: 100, correctMarks: 1, wrongMarks: -0.33,
 }
 
 const CONFETTI = [
