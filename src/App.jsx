@@ -48,7 +48,7 @@ export default function App() {
   const [attemptCount, setAttemptCount] = useState(0)
   const [savedVideos, setSavedVideos] = useState([])
   const [savedResources, setSavedResources] = useState([])
-  const [liveTestVariant, setLiveTestVariant] = useState('cta')
+  const [liveTestVariant, setLiveTestVariant] = useState('hybrid')
   const animDirRef = useRef('forward')
 
   const goTo = (next) => {
@@ -178,6 +178,7 @@ export default function App() {
   }
 
   const VARIANTS = [
+    { id: 'hybrid', label: 'Hybrid (v3)', desc: '2 inline cards + CTA + collapsed past', icon: '🔀' },
     { id: 'cta', label: 'Calendar CTA', desc: 'Card link → date list view', icon: '📅' },
     { id: 'full', label: 'Full List', desc: 'Segmented tab → card grid', icon: '📋' },
   ]

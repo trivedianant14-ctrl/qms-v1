@@ -251,9 +251,12 @@ const MONTH_MAP = { Jan:'January', Feb:'February', Mar:'March', Apr:'April', May
 const DAY_MAP   = { Sun:'Sunday', Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday', Sat:'Saturday' }
 
 function CalendarScreen({ tests, registeredIds, onRegister, onBack }) {
+  const [calFilter, setCalFilter] = useState('all')
+  const displayTests = calFilter === 'all' ? tests : tests.filter(t => t.format === calFilter)
+
   const monthGroups = []
   const seenMonths = {}
-  tests.forEach(t => {
+  displayTests.forEach(t => {
     const parts = t.date.split(', ')
     const [dayNum, monthAbbr] = parts[1].split(' ')
     const month  = MONTH_MAP[monthAbbr] || monthAbbr
@@ -295,6 +298,26 @@ function CalendarScreen({ tests, registeredIds, onRegister, onBack }) {
         </div>
       </div>
 
+      {/* Filter pills */}
+      <div style={{ display:'flex', gap:8, padding:'12px 16px 10px', borderBottom:`1px solid ${BD}`, flexShrink:0, overflowX:'auto' }}>
+        {[
+          { id:'all', label:'All' },
+          { id:'subject_preboard', label:'Subject' },
+          { id:'full_mock', label:'Full Mock' },
+        ].map(f => {
+          const active = calFilter === f.id
+          return (
+            <button key={f.id} onClick={() => setCalFilter(f.id)} style={{
+              padding:'5px 14px', borderRadius:20, fontSize:12, fontWeight:active?700:500,
+              background: active ? P : 'white',
+              color: active ? 'white' : T2,
+              border: `1.5px solid ${active ? P : BD}`,
+              cursor:'pointer', flexShrink:0, whiteSpace:'nowrap',
+            }}>{f.label}</button>
+          )
+        })}
+      </div>
+
       {/* Scrollable month list */}
       <div className="scroll" style={{ flex:1, padding:'20px 16px 40px' }}>
         {monthGroups.map(mg => (
@@ -328,7 +351,12 @@ function CalendarScreen({ tests, registeredIds, onRegister, onBack }) {
                       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:10 }}>
                         <div style={{ flex:1, minWidth:0 }}>
                           <div style={{ fontSize:14, fontWeight:700, color:T1, lineHeight:1.4, marginBottom:2 }}>{t.fullName}</div>
-                          <div style={{ fontSize:11, color:T3, marginBottom:8 }}>{t.subtitle}</div>
+                          <div style={{ fontSize:11, color:T3, marginBottom:6 }}>{t.subtitle}</div>
+                          <div style={{ marginBottom:8 }}>
+                            <span style={{ fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:20, background:FORMAT[t.format].bg, color:FORMAT[t.format].color, border:`1px solid ${FORMAT[t.format].border}` }}>
+                              {FORMAT[t.format].label}
+                            </span>
+                          </div>
                           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                             <span style={{ fontSize:11, color:T2, display:'inline-flex', alignItems:'center', gap:3 }}><ClockIcon />{t.duration}</span>
                             <span style={{ fontSize:11, color:T2, display:'inline-flex', alignItems:'center', gap:3 }}><StarIcon />{t.marks} Marks</span>
@@ -395,6 +423,9 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
   const [upcomingTab, setUpcomingTab]         = useState('full_mock')
   const [upcomingExpanded, setUpcomingExpanded] = useState(false)
   const [pastExpanded, setPastExpanded]       = useState(false)
+  const [hybridUpcomingTab, setHybridUpcomingTab] = useState('subject_preboard')
+  const [hybridPastExpanded, setHybridPastExpanded] = useState(false)
+  const [hybridPastTab, setHybridPastTab]     = useState('subject_preboard')
 
   const [registeredIds, setRegisteredIds]     = useState(() => new Set(ALL_UPCOMING.filter(t => t.registered).map(t => t.id)))
   const [activeModal, setActiveModal]         = useState(null)
@@ -418,6 +449,8 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
   const activeList    = upcomingTab === 'subject_preboard' ? UPCOMING_PREBOARDS : UPCOMING_MOCKS
   const visibleList   = upcomingExpanded ? activeList : activeList.slice(0, SHOW_UPCOMING)
   const hasMore       = activeList.length > SHOW_UPCOMING
+  const hybridList         = (hybridUpcomingTab === 'subject_preboard' ? UPCOMING_PREBOARDS : UPCOMING_MOCKS).slice(0, 2)
+  const hybridPastFiltered = pastTests.filter(t => t.format === hybridPastTab)
 
   const CATEGORIES = ['PYQ Test', 'Subject Test', 'Daily Test', 'Mini Test', 'Live Test']
 
@@ -447,11 +480,11 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
       {/* Prototype toggle */}
       <div style={{ flexShrink:0, display:'flex', justifyContent:'center', padding:'6px 16px', background:BG2, borderBottom:`1px solid ${BD}` }}>
         <div style={{ display:'inline-flex', background:'white', border:`1px solid ${BD}`, borderRadius:20, padding:3, gap:2 }}>
-          <button onClick={() => { setManyAttempts(false); setPastExpanded(false) }}
+          <button onClick={() => { setManyAttempts(false); setPastExpanded(false); setHybridPastExpanded(false) }}
             style={{ padding:'4px 14px', borderRadius:16, fontSize:11, fontWeight:600, background:!manyAttempts?P:'transparent', color:!manyAttempts?'white':T3, border:'none', cursor:'pointer' }}>
             Few Attempts
           </button>
-          <button onClick={() => { setManyAttempts(true); setPastExpanded(false) }}
+          <button onClick={() => { setManyAttempts(true); setPastExpanded(false); setHybridPastExpanded(false) }}
             style={{ padding:'4px 14px', borderRadius:16, fontSize:11, fontWeight:600, background:manyAttempts?P:'transparent', color:manyAttempts?'white':T3, border:'none', cursor:'pointer' }}>
             Many Attempts
           </button>
@@ -518,7 +551,46 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
 
             {/* ── Upcoming Tests ── */}
             <div style={{ borderTop:`1px solid ${BD}`, paddingTop:16, marginBottom:24 }}>
-              {variant === 'cta' ? (
+              {variant === 'hybrid' ? (
+                // ── V3: 2-card inline preview + calendar CTA below ──
+                <>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+                    <span style={{ fontSize:13, fontWeight:700, color:T1 }}>Upcoming Tests</span>
+                    <div style={{ display:'inline-flex', background:BG2, border:`1px solid ${BD}`, borderRadius:20, padding:3, gap:2 }}>
+                      {[{ id:'subject_preboard', label:'Subject' }, { id:'full_mock', label:'Full Mock' }].map(tab => {
+                        const isActive = hybridUpcomingTab === tab.id
+                        return (
+                          <button key={tab.id}
+                            onClick={() => setHybridUpcomingTab(tab.id)}
+                            style={{ padding:'4px 12px', borderRadius:16, fontSize:11, fontWeight:600, background:isActive?P:'transparent', color:isActive?'white':T3, border:'none', cursor:'pointer', whiteSpace:'nowrap' }}>
+                            {tab.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  {hybridUpcomingTab === 'full_mock' && (
+                    <div style={{ fontSize:11, color:T3, marginBottom:10, display:'flex', alignItems:'center', gap:5 }}>
+                      <span style={{ fontSize:10, fontWeight:600, background:PL, color:PD, border:`1px solid ${PB}`, padding:'2px 7px', borderRadius:20 }}>NASHTA Series</span>
+                      Full-length NORCET simulations
+                    </div>
+                  )}
+                  {hybridList.map(t => (
+                    <UpcomingCard key={t.id} test={t} isRegistered={registeredIds.has(t.id)} onRegisterClick={handleRegisterClick} />
+                  ))}
+                  {/* Calendar CTA strip */}
+                  <button onClick={() => setShowCalendar(true)}
+                    style={{ width:'100%', display:'flex', alignItems:'center', gap:10, background:'#EDF4FF', border:'1.5px solid #93B8F0', borderRadius:10, padding:'10px 14px', cursor:'pointer', textAlign:'left', marginTop:6 }}>
+                    <div style={{ width:30, height:30, borderRadius:8, background:'#1A56B0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                    </div>
+                    <span style={{ flex:1, fontSize:12, fontWeight:600, color:'#1A56B0' }}>View full test calendar</span>
+                    <ChevronRight size={16} />
+                  </button>
+                </>
+              ) : variant === 'cta' ? (
                 // ── V1: Calendar CTA card (opens full-screen overlay) ──
                 <button onClick={() => setShowCalendar(true)}
                   style={{ width:'100%', display:'flex', alignItems:'center', gap:12, background:'#EDF4FF', border:'1.5px solid #93B8F0', borderRadius:12, padding:'13px 14px', cursor:'pointer', textAlign:'left' }}>
@@ -578,7 +650,66 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
 
             {/* ── Past Tests ── */}
             <div style={{ borderTop:`1px solid ${BD}`, paddingTop:16 }}>
-              {variant === 'cta' ? (
+              {variant === 'hybrid' ? (
+                // ── V3: Collapsed summary → expand with filter pills ──
+                <>
+                  {!hybridPastExpanded ? (
+                    <button onClick={() => setHybridPastExpanded(true)}
+                      style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 16px', borderRadius:12, background:BG2, border:`1px solid ${BD}`, cursor:'pointer', marginBottom:8 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                        <div style={{ width:36, height:36, borderRadius:10, background:PL, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><polyline points="9,12 11,14 15,10"/></svg>
+                        </div>
+                        <div>
+                          <div style={{ fontSize:13, fontWeight:600, color:T1, textAlign:'left' }}>
+                            {totalPast} past tests
+                          </div>
+                          <div style={{ fontSize:11, color:T3, marginTop:3, display:'flex', alignItems:'center', gap:6 }}>
+                            <span>Subject <span style={{ color:G, fontWeight:700 }}>{subjectAttempted}</span>/{subjectPast.length}</span>
+                            <span style={{ color:BD }}>·</span>
+                            <span>Full Mock <span style={{ color:G, fontWeight:700 }}>{fullAttempted}</span>/{fullPast.length}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ color:T3 }}><ChevronDown size={18} /></div>
+                    </button>
+                  ) : (
+                    <>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+                        <span style={{ fontSize:13, fontWeight:700, color:T1 }}>Past Tests</span>
+                        <button onClick={() => setHybridPastExpanded(false)}
+                          style={{ display:'flex', alignItems:'center', gap:3, background:'none', border:'none', color:T2, fontSize:11, fontWeight:600, cursor:'pointer', padding:0 }}>
+                          Collapse <ChevronUp size={13} />
+                        </button>
+                      </div>
+                      {/* Filter pills */}
+                      <div style={{ display:'flex', gap:7, marginBottom:14 }}>
+                        {[{ id:'subject_preboard', label:'Subject' }, { id:'full_mock', label:'Full Mock' }].map(f => {
+                          const isActive = hybridPastTab === f.id
+                          return (
+                            <button key={f.id} onClick={() => setHybridPastTab(f.id)} style={{
+                              padding:'5px 14px', borderRadius:20, fontSize:12, fontWeight:isActive?700:500,
+                              background: isActive ? P : 'white',
+                              color: isActive ? 'white' : T2,
+                              border: `1.5px solid ${isActive ? P : BD}`,
+                              cursor:'pointer',
+                            }}>{f.label}</button>
+                          )
+                        })}
+                        <span style={{ marginLeft:'auto', fontSize:11, color:T3, alignSelf:'center' }}>
+                          <span style={{ color:G, fontWeight:700 }}>{hybridPastTab === 'subject_preboard' ? subjectAttempted : fullAttempted}</span>
+                          /{hybridPastTab === 'subject_preboard' ? subjectPast.length : fullPast.length} attempted
+                        </span>
+                      </div>
+                      {hybridPastFiltered.length === 0 ? (
+                        <div style={{ textAlign:'center', padding:'24px 0', color:T3, fontSize:13 }}>No past tests in this category</div>
+                      ) : (
+                        hybridPastFiltered.map(t => <PastCard key={t.id} test={t} />)
+                      )}
+                    </>
+                  )}
+                </>
+              ) : variant === 'cta' ? (
                 // ── V1: Segmented filter tabs, always visible ──
                 <>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
