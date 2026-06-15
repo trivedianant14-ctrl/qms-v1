@@ -227,19 +227,30 @@ function PastCard({ test }) {
   }
 
   return (
-    <div style={{ background:BG2, border:`1px solid ${BD}`, borderRadius:12, padding:'14px 14px 12px', marginBottom:10, opacity:0.65 }}>
+    <div style={{ background:AL, border:`1.5px solid ${AB}`, borderRadius:12, padding:'14px 14px 12px', marginBottom:10 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-        <span style={{ display:'inline-flex', alignItems:'center', padding:'2px 9px', borderRadius:20, fontSize:10, fontWeight:600, background:'white', color:T3, border:`1px solid ${BD}` }}>
-          Not Attempted
+        {/* Gold badge */}
+        <span style={{ display:'inline-flex', alignItems:'center', gap:5, padding:'2px 10px', borderRadius:20, fontSize:10, fontWeight:700, background:'#FFC533', color:'#5A3700', border:'1.5px solid #E6A800' }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.5 8.5L24 9.7L18 15.5L19.5 24L12 20L4.5 24L6 15.5L0 9.7L8.5 8.5Z"/></svg>
+          Gold
         </span>
         <FormatTag format={test.format} />
       </div>
-      <div style={{ fontSize:14, fontWeight:600, color:T2, lineHeight:1.4, marginBottom:3 }}>{test.fullName}</div>
-      <div style={{ fontSize:11, color:T3, marginBottom:10 }}>{test.subtitle}</div>
-      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-        <span style={{ fontSize:11, color:T3 }}>{test.date}</span>
-        <span style={{ color:BD }}>·</span>
-        <span style={{ fontSize:11, color:T3, display:'inline-flex', alignItems:'center', gap:3 }}><ClockIcon />{test.dur}</span>
+
+      {/* Test info — slightly muted */}
+      <div style={{ fontSize:14, fontWeight:600, color:A, lineHeight:1.4, marginBottom:3 }}>{test.fullName}</div>
+      <div style={{ fontSize:11, color:AB, marginBottom:10 }}>{test.subtitle}</div>
+
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <span style={{ fontSize:11, color:A, opacity:0.7 }}>{test.date}</span>
+          <span style={{ color:AB }}>·</span>
+          <span style={{ fontSize:11, color:A, opacity:0.7, display:'inline-flex', alignItems:'center', gap:3 }}><ClockIcon />{test.dur}</span>
+        </div>
+        <button style={{ display:'inline-flex', alignItems:'center', gap:5, padding:'6px 12px', borderRadius:8, fontSize:11, fontWeight:700, background:'#FFC533', color:'#5A3700', border:'1.5px solid #E6A800', cursor:'pointer', flexShrink:0 }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Upgrade to Gold
+        </button>
       </div>
     </div>
   )
