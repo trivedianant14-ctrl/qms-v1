@@ -36,7 +36,7 @@ const EXISTING_USER_SAVES = [
 ]
 
 function NprepPrototype() {
-  const [screen, setScreen] = useState('livetest')
+  const [screen, setScreen] = useState('home')
   const [currentLiveTest, setCurrentLiveTest] = useState(null)
   const [mode, setMode] = useState('guide')
   const [currentQ, setCurrentQ] = useState(0)
@@ -258,7 +258,7 @@ export default function App() {
     <QueryProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/form" replace />} />
+          <Route path="/" element={<Navigate to="/nprep" replace />} />
           <Route path="/nprep" element={<NprepPrototype />} />
           <Route path="/form" element={<RaiseAQueryLayout><FormShell /></RaiseAQueryLayout>} />
           <Route path="/dashboard" element={<RaiseAQueryLayout><Dashboard /></RaiseAQueryLayout>} />
