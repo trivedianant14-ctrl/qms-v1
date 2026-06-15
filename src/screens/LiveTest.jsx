@@ -41,18 +41,18 @@ const CONFETTI = [
 
 // Upcoming — Subject Preboards
 const UPCOMING_PREBOARDS = [
-  { id:3,  fullName:'Fundamentals of Nursing',          subtitle:'FON · NORCET Preboard',   date:'Sun, 22 Jun', daysOut:7,  duration:'60 min',  marks:'100', enrolled:743,  registered:false },
-  { id:4,  fullName:'Medical Surgical Nursing',         subtitle:'MSN · NORCET Preboard',   date:'Wed, 25 Jun', daysOut:10, duration:'60 min',  marks:'100', enrolled:1203, registered:false },
-  { id:5,  fullName:'Community Health Nursing',         subtitle:'CHN · NORCET Preboard',   date:'Sun, 29 Jun', daysOut:14, duration:'60 min',  marks:'100', enrolled:891,  registered:false },
-  { id:6,  fullName:'Obstetrics & Gynecology Nursing',  subtitle:'OBG · NORCET Preboard',   date:'Mon, 7 Jul',  daysOut:22, duration:'60 min',  marks:'100', enrolled:654,  registered:true  },
-  { id:7,  fullName:'Pediatric Nursing',                subtitle:'PDR TREX · NORCET Preboard', date:'Sun, 13 Jul', daysOut:28, duration:'60 min', marks:'100', enrolled:512, registered:false },
+  { id:3,  format:'subject_preboard', fullName:'Fundamentals of Nursing',          subtitle:'FON · NORCET Preboard',   date:'Sun, 22 Jun', daysOut:7,  duration:'60 min',  marks:'100', enrolled:743,  registered:false },
+  { id:4,  format:'subject_preboard', fullName:'Medical Surgical Nursing',         subtitle:'MSN · NORCET Preboard',   date:'Wed, 25 Jun', daysOut:10, duration:'60 min',  marks:'100', enrolled:1203, registered:false },
+  { id:5,  format:'subject_preboard', fullName:'Community Health Nursing',         subtitle:'CHN · NORCET Preboard',   date:'Sun, 29 Jun', daysOut:14, duration:'60 min',  marks:'100', enrolled:891,  registered:false },
+  { id:6,  format:'subject_preboard', fullName:'Obstetrics & Gynecology Nursing',  subtitle:'OBG · NORCET Preboard',   date:'Mon, 7 Jul',  daysOut:22, duration:'60 min',  marks:'100', enrolled:654,  registered:true  },
+  { id:7,  format:'subject_preboard', fullName:'Pediatric Nursing',                subtitle:'PDR TREX · NORCET Preboard', date:'Sun, 13 Jul', daysOut:28, duration:'60 min', marks:'100', enrolled:512, registered:false },
 ]
 
 // Upcoming — Full Mock Tests (NASHTA Series)
 const UPCOMING_MOCKS = [
-  { id:10, fullName:'NASHTA 3 for NORCET', subtitle:'Full-length NORCET simulation · All subjects', date:'Sat, 5 Jul',  daysOut:20, duration:'120 min', marks:'200', enrolled:3241, registered:true  },
-  { id:11, fullName:'NASHTA 4 for NORCET', subtitle:'Full-length NORCET simulation · All subjects', date:'Sat, 26 Jul', daysOut:41, duration:'120 min', marks:'200', enrolled:2103, registered:false },
-  { id:12, fullName:'RRB NASHTA',           subtitle:'RRB Nursing · Full Mock',                       date:'Sat, 9 Aug',  daysOut:55, duration:'120 min', marks:'200', enrolled:1847, registered:false },
+  { id:10, format:'full_mock', fullName:'NASHTA 3 for NORCET', subtitle:'Full-length NORCET simulation · All subjects', date:'Sat, 5 Jul',  daysOut:20, duration:'120 min', marks:'200', enrolled:3241, registered:true  },
+  { id:11, format:'full_mock', fullName:'NASHTA 4 for NORCET', subtitle:'Full-length NORCET simulation · All subjects', date:'Sat, 26 Jul', daysOut:41, duration:'120 min', marks:'200', enrolled:2103, registered:false },
+  { id:12, format:'full_mock', fullName:'RRB NASHTA',           subtitle:'RRB Nursing · Full Mock',                       date:'Sat, 9 Aug',  daysOut:55, duration:'120 min', marks:'200', enrolled:1847, registered:false },
 ]
 
 const ALL_UPCOMING = [...UPCOMING_PREBOARDS, ...UPCOMING_MOCKS]
