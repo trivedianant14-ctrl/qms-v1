@@ -22,7 +22,7 @@ export const MAIN_OPTIONS = [
     icon: '!',
     iconBg: 'rgba(22,163,74,0.1)',
     iconColor: '#16A34A',
-    title: 'Need help',
+    title: 'Explanation gap',
     subtitle: 'I want this question or answer explained',
     screenKey: '2C'
   },
@@ -61,7 +61,7 @@ export const SUB_OPTIONS = {
   },
   '2C': {
     header: 'What kind of help do you need?',
-    category: 'Need Help',
+    category: 'Explanation Gap',
     options: [
       { id: 'explain-why', label: 'Explain why this answer is correct', prompt: 'What part of the explanation is confusing?' },
       { id: 'simpler', label: 'Explain in simpler language', prompt: 'Which part do you want explained more simply?' },
