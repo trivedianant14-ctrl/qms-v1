@@ -19,6 +19,7 @@ import Nav from './components/Nav'
 import FormShell from './components/form/FormShell'
 import Dashboard from './components/dashboard/Dashboard'
 import { QueryProvider } from './context/QueryContext'
+import QueryTracker from './components/QueryTracker'
 
 const SCREEN_DEPTH = {
   home: 0,
@@ -201,7 +202,7 @@ function NprepPrototype() {
           {screen === 'livetestsolve' && <LiveTestSolve navigate={navigate} test={currentLiveTest} />}
         </div>
       </div>
-
+      <QueryTracker />
     </div>
   )
 }
