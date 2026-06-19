@@ -17,6 +17,8 @@ const CATEGORY_META = {
   'Not the Right Question':     { color: '#EA580C', bg: '#FFF7ED', abbr: '!' },
 }
 
+const STAGE_FROM_STATUS = { raised: 0, received: 1, assigned: 2, resolved: 3 }
+
 const AGENTS = [
   { name: 'Priya S.',  team: 'Content QA',  avatar: 'P', color: '#7C3AED' },
   { name: 'Rahul M.',  team: 'Content QA',  avatar: 'R', color: '#0369A1' },
@@ -24,12 +26,8 @@ const AGENTS = [
   { name: 'Amit K.',   team: 'Educator',    avatar: 'A', color: '#DC2626' },
 ]
 
-const TIMELINE_STEPS = [
-  { key: 'raised',   title: 'Query raised',        desc: 'Your report has been logged',             detail: "We've received your query and it's in our review queue." },
-  { key: 'received', title: 'Received by team',     desc: 'Content team has picked this up',         detail: 'Our team has acknowledged your report and will begin review shortly.' },
-  { key: 'assigned', title: 'Agent assigned',       desc: null,                                       detail: 'Your query is being actively reviewed by an expert.' },
-  { key: 'resolved', title: 'Query resolved',       desc: 'Issue addressed',                         detail: "We've reviewed and updated the question. Thank you for helping us improve NPrep!" },
-]
+const STAGE_LABELS = ['Raised', 'In Review', 'Working', 'Resolved']
+const STAGE_COLORS = [P, ORANGE, '#0369A1', GREEN]
 
 function timeAgo(iso) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -58,38 +56,119 @@ function StarRating({ value, onChange }) {
         <button key={s} type="button"
           onMouseEnter={() => setHovered(s)} onMouseLeave={() => setHovered(0)}
           onClick={() => onChange(s)}
-          style={{ background: 'none', border: 'none', padding: 2, fontSize: 26, lineHeight: 1, cursor: 'pointer', color: s <= (hovered || value) ? '#FBBF24' : '#D1D5DB', transform: hovered === s ? 'scale(1.15)' : 'scale(1)', transition: 'transform 0.1s, color 0.1s' }}
+          style={{ background: 'none', border: 'none', padding: 2, fontSize: 28, lineHeight: 1, cursor: 'pointer', color: s <= (hovered || value) ? '#FBBF24' : '#D1D5DB', transform: hovered === s ? 'scale(1.15)' : 'scale(1)', transition: 'transform 0.1s, color 0.1s' }}
         >★</button>
       ))}
     </div>
   )
 }
 
-// ── Timeline Step ────────────────────────────────────────────────────────────
-function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast }) {
-  const status = idx < activeIdx ? 'done' : idx === activeIdx ? 'active' : 'pending'
+// ── Feedback Section ─────────────────────────────────────────────────────────
+function FeedbackSection() {
+  const [rating, setRating] = useState(0)
+  const [submitted, setSubmitted] = useState(false)
+  const [feedback, setFeedback] = useState('')
+  const [shareTestimonial, setShareTestimonial] = useState(false)
+
+  if (submitted) return (
+    <div style={{ textAlign: 'center', padding: '14px 0' }}>
+      <div style={{ fontSize: 22, marginBottom: 6 }}>{rating === 5 ? '🎉' : '🙏'}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>
+        {rating === 5 ? 'Thanks for the love!' : 'Thanks for your feedback!'}
+      </div>
+      <div style={{ fontSize: 11, color: T2 }}>
+        {rating === 5 ? 'Your kind words help us grow.' : "We'll use this to keep improving."}
+      </div>
+    </div>
+  )
+
   return (
-    <div style={{ display: 'flex', gap: 12, opacity: status === 'pending' ? 0.38 : 1 }}>
+    <div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 8 }}>Rate this resolution</div>
+      <StarRating value={rating} onChange={setRating} />
+
+      {/* Text box appears for any rating */}
+      {rating > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 12, color: T2, marginBottom: 6 }}>
+            {rating === 5 ? 'Any additional thoughts?' : 'What could we have done better?'}
+          </div>
+          <textarea
+            value={feedback}
+            onChange={e => setFeedback(e.target.value)}
+            placeholder={rating === 5 ? 'Share what we got right (optional)...' : 'Tell us more (optional)...'}
+            style={{ width: '100%', minHeight: 72, padding: '9px 11px', border: `1px solid ${BD}`, borderRadius: 10, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' }}
+          />
+
+          {/* Testimonial option — only for 5 stars */}
+          {rating === 5 && (
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', marginTop: 10 }}>
+              <input type="checkbox" checked={shareTestimonial} onChange={e => setShareTestimonial(e.target.checked)} style={{ marginTop: 2, accentColor: P }} />
+              <span style={{ fontSize: 12, color: T2 }}>I'd like to share this as a testimonial</span>
+            </label>
+          )}
+
+          <button
+            onClick={() => setSubmitted(true)}
+            style={{ marginTop: 12, width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: P, color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+          >
+            Submit feedback
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Timeline Step ────────────────────────────────────────────────────────────
+function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, query }) {
+  const [expanded, setExpanded] = useState(false)
+  const status = idx < activeIdx ? 'done' : idx === activeIdx ? 'active' : 'pending'
+  const meta = CATEGORY_META[query?.category] || CATEGORY_META['Others']
+  const isExpandable = (step.key === 'raised' || step.key === 'resolved') && status !== 'pending'
+
+  return (
+    <div style={{ display: 'flex', gap: 12, opacity: status === 'pending' ? 0.35 : 1 }}>
+      {/* Dot + connector line */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
         <div style={{ width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: status === 'done' ? GREEN : status === 'active' ? P : 'white', border: `2px solid ${status === 'done' ? GREEN : status === 'active' ? P : BD}`, boxShadow: status === 'active' ? `0 0 0 4px ${PL}` : 'none', animation: status === 'active' ? 'tl-pulse 2s ease-in-out infinite' : 'none', flexShrink: 0 }}>
           {status === 'done'
             ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             : <div style={{ width: 7, height: 7, borderRadius: '50%', background: status === 'active' ? 'white' : BD }} />}
         </div>
-        {!isLast && <div style={{ width: 2, flex: 1, minHeight: 24, background: idx < activeIdx ? GREEN : BD, marginTop: 2, borderRadius: 1 }} />}
+        {!isLast && (
+          <div style={{ width: 2, flex: 1, minHeight: expanded ? 32 : 22, background: idx < activeIdx ? GREEN : BD, marginTop: 2, borderRadius: 1 }} />
+        )}
       </div>
-      <div style={{ paddingBottom: isLast ? 0 : 20, flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+
+      {/* Content */}
+      <div style={{ paddingBottom: isLast ? 0 : 18, flex: 1, minWidth: 0 }}>
+        {/* Step header — clickable if expandable */}
+        <div
+          onClick={isExpandable ? () => setExpanded(e => !e) : undefined}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3, cursor: isExpandable ? 'pointer' : 'default', userSelect: 'none' }}
+        >
           <span style={{ fontSize: 12, fontWeight: 700, color: status === 'pending' ? T3 : T1 }}>{step.title}</span>
-          {stepTimestamps[idx] && <span style={{ fontSize: 10, color: T3 }}>{stepTimestamps[idx]}</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {stepTimestamps[idx] && <span style={{ fontSize: 10, color: T3 }}>{stepTimestamps[idx]}</span>}
+            {isExpandable && (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5" strokeLinecap="round" style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            )}
+          </div>
         </div>
+
+        {/* Step subtitle */}
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: 0 }}>
           {step.key === 'assigned' && status !== 'pending'
             ? <>{agent.name} · <strong>{agent.team}</strong></>
             : step.desc}
         </p>
+
+        {/* Agent card for assigned step */}
         {status === 'active' && step.key === 'assigned' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 7, padding: '7px 10px', background: PL, borderRadius: 8, border: `1px solid ${PB}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '8px 10px', background: PL, borderRadius: 8, border: `1px solid ${PB}` }}>
             <div style={{ width: 26, height: 26, borderRadius: '50%', background: agent.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: 'white' }}>{agent.avatar}</span>
             </div>
@@ -100,83 +179,59 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast }) {
             <div style={{ marginLeft: 'auto', width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'tl-pulse 1.5s ease-in-out infinite' }} />
           </div>
         )}
-        {status === 'done' && (
-          <p style={{ fontSize: 10, color: T3, marginTop: 3, lineHeight: 1.4 }}>{step.detail}</p>
+
+        {/* Expandable: Query Raised — shows original query details */}
+        {expanded && step.key === 'raised' && query && (
+          <div style={{ marginTop: 8, background: BG2, borderRadius: 9, border: `1px solid ${BD}`, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Your original report</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+              <div style={{ width: 16, height: 16, borderRadius: 4, background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 800, color: meta.color, flexShrink: 0 }}>{meta.abbr}</div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: meta.color }}>{query.category}</span>
+            </div>
+            <div style={{ fontSize: 11, color: T1, fontWeight: 500, marginBottom: 4 }}>{query.sub_option}</div>
+            {query.query_text && (
+              <div style={{ fontSize: 11, color: T2, fontStyle: 'italic', lineHeight: 1.5, paddingTop: 6, borderTop: `1px solid ${BD}` }}>
+                "{query.query_text}"
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Expandable: Query Resolved — shows resolution text */}
+        {expanded && step.key === 'resolved' && query?.resolution_text && (
+          <div style={{ marginTop: 8, background: GREEN_BG, borderRadius: 9, border: `1px solid ${GREEN_BORDER}`, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Resolution</div>
+            <p style={{ fontSize: 11, color: '#14532D', lineHeight: 1.6, margin: 0 }}>{query.resolution_text}</p>
+            <div style={{ marginTop: 8, paddingTop: 6, borderTop: `1px solid ${GREEN_BORDER}`, fontSize: 10, color: '#166534' }}>
+              Resolved by {agent.name} · {agent.team}
+            </div>
+          </div>
         )}
       </div>
     </div>
   )
 }
 
-// ── Feedback Section ─────────────────────────────────────────────────────────
-function FeedbackSection() {
-  const [rating, setRating] = useState(0)
-  const [submitted, setSubmitted] = useState(false)
-  const [feedback, setFeedback] = useState('')
-  const [expertOpt, setExpertOpt] = useState(false)
-
-  if (submitted) return (
-    <div style={{ textAlign: 'center', padding: '12px 0' }}>
-      <div style={{ fontSize: 20, marginBottom: 4 }}>{rating >= 4 ? '🎉' : '🙏'}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 3 }}>{rating >= 4 ? 'Thanks for the love!' : 'Thanks for your feedback!'}</div>
-      <div style={{ fontSize: 11, color: T2 }}>{rating >= 4 ? 'Your experience helps us improve NPrep.' : "We'll use this to do better."}</div>
-    </div>
-  )
-
-  const isLow = rating > 0 && rating <= 3
-  const isHigh = rating >= 4
-
-  return (
-    <div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 8 }}>Rate this resolution</div>
-      <StarRating value={rating} onChange={setRating} />
-      {isLow && (
-        <div style={{ marginTop: 10 }}>
-          <div style={{ fontSize: 12, color: T2, marginBottom: 6 }}>
-            We're sorry. What could we have done better? <span style={{ color: '#DC2626' }}>*</span>
-          </div>
-          <textarea value={feedback} onChange={e => setFeedback(e.target.value)}
-            placeholder="Tell us what went wrong..."
-            style={{ width: '100%', minHeight: 72, padding: '9px 11px', border: `1px solid ${BD}`, borderRadius: 10, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' }}
-          />
-        </div>
-      )}
-      {isHigh && (
-        <div style={{ marginTop: 8 }}>
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer' }}>
-            <input type="checkbox" checked={expertOpt} onChange={e => setExpertOpt(e.target.checked)} style={{ marginTop: 2, accentColor: P }} />
-            <span style={{ fontSize: 12, color: T2 }}>I'd love to share this as a testimonial</span>
-          </label>
-          {expertOpt && (
-            <textarea value={feedback} onChange={e => setFeedback(e.target.value)} placeholder="What did we do right? (optional)"
-              style={{ marginTop: 7, width: '100%', minHeight: 60, padding: '9px 11px', border: `1px solid ${PB}`, borderRadius: 10, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' }}
-            />
-          )}
-        </div>
-      )}
-      {rating > 0 && (
-        <button onClick={() => setSubmitted(true)} disabled={isLow && !feedback.trim()}
-          style={{ marginTop: 10, width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: isLow && !feedback.trim() ? '#e2e2ec' : P, color: isLow && !feedback.trim() ? T3 : 'white', fontSize: 13, fontWeight: 600, cursor: isLow && !feedback.trim() ? 'not-allowed' : 'pointer' }}
-        >Submit feedback</button>
-      )}
-    </div>
-  )
-}
-
 // ── Query Detail View ─────────────────────────────────────────────────────────
 function QueryDetailView({ query, onBack, onClose }) {
-  const [stage, setStage] = useState(2)
+  const stage = STAGE_FROM_STATUS[query.timeline_status] ?? query.demo_stage ?? 0
   const agent = agentForQuery(query)
   const meta = CATEGORY_META[query.category] || CATEGORY_META['Others']
+
   const raised = new Date(query.timestamp).getTime()
   const stepTimestamps = [
     timeAgo(query.timestamp),
     stage >= 1 ? timeAgo(new Date(raised + 300000).toISOString()) : null,
     stage >= 2 ? timeAgo(new Date(raised + 900000).toISOString()) : null,
-    stage >= 3 ? 'Just now' : null,
+    stage >= 3 ? timeAgo(new Date(raised + 3600000 * 18).toISOString()) : null,
   ]
-  const STAGE_LABELS = ['Raised', 'In Review', 'Working', 'Resolved']
-  const STAGE_COLORS = [P, ORANGE, '#0369A1', GREEN]
+
+  const TIMELINE_STEPS = [
+    { key: 'raised',   title: 'Query raised',     desc: 'Your report has been logged' },
+    { key: 'received', title: 'Received by team',  desc: 'Content team has picked this up' },
+    { key: 'assigned', title: 'Agent assigned',    desc: null },
+    { key: 'resolved', title: 'Query resolved',    desc: 'Issue addressed' },
+  ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -190,38 +245,26 @@ function QueryDetailView({ query, onBack, onClose }) {
             <div style={{ fontSize: 14, fontWeight: 700, color: T1 }}>{ticketId(query.id)}</div>
             <div style={{ fontSize: 10, color: T3 }}>Raised {timeAgo(query.timestamp)}</div>
           </div>
-          <div style={{ padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: stage === 3 ? GREEN_BG : PL, color: stage === 3 ? GREEN : P, border: `1px solid ${stage === 3 ? GREEN_BORDER : PB}` }}>
+          <div style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, background: stage === 3 ? GREEN_BG : PL, color: stage === 3 ? GREEN : P, border: `1px solid ${stage === 3 ? GREEN_BORDER : PB}` }}>
             {STAGE_LABELS[stage]}
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: T3, padding: 2 }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: T3, padding: 2, lineHeight: 1 }}>✕</button>
         </div>
-        {/* Query summary */}
+
+        {/* Query summary chip */}
         <div style={{ background: BG2, borderRadius: 9, padding: '8px 11px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-            <div style={{ width: 16, height: 16, borderRadius: 4, background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: meta.color }}>{meta.abbr}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+            <div style={{ width: 16, height: 16, borderRadius: 4, background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 800, color: meta.color }}>{meta.abbr}</div>
             <span style={{ fontSize: 10, fontWeight: 700, color: meta.color }}>{query.category}</span>
           </div>
           <div style={{ fontSize: 11, color: T2 }}>{query.sub_option}</div>
-          {query.query_text && <div style={{ fontSize: 10, color: T3, marginTop: 2, fontStyle: 'italic' }}>"{query.query_text}"</div>}
-        </div>
-      </div>
-
-      {/* Stage toggle */}
-      <div style={{ padding: '8px 14px', background: '#FAFAFD', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <div style={{ fontSize: 9, color: T3, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 5 }}>Simulate stage</div>
-        <div style={{ display: 'flex', gap: 5 }}>
-          {STAGE_LABELS.map((label, i) => (
-            <button key={i} onClick={() => setStage(i)}
-              style={{ flex: 1, padding: '5px 3px', borderRadius: 7, border: `1.5px solid ${stage === i ? STAGE_COLORS[i] : BD}`, background: stage === i ? (i === 3 ? GREEN_BG : i === 0 ? PL : i === 1 ? ORANGE_BG : '#EFF6FF') : 'white', color: stage === i ? STAGE_COLORS[i] : T3, fontSize: 9, fontWeight: stage === i ? 700 : 400, cursor: 'pointer', lineHeight: 1.4, textAlign: 'center' }}
-            >{i + 1}<br />{label}</button>
-          ))}
         </div>
       </div>
 
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
         {/* Status banner */}
         {stage < 3 && (
-          <div style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 11, background: stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2, border: `1px solid ${stage === 2 ? PB : stage === 1 ? '#FED7AA' : BD}`, display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ marginBottom: 16, padding: '10px 13px', borderRadius: 11, background: stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2, border: `1px solid ${stage === 2 ? PB : stage === 1 ? '#FED7AA' : BD}`, display: 'flex', alignItems: 'center', gap: 9 }}>
             <div style={{ width: 9, height: 9, borderRadius: '50%', background: STAGE_COLORS[stage], flexShrink: 0, animation: 'tl-pulse 1.5s ease-in-out infinite' }} />
             <div>
               <div style={{ fontSize: 12, fontWeight: 700, color: stage === 2 ? PD : stage === 1 ? '#92400E' : T1 }}>
@@ -238,7 +281,7 @@ function QueryDetailView({ query, onBack, onClose }) {
           </div>
         )}
         {stage === 3 && (
-          <div style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 11, background: GREEN_BG, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ marginBottom: 16, padding: '10px 13px', borderRadius: 11, background: GREEN_BG, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 9 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             <div>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Query resolved</div>
@@ -249,15 +292,24 @@ function QueryDetailView({ query, onBack, onClose }) {
 
         {/* Timeline */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>Timeline</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 14 }}>Timeline</div>
           {TIMELINE_STEPS.map((step, idx) => (
-            <TimelineStep key={step.key} step={step} idx={idx} activeIdx={stage} agent={agent} stepTimestamps={stepTimestamps} isLast={idx === TIMELINE_STEPS.length - 1} />
+            <TimelineStep
+              key={step.key}
+              step={step}
+              idx={idx}
+              activeIdx={stage}
+              agent={agent}
+              stepTimestamps={stepTimestamps}
+              isLast={idx === TIMELINE_STEPS.length - 1}
+              query={query}
+            />
           ))}
         </div>
 
-        {/* Feedback */}
+        {/* Feedback — only when resolved */}
         {stage === 3 && (
-          <div style={{ padding: '12px', borderRadius: 12, border: `1px solid ${BD}`, background: 'white' }}>
+          <div style={{ padding: '14px', borderRadius: 12, border: `1px solid ${BD}`, background: 'white' }}>
             <FeedbackSection />
           </div>
         )}
@@ -269,6 +321,7 @@ function QueryDetailView({ query, onBack, onClose }) {
 // ── Query Card ───────────────────────────────────────────────────────────────
 function QueryCard({ query, onClick }) {
   const meta = CATEGORY_META[query.category] || CATEGORY_META['Others']
+  const stage = STAGE_FROM_STATUS[query.timeline_status] ?? query.demo_stage ?? 0
   return (
     <button onClick={onClick}
       style={{ width: '100%', textAlign: 'left', background: 'white', border: `1px solid ${BD}`, borderRadius: 11, padding: '11px 13px', cursor: 'pointer', display: 'block', transition: 'box-shadow 0.15s, border-color 0.15s' }}
@@ -287,8 +340,13 @@ function QueryCard({ query, onClick }) {
         <span style={{ fontSize: 10, fontWeight: 600, color: T3, fontFamily: 'monospace' }}>{ticketId(query.id)}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <span style={{ fontSize: 10, color: T3 }}>{timeAgo(query.timestamp)}</span>
-          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 20, background: query.status === 'resolved' ? GREEN_BG : PL, color: query.status === 'resolved' ? GREEN : P, border: `1px solid ${query.status === 'resolved' ? GREEN_BORDER : PB}` }}>
-            {query.status === 'resolved' ? 'Resolved' : 'In review'}
+          <span style={{
+            fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+            background: stage === 3 ? GREEN_BG : stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2,
+            color: stage === 3 ? GREEN : stage === 2 ? P : stage === 1 ? ORANGE : T2,
+            border: `1px solid ${stage === 3 ? GREEN_BORDER : stage === 2 ? PB : stage === 1 ? '#FED7AA' : BD}`,
+          }}>
+            {STAGE_LABELS[stage]}
           </span>
         </div>
       </div>
@@ -334,14 +392,15 @@ export default function QueryTracker({ onClose }) {
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>NORCET Gold 2024</div>
           </div>
         </div>
-        {/* Clickable stat filters */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
           {[
-            { label: 'Raised', value: queries.length,  key: 'all' },
-            { label: 'In review', value: activeCount,   key: 'active' },
-            { label: 'Resolved',  value: resolvedCount, key: 'resolved' },
+            { label: 'Raised', value: queries.length, key: 'all' },
+            { label: 'In review', value: activeCount, key: 'active' },
+            { label: 'Resolved', value: resolvedCount, key: 'resolved' },
           ].map(stat => (
-            <button key={stat.key} onClick={() => setFilter(stat.key)} style={{ background: filter === stat.key ? 'rgba(255,255,255,0.26)' : 'rgba(255,255,255,0.11)', border: `1.5px solid ${filter === stat.key ? 'rgba(255,255,255,0.55)' : 'transparent'}`, borderRadius: 10, padding: '9px 6px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.15s' }}>
+            <button key={stat.key} onClick={() => setFilter(stat.key)}
+              style={{ background: filter === stat.key ? 'rgba(255,255,255,0.26)' : 'rgba(255,255,255,0.11)', border: `1.5px solid ${filter === stat.key ? 'rgba(255,255,255,0.55)' : 'transparent'}`, borderRadius: 10, padding: '9px 6px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
+            >
               <div style={{ fontSize: 20, fontWeight: 800, color: 'white' }}>{stat.value}</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)' }}>{stat.label}</div>
             </button>
@@ -360,7 +419,7 @@ export default function QueryTracker({ onClose }) {
         <div style={{ fontSize: 11, color: T3, marginTop: 2 }}>Tap any query to see its full timeline</div>
       </div>
 
-      {/* Full query list — no limit */}
+      {/* Query list */}
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '10px 14px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: T3, fontSize: 13 }}>No queries in this category</div>
