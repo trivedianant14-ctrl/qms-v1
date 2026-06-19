@@ -57,6 +57,7 @@ export const mockQueries = [
     resolver_team: 'Content QA',
     sla_hours: 48,
     timestamp: new Date(Date.now() - 26 * 3600000).toISOString(),
+    resolved_at: new Date(Date.now() - 8 * 3600000).toISOString(),
     resolution_text: 'Thank you for flagging this. Our content team reviewed the question and confirmed the anatomical reference was incorrect. The question has been corrected to accurately describe the brachial plexus, and the explanation has been updated to match. This change is now live in the question bank.',
   },
 ]

@@ -13,6 +13,7 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
   const [referenceText, setReferenceText] = useState('')
   const [attachment, setAttachment] = useState(null)
   const [othersText, setOthersText] = useState('')
+  const [submittedId, setSubmittedId] = useState(null)
 
   const reset = () => {
     setScreen('1')
@@ -22,6 +23,7 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
     setReferenceText('')
     setAttachment(null)
     setOthersText('')
+    setSubmittedId(null)
   }
 
   const finish = () => {
@@ -44,7 +46,7 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
 
   const submitStructured = ({ comment = commentText, reference = referenceText, media = attachment } = {}) => {
     const config = SUB_OPTIONS[selectedOption.screenKey]
-    addQuery({
+    const id = addQuery({
       category: config.category,
       subOption: selectedSubOption.label,
       commentText: [
@@ -53,11 +55,13 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
         media && `Attachment: ${media.type} - ${media.name}`
       ].filter(Boolean).join('\n')
     })
+    setSubmittedId(id)
     setScreen('6')
   }
 
   const submitOthers = () => {
-    addQuery({ category: 'Others', subOption: 'Others', commentText: othersText })
+    const id = addQuery({ category: 'Others', subOption: 'Others', commentText: othersText })
+    setSubmittedId(id)
     setScreen('6')
   }
 
@@ -135,7 +139,7 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
             />
           )
         })()}
-        {screen === '6' && <SuccessScreen onReset={reset} onDone={finish} />}
+        {screen === '6' && <SuccessScreen onReset={reset} onDone={finish} queryId={submittedId} />}
         </div>
       </section>
     </main>
@@ -411,17 +415,37 @@ function VoiceRecorder({ onDurationChange }) {
   )
 }
 
-function SuccessScreen({ onReset, onDone }) {
+function SuccessScreen({ onReset, onDone, queryId }) {
+  const ticketDisplay = queryId
+    ? '#NP-' + String(queryId).slice(-5).padStart(5, '0')
+    : null
+
   return (
     <div className="success-screen">
       <div className="success-icon">✓</div>
-      <h1 className="form-title" style={{ marginTop: 20 }}>Query submitted</h1>
-      <p className="success-body">We'll look into this and update the question if needed.</p>
-      <div className="notify-banner">🔔 You'll be notified on the app when this is resolved.</div>
-      <button className="primary-btn" type="button" style={{ background: 'var(--navy)', marginTop: 24 }} onClick={onDone}>
+      <h1 className="form-title" style={{ marginTop: 16 }}>Query submitted!</h1>
+      <p className="success-body">We'll review this and update the question if needed.</p>
+
+      {ticketDisplay && (
+        <div style={{ width: '100%', margin: '14px 0 10px', background: 'var(--primary-light)', border: '1.5px dashed var(--primary-border)', borderRadius: 12, padding: '12px 16px', textAlign: 'left' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Your Ticket ID</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--primary-dark)', letterSpacing: '1px', fontFamily: 'monospace' }}>{ticketDisplay}</div>
+          <div style={{ fontSize: 10, color: '#7070a0', marginTop: 4 }}>Save this to track or reference your query</div>
+        </div>
+      )}
+
+      <div style={{ width: '100%', background: '#f0f7ff', border: '1px solid #c7deff', borderRadius: 10, padding: '10px 13px', textAlign: 'left', fontSize: 12, color: '#1e3a5f', lineHeight: 1.6 }}>
+        <span style={{ fontWeight: 700 }}>Track your query:</span> open your profile and tap{' '}
+        <span style={{ background: 'white', border: '1px solid #c7deff', borderRadius: 5, padding: '0 5px', fontWeight: 600, fontSize: 11 }}>My Queries</span>
+        {' '}to see live status updates.
+      </div>
+
+      <div className="notify-banner" style={{ marginTop: 10 }}>🔔 You'll be notified when this is resolved.</div>
+
+      <button className="primary-btn" type="button" style={{ background: 'var(--navy)', marginTop: 20 }} onClick={onDone}>
         Continue practice
       </button>
-      <button className="link-btn" type="button" style={{ marginTop: 12, fontSize: 13 }} onClick={onReset}>
+      <button className="link-btn" type="button" style={{ marginTop: 10, fontSize: 13 }} onClick={onReset}>
         Raise another query
       </button>
     </div>

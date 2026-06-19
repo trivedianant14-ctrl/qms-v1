@@ -19,8 +19,10 @@ export function QueryProvider({ children }) {
       timeline_status: 'raised',
       resolver_team: getResolverTeam(newQuery.category),
       sla_hours: getSLA(newQuery.category),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      resolved_at: null,
     }, ...prev])
+    return id
   }
 
   return (

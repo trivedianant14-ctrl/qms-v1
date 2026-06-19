@@ -48,8 +48,28 @@ function agentForQuery(query) {
 }
 
 // ── Thumbs Feedback (replaces star rating) ──────────────────────────────────
-function ThumbsFeedback({ agent }) {
+function ThumbsFeedback({ agent, resolvedAt }) {
   const [choice, setChoice] = useState(null) // 'up' | 'down'
+
+  const resolvedTime = resolvedAt ? new Date(resolvedAt).getTime() : Date.now()
+  const expiresAt = resolvedTime + 48 * 3600000
+  const remainingMs = expiresAt - Date.now()
+  const remainingH = Math.max(0, Math.ceil(remainingMs / 3600000))
+  const isExpired = remainingMs <= 0
+
+  // Auto-closed — window has passed
+  if (isExpired) return (
+    <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
+      <div style={{ fontSize: 28, marginBottom: 8 }}>🔒</div>
+      <div style={{ fontSize: 13, fontWeight: 800, color: T1, marginBottom: 6 }}>Ticket auto-closed</div>
+      <div style={{ fontSize: 11, color: T2, lineHeight: 1.6 }}>
+        The 48-hour response window has passed. This ticket has been automatically closed.
+      </div>
+      <div style={{ marginTop: 10, fontSize: 11, color: P }}>
+        Still have a doubt? Raise a new query and our team will help.
+      </div>
+    </div>
+  )
 
   if (choice === 'up') return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
@@ -90,11 +110,9 @@ function ThumbsFeedback({ agent }) {
   return (
     <div>
       <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did this resolve your issue?</div>
-      <div style={{ fontSize: 11, color: T2, marginBottom: 14 }}>Your feedback helps us close the loop or escalate if needed.</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {/* Thumbs UP */}
-        <button
-          onClick={() => setChoice('up')}
+      <div style={{ fontSize: 11, color: T2, marginBottom: 12 }}>Your feedback helps us close the loop or escalate if needed.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <button onClick={() => setChoice('up')}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer', transition: 'all 0.15s' }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(34,197,94,0.2)` }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
@@ -103,9 +121,7 @@ function ThumbsFeedback({ agent }) {
           <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, got it!</span>
           <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Issue is resolved</span>
         </button>
-        {/* Thumbs DOWN */}
-        <button
-          onClick={() => setChoice('down')}
+        <button onClick={() => setChoice('down')}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer', transition: 'all 0.15s' }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(220,38,38,0.15)` }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
@@ -114,6 +130,15 @@ function ThumbsFeedback({ agent }) {
           <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Still confused</span>
           <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>Need more help</span>
         </button>
+      </div>
+      {/* Countdown chip */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', background: remainingH <= 12 ? '#FFF7ED' : BG2, borderRadius: 8, border: `1px solid ${remainingH <= 12 ? '#FED7AA' : BD}` }}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={remainingH <= 12 ? ORANGE : T3} strokeWidth="2.5" strokeLinecap="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span style={{ fontSize: 10, color: remainingH <= 12 ? '#92400E' : T2, fontWeight: remainingH <= 12 ? 600 : 400 }}>
+          {remainingH}h left to respond · ticket auto-closes if no action
+        </span>
       </div>
     </div>
   )
@@ -289,7 +314,7 @@ function QueryDetailView({ query, onBack, onClose }) {
         {/* Thumbs feedback — only when resolved */}
         {stage === 3 && (
           <div style={{ padding: '14px', borderRadius: 12, border: `1px solid ${BD}`, background: 'white' }}>
-            <ThumbsFeedback agent={agent} />
+            <ThumbsFeedback agent={agent} resolvedAt={query.resolved_at} />
           </div>
         )}
       </div>
