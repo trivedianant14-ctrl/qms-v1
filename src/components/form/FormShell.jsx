@@ -105,8 +105,11 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
           const FULL_EVIDENCE = ['answer-wrong', 'book-different', 'multi-correct']
           const isWrongAnswer = selectedOption?.id === 'wrong-answer'
           const needsFullEvidence = isWrongAnswer && FULL_EVIDENCE.includes(selectedSubOption?.id)
-          // Remaining wrong-answer subs + cant-see: no voice
-          const isTextOnly = (isWrongAnswer && !needsFullEvidence) || selectedOption?.id === 'cant-see'
+          // No voice for: wrong-answer simple subs, cant-see, and two specific not-right-q subs
+          const NO_VOICE_NOT_RIGHT = ['already-seen', 'wrong-language']
+          const isTextOnly = (isWrongAnswer && !needsFullEvidence)
+            || selectedOption?.id === 'cant-see'
+            || (selectedOption?.id === 'not-right-q' && NO_VOICE_NOT_RIGHT.includes(selectedSubOption?.id))
 
           if (needsFullEvidence) return (
             <WrongAnswerEvidenceScreen
