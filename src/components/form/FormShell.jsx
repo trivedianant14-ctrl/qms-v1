@@ -100,8 +100,15 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
             onSubmit={submitOthers}
           />
         )}
-        {screen === '5' && (
-          selectedOption?.id === 'wrong-answer' ? (
+        {screen === '5' && (() => {
+          // Sub-options that get full evidence panel (voice + reference + photo)
+          const FULL_EVIDENCE = ['answer-wrong', 'book-different', 'multi-correct']
+          const isWrongAnswer = selectedOption?.id === 'wrong-answer'
+          const needsFullEvidence = isWrongAnswer && FULL_EVIDENCE.includes(selectedSubOption?.id)
+          // Remaining wrong-answer subs get textbox only — no voice, no evidence
+          const isTextOnly = isWrongAnswer && !needsFullEvidence
+
+          if (needsFullEvidence) return (
             <WrongAnswerEvidenceScreen
               value={commentText}
               referenceValue={referenceText}
@@ -113,16 +120,18 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
               onSubmit={() => submitStructured()}
               onSkip={() => submitStructured({ comment: '', reference: '', media: null })}
             />
-          ) : (
+          )
+          return (
             <CommentScreen
               value={commentText}
               prompt={selectedSubOption?.prompt}
               onChange={setCommentText}
               onSubmit={() => submitStructured({ comment: commentText, reference: '', media: null })}
               onSkip={() => submitStructured({ comment: '', reference: '', media: null })}
+              showVoice={!isTextOnly}
             />
           )
-        )}
+        })()}
         {screen === '6' && <SuccessScreen onReset={reset} onDone={finish} />}
         </div>
       </section>
@@ -280,7 +289,7 @@ function WrongAnswerEvidenceScreen({
   )
 }
 
-function CommentScreen({ value, prompt, onChange, onSubmit, onSkip }) {
+function CommentScreen({ value, prompt, onChange, onSubmit, onSkip, showVoice = true }) {
   return (
     <>
       <div className="comment-title">
@@ -293,7 +302,7 @@ function CommentScreen({ value, prompt, onChange, onSubmit, onSkip }) {
         onChange={(event) => onChange(event.target.value)}
         style={{ minHeight: 100 }}
       />
-      <VoiceRecorder />
+      {showVoice && <VoiceRecorder />}
       <button className="primary-btn" type="button" onClick={onSubmit}>Submit query</button>
       <button className="secondary-btn" type="button" onClick={onSkip}>Skip and submit</button>
     </>
