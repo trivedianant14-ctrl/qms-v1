@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useQueries } from '../context/QueryContext'
 
 const P = '#534AB7', PL = '#EEEDFE', PB = '#AFA9EC', PD = '#3C3489'
 const G = '#3B6D11', GL = '#EAF3DE', GB = '#97C459'
@@ -455,6 +456,9 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
   const [showNotifs, setShowNotifs]           = useState(false)
   const [readIds, setReadIds]                 = useState(() => new Set(NOTIFICATIONS.filter(n => n.read).map(n => n.id)))
 
+  const { queries, unresolvedNotifCount, ackResolvedQuery } = useQueries()
+  const resolvedQueries = queries.filter(q => q.timeline_status === 'resolved')
+
   // Past tests: attempted first (desc date), unattempted after (desc date)
   const rawPast   = PAST.map(t => ({ ...t, attempted: manyAttempts ? t.m : t.f }))
   const pastTests = [...rawPast].sort((a, b) => a.attempted !== b.attempted ? (a.attempted ? -1 : 1) : b.ts - a.ts)
@@ -501,8 +505,12 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
   const handleCancel      = () => setActiveModal(null)
   const handleSuccessDone = () => setActiveModal(null)
 
-  const unreadCount   = NOTIFICATIONS.filter(n => !readIds.has(n.id)).length
-  const handleBellClick = () => { setShowNotifs(true); setReadIds(new Set(NOTIFICATIONS.map(n => n.id))) }
+  const unreadCount   = NOTIFICATIONS.filter(n => !readIds.has(n.id)).length + unresolvedNotifCount
+  const handleBellClick = () => {
+    setShowNotifs(true)
+    setReadIds(new Set(NOTIFICATIONS.map(n => n.id)))
+    resolvedQueries.forEach(q => ackResolvedQuery(q.id))
+  }
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100%', background:'white', position:'relative' }}>
@@ -880,6 +888,29 @@ export default function LiveTest({ navigate, onJoinNow, variant = 'cta' }) {
             {unreadCount > 0 && <span style={{ background:P, color:'white', fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:20 }}>{unreadCount} new</span>}
           </div>
           <div className="scroll" style={{ flex:1, padding:'12px 16px 24px' }}>
+            {/* Resolved query notifications */}
+            {resolvedQueries.map(q => (
+              <div key={`query-${q.id}`} style={{ padding:'13px 14px', borderRadius:12, marginBottom:8, background:'white', border:`1.5px solid #86EFAC` }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:4 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
+                    <span style={{ width:6, height:6, borderRadius:'50%', background:'#22C55E', flexShrink:0, marginTop:2 }} />
+                    <span style={{ fontSize:13, fontWeight:700, color:T1, lineHeight:1.4 }}>Query Resolved</span>
+                  </div>
+                  <span style={{ fontSize:10, color:T3, flexShrink:0, marginLeft:8, marginTop:2 }}>
+                    {q.resolved_at ? (() => { const d = Date.now() - new Date(q.resolved_at).getTime(); const h = Math.floor(d/3600000); return h < 1 ? 'just now' : h < 24 ? `${h}h ago` : `${Math.floor(h/24)}d ago` })() : 'recently'}
+                  </span>
+                </div>
+                <div style={{ fontSize:12, color:T2, lineHeight:1.5, marginLeft:14 }}>
+                  Your query for <strong>{q.category}</strong>{q.subject_name ? ` in ${q.subject_name}` : ''} has been resolved by our team.
+                </div>
+                {q.resolution_text && (
+                  <div style={{ marginTop:7, marginLeft:14, padding:'8px 10px', background:'#F0FDF4', borderRadius:8, border:'1px solid #86EFAC', fontSize:11, color:'#14532D', lineHeight:1.5 }}>
+                    {q.resolution_text.length > 100 ? q.resolution_text.slice(0,97) + '…' : q.resolution_text}
+                  </div>
+                )}
+              </div>
+            ))}
+            {/* Regular notifications */}
             {NOTIFICATIONS.map(n => {
               const isUnread = !readIds.has(n.id)
               return (

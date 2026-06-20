@@ -5,6 +5,7 @@ const QueryContext = createContext(null)
 
 export function QueryProvider({ children }) {
   const [queries, setQueries] = useState(mockQueries)
+  const [resolvedAck, setResolvedAck] = useState(() => new Set())
 
   const addQuery = (newQuery) => {
     const id = Date.now()
@@ -12,21 +13,35 @@ export function QueryProvider({ children }) {
       id,
       ticket_id: 'NP-' + id.toString(36).toUpperCase().slice(-6),
       question_id: Math.floor(Math.random() * 90000) + 10000,
+      subject_name: newQuery.subjectName || 'QBank Practice',
+      test_name: newQuery.testName || 'Chapter Practice',
+      question_text: newQuery.questionText || '',
+      question_num: newQuery.questionNum || null,
       category: newQuery.category,
       sub_option: newQuery.subOption,
       query_text: newQuery.commentText || '',
       status: 'active',
       timeline_status: 'raised',
+      demo_stage: 0,
       resolver_team: getResolverTeam(newQuery.category),
       sla_hours: getSLA(newQuery.category),
       timestamp: new Date().toISOString(),
       resolved_at: null,
+      resolution_text: null,
     }, ...prev])
     return id
   }
 
+  const ackResolvedQuery = (id) => {
+    setResolvedAck(prev => new Set([...prev, id]))
+  }
+
+  const unresolvedNotifCount = queries.filter(
+    q => q.timeline_status === 'resolved' && !resolvedAck.has(q.id)
+  ).length
+
   return (
-    <QueryContext.Provider value={{ queries, addQuery }}>
+    <QueryContext.Provider value={{ queries, addQuery, resolvedAck, ackResolvedQuery, unresolvedNotifCount }}>
       {children}
     </QueryContext.Provider>
   )

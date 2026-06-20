@@ -546,7 +546,17 @@ export default function LiveTestSolve({ navigate, test }) {
         <div className="overlay" onClick={() => setShowReport(false)}>
           <div className="sheet query-sheet" onClick={e => e.stopPropagation()}>
             <div className="sheet-handle" />
-            <FormShell embedded onClose={() => setShowReport(false)} onDone={() => setShowReport(false)} />
+            <FormShell
+              embedded
+              questionContext={{
+                questionText: q?.text,
+                questionNum: curGlobalIdx + 1,
+                subjectName: section?.name,
+                testName: NORCET_META.name,
+              }}
+              onClose={() => setShowReport(false)}
+              onDone={() => setShowReport(false)}
+            />
           </div>
         </div>
       )}

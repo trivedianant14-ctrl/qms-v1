@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQueries } from '../context/QueryContext'
 
 const P = '#534AB7', PL = '#EEEDFE', PB = '#AFA9EC', PD = '#3C3489'
@@ -47,9 +47,13 @@ function agentForQuery(query) {
   return AGENTS[(query.id || 0) % AGENTS.length]
 }
 
-// ── Thumbs Feedback (replaces star rating) ──────────────────────────────────
+// ── Thumbs Feedback ──────────────────────────────────────────────────────────
 function ThumbsFeedback({ agent, resolvedAt }) {
-  const [choice, setChoice] = useState(null) // 'up' | 'down'
+  const [step, setStep] = useState('prompt') // 'prompt' | 'explain' | 'called' | 'up'
+  const [explainText, setExplainText] = useState('')
+  const [voiceDuration, setVoiceDuration] = useState(0)
+  const [referenceText, setReferenceText] = useState('')
+  const [callRequested, setCallRequested] = useState(false)
 
   const resolvedTime = resolvedAt ? new Date(resolvedAt).getTime() : Date.now()
   const expiresAt = resolvedTime + 48 * 3600000
@@ -57,7 +61,6 @@ function ThumbsFeedback({ agent, resolvedAt }) {
   const remainingH = Math.max(0, Math.ceil(remainingMs / 3600000))
   const isExpired = remainingMs <= 0
 
-  // Auto-closed — window has passed
   if (isExpired) return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
       <div style={{ fontSize: 28, marginBottom: 8 }}>🔒</div>
@@ -65,81 +68,189 @@ function ThumbsFeedback({ agent, resolvedAt }) {
       <div style={{ fontSize: 11, color: T2, lineHeight: 1.6 }}>
         The 48-hour response window has passed. This ticket has been automatically closed.
       </div>
-      <div style={{ marginTop: 10, fontSize: 11, color: P }}>
-        Still have a doubt? Raise a new query and our team will help.
-      </div>
+      <div style={{ marginTop: 10, fontSize: 11, color: P }}>Still have a doubt? Raise a new query and our team will help.</div>
     </div>
   )
 
-  if (choice === 'up') return (
+  if (step === 'up') return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>🎉</div>
       <div style={{ fontSize: 14, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Great, glad it helped!</div>
-      <div style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>
-        Your ticket is now closed. Keep learning — NPrep's got your back.
-      </div>
+      <div style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>Your ticket is now closed. Keep learning — NPrep's got your back.</div>
     </div>
   )
 
-  if (choice === 'down') return (
-    <div style={{ padding: '10px 0 4px' }}>
-      <div style={{ textAlign: 'center', marginBottom: 10 }}>
+  // Step 2: Explain what's still unclear
+  if (step === 'explain') {
+    const hasText = explainText.trim().length >= 10
+    const hasVoice = voiceDuration >= 5
+    const canSubmit = hasText || hasVoice
+    return (
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <button onClick={() => setStep('prompt')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+          </button>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>What's still unclear?</div>
+            <div style={{ fontSize: 11, color: T2 }}>Help us understand so we can explain it properly.</div>
+          </div>
+        </div>
+        <textarea
+          value={explainText}
+          onChange={e => setExplainText(e.target.value)}
+          placeholder="Describe what you still don't understand about this question or its explanation..."
+          style={{ width: '100%', minHeight: 90, borderRadius: 10, border: `1.5px solid ${explainText.trim().length >= 10 ? P : BD}`, padding: '10px 12px', fontSize: 12, color: T1, resize: 'none', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6, background: BG2 }}
+        />
+        <div style={{ fontSize: 10, color: hasText ? P : T3, marginBottom: 10, marginTop: 3 }}>
+          {hasText ? `${explainText.trim().length} chars ✓` : `${explainText.trim().length} / 10 min · or record 5s voice`}
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <MiniVoiceRecorder onDurationChange={setVoiceDuration} />
+        </div>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 12 }}>
+          <span style={{ fontSize: 11, color: T2, fontWeight: 600 }}>Reference <span style={{ fontWeight: 400, color: T3 }}>(optional)</span></span>
+          <input
+            value={referenceText}
+            onChange={e => setReferenceText(e.target.value)}
+            placeholder="Book, teacher, website, or class note..."
+            style={{ borderRadius: 8, border: `1px solid ${BD}`, padding: '8px 10px', fontSize: 12, color: T1, outline: 'none', fontFamily: 'inherit', background: 'white' }}
+          />
+        </label>
+        <button
+          disabled={!canSubmit}
+          onClick={() => setStep('called')}
+          style={{ width: '100%', padding: '12px', borderRadius: 10, background: canSubmit ? P : BG2, color: canSubmit ? 'white' : T3, border: 'none', fontSize: 13, fontWeight: 700, cursor: canSubmit ? 'pointer' : 'default', marginBottom: 8 }}
+        >
+          Submit &amp; Request 1-on-1 Call
+        </button>
+        <button
+          onClick={() => setStep('called')}
+          style={{ width: '100%', padding: '10px', borderRadius: 10, background: 'none', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+        >
+          Skip — just request a call
+        </button>
+      </div>
+    )
+  }
+
+  // Step 3: Call confirmed
+  if (step === 'called') return (
+    <div style={{ padding: '6px 0 4px' }}>
+      <div style={{ textAlign: 'center', marginBottom: 14 }}>
         <div style={{ fontSize: 32, marginBottom: 6 }}>📞</div>
-        <div style={{ fontSize: 13, fontWeight: 800, color: T1, marginBottom: 4 }}>We're reopening your ticket</div>
+        <div style={{ fontSize: 13, fontWeight: 800, color: T1, marginBottom: 4 }}>1-on-1 call requested</div>
         <div style={{ fontSize: 12, color: T2, lineHeight: 1.6 }}>
-          {agent.name} from <strong>{agent.team}</strong> will call you shortly to understand your doubt better and resolve it properly.
+          {agent.name} from <strong>{agent.team}</strong> will reach out to you within 24 hours to walk through this personally.
         </div>
       </div>
-      <div style={{ background: ORANGE_BG, border: `1px solid #FED7AA`, borderRadius: 10, padding: '10px 12px' }}>
+      <div style={{ background: ORANGE_BG, border: `1px solid #FED7AA`, borderRadius: 10, padding: '10px 12px', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <div style={{ width: 26, height: 26, borderRadius: '50%', background: agent.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'white' }}>{agent.avatar}</span>
+          <div style={{ width: 30, height: 30, borderRadius: '50%', background: agent.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>{agent.avatar}</span>
           </div>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#92400E' }}>{agent.name} · {agent.team}</div>
-            <div style={{ fontSize: 10, color: ORANGE }}>Will reach out within 24 hours</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#92400E' }}>{agent.name} · {agent.team}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ORANGE, animation: 'tl-pulse 1.5s ease-in-out infinite' }} />
+              <span style={{ fontSize: 10, color: ORANGE }}>Will call within 24 hours</span>
+            </div>
           </div>
         </div>
         <div style={{ fontSize: 10, color: '#92400E', borderTop: `1px solid #FED7AA`, paddingTop: 7, marginTop: 2 }}>
-          Ticket status changed to <strong>Escalated</strong>. You'll get a notification before the call.
+          Ticket status → <strong>Escalated</strong>. You'll get a notification before the call.
         </div>
       </div>
+      {explainText.trim() && (
+        <div style={{ background: BG2, border: `1px solid ${BD}`, borderRadius: 9, padding: '9px 11px', marginBottom: 10 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Your clarification</div>
+          <div style={{ fontSize: 11, color: T2, lineHeight: 1.5, fontStyle: 'italic' }}>"{explainText.trim()}"</div>
+        </div>
+      )}
     </div>
   )
 
+  // Step 1: Prompt
   return (
     <div>
       <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did this resolve your issue?</div>
       <div style={{ fontSize: 11, color: T2, marginBottom: 12 }}>Your feedback helps us close the loop or escalate if needed.</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-        <button onClick={() => setChoice('up')}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer', transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(34,197,94,0.2)` }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
+        <button onClick={() => setStep('up')}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}
         >
           <span style={{ fontSize: 28 }}>👍</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, got it!</span>
           <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Issue is resolved</span>
         </button>
-        <button onClick={() => setChoice('down')}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer', transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(220,38,38,0.15)` }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
+        <button onClick={() => setStep('explain')}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer' }}
         >
           <span style={{ fontSize: 28 }}>👎</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Still confused</span>
           <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>Need more help</span>
         </button>
       </div>
-      {/* Countdown chip */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', background: remainingH <= 12 ? '#FFF7ED' : BG2, borderRadius: 8, border: `1px solid ${remainingH <= 12 ? '#FED7AA' : BD}` }}>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={remainingH <= 12 ? ORANGE : T3} strokeWidth="2.5" strokeLinecap="round">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
         <span style={{ fontSize: 10, color: remainingH <= 12 ? '#92400E' : T2, fontWeight: remainingH <= 12 ? 600 : 400 }}>
-          {remainingH}h left to respond · ticket auto-closes if no action
+          {remainingH}h left to respond · auto-closes if no action
         </span>
       </div>
+    </div>
+  )
+}
+
+// ── Inline mini voice recorder (for escalation form) ──────────────────────────
+function MiniVoiceRecorder({ onDurationChange }) {
+  const [recState, setRecState] = useState('idle')
+  const [audioURL, setAudioURL] = useState(null)
+  const [duration, setDuration] = useState(0)
+  const mrRef = useRef(null)
+  const chunksRef = useRef([])
+  const timerRef = useRef(null)
+  const finalDurRef = useRef(0)
+
+  const start = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mr = new MediaRecorder(stream)
+      chunksRef.current = []
+      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+      mr.onstop = () => {
+        setAudioURL(URL.createObjectURL(new Blob(chunksRef.current, { type: 'audio/webm' })))
+        stream.getTracks().forEach(t => t.stop())
+        setRecState('done')
+        onDurationChange?.(finalDurRef.current)
+      }
+      mr.start(); mrRef.current = mr; setRecState('rec'); setDuration(0); finalDurRef.current = 0
+      timerRef.current = setInterval(() => setDuration(d => { finalDurRef.current = d + 1; return d + 1 }), 1000)
+    } catch { /* mic denied */ }
+  }
+  const stop = () => { mrRef.current?.state === 'recording' && mrRef.current.stop(); clearInterval(timerRef.current) }
+  const remove = () => { if (audioURL) URL.revokeObjectURL(audioURL); setAudioURL(null); setDuration(0); finalDurRef.current = 0; setRecState('idle'); onDurationChange?.(0) }
+  const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+
+  if (recState === 'idle') return (
+    <button type="button" onClick={start} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 20, background: 'white', border: `1px solid ${BD}`, color: T2, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      Add voice note
+    </button>
+  )
+  if (recState === 'rec') return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 20, background: '#FEF2F2', border: `1px solid ${RED_BORDER}` }}>
+      <span style={{ width: 8, height: 8, borderRadius: '50%', background: RED, animation: 'tl-pulse 1s ease-in-out infinite', flexShrink: 0 }} />
+      <span style={{ fontSize: 11, fontWeight: 700, color: RED, fontFamily: 'monospace' }}>{fmt(duration)}</span>
+      <button onClick={stop} style={{ marginLeft: 'auto', padding: '3px 10px', borderRadius: 12, background: RED, color: 'white', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>Stop</button>
+    </div>
+  )
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 20, background: PL, border: `1px solid ${PB}` }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2" strokeLinecap="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      <audio src={audioURL} controls style={{ height: 24, flex: 1 }} />
+      <button onClick={remove} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
     </div>
   )
 }
@@ -299,6 +410,42 @@ function QueryDetailView({ query, onBack, onClose }) {
             <div>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Query resolved</div>
               <div style={{ fontSize: 10, color: '#166534' }}>The question has been reviewed and updated</div>
+            </div>
+          </div>
+        )}
+
+        {/* Question context */}
+        {(query.subject_name || query.test_name || query.question_text) && (
+          <div style={{ marginBottom: 16, borderRadius: 11, border: `1px solid ${BD}`, overflow: 'hidden' }}>
+            <div style={{ padding: '8px 12px', background: BG2, borderBottom: `1px solid ${BD}`, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2.5" strokeLinecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span style={{ fontSize: 10, fontWeight: 700, color: P, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Question Context</span>
+            </div>
+            <div style={{ padding: '10px 12px', background: 'white' }}>
+              {(query.subject_name || query.test_name) && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: query.question_text ? 9 : 0 }}>
+                  {query.subject_name && (
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: PL, color: P, border: `1px solid ${PB}` }}>
+                      {query.subject_name}
+                    </span>
+                  )}
+                  {query.test_name && (
+                    <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 20, background: BG2, color: T2, border: `1px solid ${BD}` }}>
+                      {query.test_name}
+                    </span>
+                  )}
+                  {query.question_num && (
+                    <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 20, background: BG2, color: T3, border: `1px solid ${BD}` }}>
+                      Q{query.question_num}
+                    </span>
+                  )}
+                </div>
+              )}
+              {query.question_text && (
+                <div style={{ fontSize: 11, color: T1, lineHeight: 1.6, fontStyle: 'italic', borderLeft: `3px solid ${PB}`, paddingLeft: 10 }}>
+                  "{query.question_text.length > 140 ? query.question_text.slice(0, 137) + '…' : query.question_text}"
+                </div>
+              )}
             </div>
           </div>
         )}

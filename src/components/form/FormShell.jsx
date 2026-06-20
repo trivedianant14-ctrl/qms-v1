@@ -4,7 +4,7 @@ import { useQueries } from '../../context/QueryContext'
 
 const progressMap = { 1: 20, '2A': 42, '2B': 42, '2C': 42, '2D': 42, 3: 35, 4: 62, 5: 80, 6: 100 }
 
-export default function FormShell({ embedded = false, onClose, onDone }) {
+export default function FormShell({ embedded = false, onClose, onDone, questionContext = {} }) {
   const { addQuery } = useQueries()
   const [screen, setScreen] = useState('1')
   const [selectedOption, setSelectedOption] = useState(null)
@@ -53,14 +53,24 @@ export default function FormShell({ embedded = false, onClose, onDone }) {
         comment && `Reason: ${comment}`,
         reference && `Reference: ${reference}`,
         media && `Attachment: ${media.type} - ${media.name}`
-      ].filter(Boolean).join('\n')
+      ].filter(Boolean).join('\n'),
+      subjectName: questionContext.subjectName,
+      testName: questionContext.testName,
+      questionText: questionContext.questionText,
+      questionNum: questionContext.questionNum,
     })
     setSubmittedId(id)
     setScreen('6')
   }
 
   const submitOthers = () => {
-    const id = addQuery({ category: 'Others', subOption: 'Others', commentText: othersText })
+    const id = addQuery({
+      category: 'Others', subOption: 'Others', commentText: othersText,
+      subjectName: questionContext.subjectName,
+      testName: questionContext.testName,
+      questionText: questionContext.questionText,
+      questionNum: questionContext.questionNum,
+    })
     setSubmittedId(id)
     setScreen('6')
   }

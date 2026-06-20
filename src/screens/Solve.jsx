@@ -563,7 +563,17 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         <div className="overlay" onClick={() => setShowReport(false)}>
           <div className="sheet query-sheet" onClick={e => e.stopPropagation()}>
             <div className="sheet-handle" />
-            <FormShell embedded onClose={() => setShowReport(false)} onDone={() => setShowReport(false)} />
+            <FormShell
+              embedded
+              questionContext={{
+                questionText: q?.text,
+                questionNum: currentQ + 1,
+                subjectName: 'Applied Anatomy',
+                testName: 'QBank — Chapter Practice',
+              }}
+              onClose={() => setShowReport(false)}
+              onDone={() => setShowReport(false)}
+            />
           </div>
         </div>
       )}
