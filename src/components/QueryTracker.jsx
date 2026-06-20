@@ -433,10 +433,20 @@ function CallRequestSection({ agent }) {
 
 // ── Timeline Step ────────────────────────────────────────────────────────────
 function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, query }) {
-  const [expanded, setExpanded] = useState(false)
   const status = idx < activeIdx ? 'done' : idx === activeIdx ? 'active' : 'pending'
   const meta = CATEGORY_META[query?.category] || CATEGORY_META['Others']
   const isExpandable = (step.key === 'raised' || step.key === 'resolved') && status !== 'pending'
+
+  // Default open: 'raised' until an agent is assigned (stage < 2);
+  // 'resolved' while within the 48h feedback window
+  const defaultExpanded = (() => {
+    if (step.key === 'raised') return activeIdx < 2
+    if (step.key === 'resolved' && query?.resolved_at) {
+      return Date.now() < new Date(query.resolved_at).getTime() + 48 * 3600000
+    }
+    return false
+  })()
+  const [expanded, setExpanded] = useState(defaultExpanded)
 
   return (
     <div style={{ display: 'flex', gap: 12, opacity: status === 'pending' ? 0.35 : 1 }}>
