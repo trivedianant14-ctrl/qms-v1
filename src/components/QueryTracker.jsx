@@ -255,6 +255,182 @@ function MiniVoiceRecorder({ onDurationChange }) {
   )
 }
 
+// ── Call Request Flow (number verification) ──────────────────────────────────
+function CallRequestFlow({ agent, onClose }) {
+  const DEMO_NUMBER = '+91 98765 43210'
+  const [step, setStep] = useState('confirm') // confirm | enter | otp | done
+  const [phone, setPhone] = useState('')
+  const [finalPhone, setFinalPhone] = useState(DEMO_NUMBER)
+  const [otp, setOtp] = useState(['', '', '', ''])
+  const [otpError, setOtpError] = useState(false)
+  const ref0 = useRef(), ref1 = useRef(), ref2 = useRef(), ref3 = useRef()
+  const otpRefs = [ref0, ref1, ref2, ref3]
+
+  const handleOtpChange = (idx, val) => {
+    if (!/^\d?$/.test(val)) return
+    const next = [...otp]; next[idx] = val; setOtp(next); setOtpError(false)
+    if (val && idx < 3) otpRefs[idx + 1].current?.focus()
+  }
+  const handleOtpKey = (idx, e) => {
+    if (e.key === 'Backspace' && !otp[idx] && idx > 0) otpRefs[idx - 1].current?.focus()
+  }
+  const verifyOtp = () => {
+    if (otp.join('') === '0000') { setFinalPhone('+91 ' + phone); setStep('done') }
+    else { setOtpError(true); setOtp(['', '', '', '']); ref0.current?.focus() }
+  }
+
+  if (step === 'done') return (
+    <div style={{ padding: '14px 14px 10px', borderRadius: 12, background: '#F0FDF4', border: '1.5px solid #86EFAC' }}>
+      <div style={{ textAlign: 'center', marginBottom: 12 }}>
+        <div style={{ fontSize: 30, marginBottom: 6 }}>📞</div>
+        <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D', marginBottom: 3 }}>Call Requested!</div>
+        <div style={{ fontSize: 11, color: '#166534', lineHeight: 1.6 }}>
+          {agent.name} from <strong>{agent.team}</strong> will call you on <strong>{finalPhone}</strong> within 24 hours.
+        </div>
+      </div>
+      <div style={{ background: 'white', borderRadius: 9, border: '1px solid #86EFAC', padding: '9px 11px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 28, height: 28, borderRadius: '50%', background: agent.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'white' }}>{agent.avatar}</span>
+        </div>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#14532D' }}>{agent.name} · {agent.team}</div>
+          <div style={{ fontSize: 10, color: '#166534' }}>Will call you within 24 hours</div>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (step === 'confirm') return (
+    <div style={{ padding: 14, borderRadius: 12, border: `1px solid ${BD}`, background: 'white' }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 3 }}>Is this your number?</div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: 12 }}>We'll reach out on this number to help resolve your doubt.</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 13px', borderRadius: 10, background: BG2, border: `1px solid ${BD}`, marginBottom: 14 }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2.2" strokeLinecap="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.64a19.79 19.79 0 01-2.93-8.63A2 2 0 012.11 0H5a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+        </svg>
+        <span style={{ fontSize: 15, fontWeight: 700, color: T1, letterSpacing: '0.04em' }}>{DEMO_NUMBER}</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <button onClick={() => setStep('enter')} style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>No, use different</button>
+        <button onClick={() => setStep('done')} style={{ padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Yes, call me</button>
+      </div>
+    </div>
+  )
+
+  if (step === 'enter') return (
+    <div style={{ padding: 14, borderRadius: 12, border: `1px solid ${BD}`, background: 'white' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <button onClick={() => setStep('confirm')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Enter your number</div>
+          <div style={{ fontSize: 10, color: T2 }}>We'll send a one-time OTP to verify</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        <div style={{ padding: '10px 11px', borderRadius: 10, border: `1px solid ${BD}`, background: BG2, fontSize: 13, fontWeight: 600, color: T2, flexShrink: 0 }}>+91</div>
+        <input
+          value={phone}
+          onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+          placeholder="10-digit mobile number"
+          inputMode="numeric"
+          style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${phone.length === 10 ? P : BD}`, fontSize: 13, color: T1, outline: 'none', fontFamily: 'inherit' }}
+        />
+      </div>
+      <button
+        disabled={phone.length !== 10}
+        onClick={() => setStep('otp')}
+        style={{ width: '100%', padding: '12px', borderRadius: 10, background: phone.length === 10 ? P : BG2, color: phone.length === 10 ? 'white' : T3, border: 'none', fontSize: 13, fontWeight: 700, cursor: phone.length === 10 ? 'pointer' : 'default' }}
+      >
+        Send OTP
+      </button>
+    </div>
+  )
+
+  // step === 'otp'
+  return (
+    <div style={{ padding: 14, borderRadius: 12, border: `1px solid ${BD}`, background: 'white' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <button onClick={() => { setOtp(['','','','']); setOtpError(false); setStep('enter') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Enter OTP</div>
+      </div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: 16 }}>Sent to +91 {phone}</div>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 10 }}>
+        {[0,1,2,3].map(idx => (
+          <input key={idx} ref={otpRefs[idx]}
+            value={otp[idx]} maxLength={1} inputMode="numeric"
+            onChange={e => handleOtpChange(idx, e.target.value)}
+            onKeyDown={e => handleOtpKey(idx, e)}
+            style={{ width: 50, height: 56, textAlign: 'center', fontSize: 24, fontWeight: 800, color: otpError ? RED : T1, borderRadius: 10, border: `2px solid ${otpError ? RED_BORDER : otp[idx] ? P : BD}`, outline: 'none', fontFamily: 'inherit', background: otpError ? RED_BG : 'white', transition: 'border-color 0.15s' }}
+          />
+        ))}
+      </div>
+      {otpError && (
+        <div style={{ textAlign: 'center', fontSize: 11, color: RED, marginBottom: 10 }}>Incorrect OTP. Please try again.</div>
+      )}
+      <button
+        disabled={otp.join('').length < 4}
+        onClick={verifyOtp}
+        style={{ width: '100%', padding: '12px', borderRadius: 10, background: otp.join('').length === 4 ? P : BG2, color: otp.join('').length === 4 ? 'white' : T3, border: 'none', fontSize: 13, fontWeight: 700, cursor: otp.join('').length === 4 ? 'pointer' : 'default' }}
+      >
+        Verify &amp; Request Call
+      </button>
+    </div>
+  )
+}
+
+// ── Call Request Section (write / voice / call) ───────────────────────────────
+function CallRequestSection({ agent }) {
+  const [additionalText, setAdditionalText] = useState('')
+  const [voiceDuration, setVoiceDuration] = useState(0)
+  const [showCallFlow, setShowCallFlow] = useState(false)
+
+  return (
+    <div style={{ marginTop: 14, padding: 14, borderRadius: 12, border: `1px solid ${BD}`, background: 'white' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
+        <div style={{ width: 22, height: 22, borderRadius: 6, background: PL, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2.5" strokeLinecap="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Still have a doubt?</div>
+      </div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: 12, lineHeight: 1.5 }}>
+        Write or record what's still unclear — our team will get back to you, or you can request a call.
+      </div>
+
+      <textarea
+        value={additionalText}
+        onChange={e => setAdditionalText(e.target.value)}
+        placeholder="Describe what's still unclear... (optional)"
+        style={{ width: '100%', minHeight: 76, borderRadius: 10, border: `1.5px solid ${additionalText.trim() ? P : BD}`, padding: '9px 11px', fontSize: 12, color: T1, resize: 'none', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6, background: BG2, transition: 'border-color 0.15s', marginBottom: 10 }}
+      />
+
+      <div style={{ marginBottom: 12 }}>
+        <MiniVoiceRecorder onDurationChange={setVoiceDuration} />
+      </div>
+
+      {showCallFlow
+        ? <CallRequestFlow agent={agent} onClose={() => setShowCallFlow(false)} />
+        : (
+          <button
+            onClick={() => setShowCallFlow(true)}
+            style={{ width: '100%', padding: '12px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.64a19.79 19.79 0 01-2.93-8.63A2 2 0 012.11 0H5a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+            Request a Call
+          </button>
+        )
+      }
+    </div>
+  )
+}
+
 // ── Timeline Step ────────────────────────────────────────────────────────────
 function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, query }) {
   const [expanded, setExpanded] = useState(false)
@@ -464,6 +640,9 @@ function QueryDetailView({ query, onBack, onClose }) {
             <ThumbsFeedback agent={agent} resolvedAt={query.resolved_at} />
           </div>
         )}
+
+        {/* Call / write / voice section — for resolved tickets */}
+        {stage === 3 && <CallRequestSection agent={agent} />}
       </div>
     </div>
   )
