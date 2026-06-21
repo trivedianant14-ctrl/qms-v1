@@ -13,14 +13,8 @@ export default function Nav() {
           <NavLink className={({ isActive }) => `raq-tab ${isActive ? 'active' : ''}`} to="/dashboard">
             Product Dashboard
           </NavLink>
-          <NavLink className={({ isActive }) => `raq-tab ${isActive ? 'active' : ''}`} to="/resolver">
-            Agent
-          </NavLink>
-          <NavLink className={({ isActive }) => `raq-tab ${isActive ? 'active' : ''}`} to="/manager">
-            Manager
-          </NavLink>
-          <NavLink className={({ isActive }) => `raq-tab ${isActive ? 'active' : ''}`} to="/faculty">
-            Faculty View
+          <NavLink className={({ isActive }) => `raq-tab ${isActive ? 'active' : ''}`} to="/tickets">
+            Tickets
           </NavLink>
         </div>
       </div>

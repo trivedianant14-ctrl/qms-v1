@@ -20,9 +20,12 @@ import FormShell from './components/form/FormShell'
 import Dashboard from './components/dashboard/Dashboard'
 import { QueryProvider } from './context/QueryContext'
 import { NotificationProvider } from './context/NotificationContext'
+import { AuthProvider } from './context/AuthContext'
 import QueryTracker from './components/QueryTracker'
 import ResolverDashboard from './pages/ResolverDashboard'
 import ManagerDashboard from './pages/ManagerDashboard'
+import UnifiedDashboard from './pages/UnifiedDashboard'
+import LoginPage from './pages/LoginPage'
 
 const SCREEN_DEPTH = {
   home: 0,
@@ -240,16 +243,20 @@ export default function App() {
   return (
     <QueryProvider>
       <NotificationProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/nprep" replace />} />
-            <Route path="/nprep" element={<NprepPrototype />} />
-            <Route path="/form" element={<RaiseAQueryLayout><FormShell /></RaiseAQueryLayout>} />
-            <Route path="/dashboard" element={<RaiseAQueryLayout><Dashboard /></RaiseAQueryLayout>} />
-            <Route path="/resolver" element={<RaiseAQueryLayout><ResolverDashboard /></RaiseAQueryLayout>} />
-            <Route path="/manager" element={<RaiseAQueryLayout><ManagerDashboard /></RaiseAQueryLayout>} />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/nprep" replace />} />
+              <Route path="/nprep" element={<NprepPrototype />} />
+              <Route path="/form" element={<RaiseAQueryLayout><FormShell /></RaiseAQueryLayout>} />
+              <Route path="/dashboard" element={<RaiseAQueryLayout><Dashboard /></RaiseAQueryLayout>} />
+              <Route path="/resolver" element={<RaiseAQueryLayout><ResolverDashboard /></RaiseAQueryLayout>} />
+              <Route path="/manager" element={<RaiseAQueryLayout><ManagerDashboard /></RaiseAQueryLayout>} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/tickets" element={<UnifiedDashboard />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </NotificationProvider>
     </QueryProvider>
   )
