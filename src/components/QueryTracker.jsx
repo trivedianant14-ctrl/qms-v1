@@ -68,11 +68,10 @@ function StarRating({ rating, onRate }) {
 }
 
 function ThumbsFeedback({ resolvedAt }) {
-  // steps: 'prompt' | 'rate' | 'rate_low' | 'up_done' | 'call_confirm' | 'call_enter' | 'call_otp' | 'call_done'
+  // steps: 'prompt' | 'rate' | 'up_done' | 'call_confirm' | 'call_enter' | 'call_otp' | 'call_done'
   const [step, setStep] = useState('prompt')
   const [rating, setRating] = useState(0)
   const [rateNote, setRateNote] = useState('')
-  const [lowNote, setLowNote] = useState('')
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState(['', '', '', ''])
   const [otpError, setOtpError] = useState(false)
@@ -81,10 +80,7 @@ function ThumbsFeedback({ resolvedAt }) {
     React.useRef(), React.useRef(), React.useRef(), React.useRef()
   ]
 
-  const submitRating = () => {
-    if (rating > 0 && rating <= 3) setStep('rate_low')
-    else setStep('up_done')
-  }
+  const submitRating = () => setStep('up_done')
 
   const DEMO_NUMBER = '+91 98765 43210'
 
@@ -139,46 +135,36 @@ function ThumbsFeedback({ resolvedAt }) {
           {STAR_LABELS[rating]}
         </div>
       )}
-      <textarea
-        value={rateNote}
-        onChange={e => setRateNote(e.target.value)}
-        placeholder="Want to leave a note for our team? (optional)"
-        rows={3}
-        style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${BD}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 12 }}
-      />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <button onClick={() => setStep('up_done')}
-          style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-          Skip &amp; Submit
-        </button>
-        <button onClick={submitRating} disabled={!rating}
-          style={{ padding: '11px', borderRadius: 10, background: rating ? P : BG2, color: rating ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: rating ? 'pointer' : 'default' }}>
-          Submit
-        </button>
-      </div>
-    </div>
-  )
-
-  if (step === 'rate_low') return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-        <button onClick={() => setStep('rate')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
-        </button>
-        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Did you not understand anything?</div>
-      </div>
-      <div style={{ fontSize: 12, color: T2, marginBottom: 14 }}>Let us know what was unclear — this helps our team improve.</div>
-      <textarea
-        value={lowNote}
-        onChange={e => setLowNote(e.target.value)}
-        placeholder="What didn't you understand? (required)"
-        rows={4}
-        style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${lowNote.trim() ? P : BD}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 12 }}
-      />
-      <button onClick={() => setStep('up_done')} disabled={!lowNote.trim()}
-        style={{ width: '100%', padding: '12px', borderRadius: 10, background: lowNote.trim() ? P : BG2, color: lowNote.trim() ? 'white' : T3, border: 'none', fontSize: 13, fontWeight: 700, cursor: lowNote.trim() ? 'pointer' : 'default' }}>
-        Submit Feedback
-      </button>
+      {(() => {
+        const isLow = rating > 0 && rating <= 3
+        const canSubmit = rating > 0 && (!isLow || rateNote.trim().length > 0)
+        return (
+          <>
+            {isLow && (
+              <div style={{ fontSize: 11, fontWeight: 700, color: ORANGE, marginBottom: 6 }}>
+                Please tell us what was unclear — it's required for low ratings.
+              </div>
+            )}
+            <textarea
+              value={rateNote}
+              onChange={e => setRateNote(e.target.value)}
+              placeholder={isLow ? 'What didn\'t you understand? (required)' : 'Want to leave a note for our team? (optional)'}
+              rows={3}
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${isLow ? (rateNote.trim() ? P : ORANGE) : BD}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 12 }}
+            />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <button onClick={() => setStep('up_done')}
+                style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                Skip &amp; Submit
+              </button>
+              <button onClick={submitRating} disabled={!canSubmit}
+                style={{ padding: '11px', borderRadius: 10, background: canSubmit ? P : BG2, color: canSubmit ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: canSubmit ? 'pointer' : 'default' }}>
+                Submit
+              </button>
+            </div>
+          </>
+        )
+      })()}
     </div>
   )
 
