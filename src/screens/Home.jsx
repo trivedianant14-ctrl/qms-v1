@@ -24,7 +24,7 @@ const NavBar = ({ navigate }) => {
   )
 }
 
-export default function Home({ navigate, savedQs, bannerDismissed, setBannerDismissed, unsaveQuestion, isNewUser, toggleUserMode, todayQs: realTodayQs, overallAcc: realOverallAcc, sessions, lastSession }) {
+export default function Home({ navigate, onOpenProfile, savedQs, bannerDismissed, setBannerDismissed, unsaveQuestion, isNewUser, toggleUserMode, todayQs: realTodayQs, overallAcc: realOverallAcc, sessions, lastSession }) {
   const hasSessions = sessions && sessions.length > 0
   const todayQs = isNewUser ? (hasSessions ? realTodayQs : 0) : 12
   const overallAcc = isNewUser ? (hasSessions ? realOverallAcc : 0) : 71
@@ -63,7 +63,7 @@ export default function Home({ navigate, savedQs, bannerDismissed, setBannerDism
       {/* Header */}
       <div style={{ padding: '6px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, borderBottom: `1px solid ${BD}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${P}, #8B82E0)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 14 }}>A</div>
+          <button onClick={onOpenProfile} style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${P}, #8B82E0)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', flexShrink: 0 }}>A</button>
           <span style={{ fontSize: 17, fontWeight: 700, color: T1 }}>Question Bank</span>
         </div>
         <button style={{ background: 'none', border: 'none', color: T2, display: 'flex' }}>
@@ -82,16 +82,19 @@ export default function Home({ navigate, savedQs, bannerDismissed, setBannerDism
           </div>
         ) : (
           /* Returning: progress stats */
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', border: `1px solid ${BD}`, borderRadius: 14, padding: 14 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: T3, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Daily Progress</div>
-              <span style={{ fontSize: 26, fontWeight: 700, color: T1 }}>{todayQs}</span>
-              <div style={{ fontSize: 11, color: T3, marginTop: 2 }}>Question Attempted</div>
+          <div style={{ background: 'white', border: `1px solid ${BD}`, borderRadius: 14, padding: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 11, color: T3, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Daily Progress</div>
+                <span style={{ fontSize: 26, fontWeight: 700, color: T1 }}>{todayQs}</span>
+                <div style={{ fontSize: 11, color: T3, marginTop: 2 }}>Questions Attempted</div>
+              </div>
+              <div style={{ marginLeft: 14, textAlign: 'center', background: BG2, borderRadius: 10, padding: '8px 14px' }}>
+                <div style={{ fontSize: 11, color: T3, marginBottom: 2 }}>Overall Accuracy</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: overallAcc >= 70 ? '#3B6D11' : overallAcc >= 50 ? P : '#A32D2D' }}>{overallAcc}%</div>
+              </div>
             </div>
-            <div style={{ marginLeft: 14, textAlign: 'center', background: BG2, borderRadius: 10, padding: '8px 14px' }}>
-              <div style={{ fontSize: 11, color: T3, marginBottom: 2 }}>Overall Accuracy</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: overallAcc >= 70 ? '#3B6D11' : overallAcc >= 50 ? P : '#A32D2D' }}>{overallAcc}%</div>
-            </div>
+            <button onClick={() => navigate('pretest')} className="btn-primary" style={{ width: '100%', padding: '9px 20px', fontSize: 13 }}>Attempt →</button>
           </div>
         )}
       </div>

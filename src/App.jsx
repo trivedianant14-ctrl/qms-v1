@@ -44,6 +44,7 @@ const EXISTING_USER_SAVES = [
 
 function NprepPrototype() {
   const [screen, setScreen] = useState('home')
+  const [showTracker, setShowTracker] = useState(false)
   const [currentLiveTest, setCurrentLiveTest] = useState(null)
   const [mode, setMode] = useState('guide')
   const [currentQ, setCurrentQ] = useState(0)
@@ -171,7 +172,7 @@ function NprepPrototype() {
   const lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null
 
   const sharedProps = {
-    navigate, mode, setMode,
+    navigate, onOpenProfile: () => setShowTracker(true), mode, setMode,
     currentQ, setCurrentQ,
     answers, setAnswers,
     timerPerQ, setTimerPerQ,
@@ -192,7 +193,10 @@ function NprepPrototype() {
   return (
     <div className="desktop-wrapper">
       <div className="phone-wrapper">
-        <div className="phone">
+        <div className="phone" style={{ position: 'relative' }}>
+          {showTracker && (
+            <QueryTracker onClose={() => setShowTracker(false)} />
+          )}
           <div key={screen} className={`screen-trans screen-${animDirRef.current}`}>
             {screen === 'home' && <Home {...sharedProps} />}
             {screen === 'subject' && <Subject {...sharedProps} />}

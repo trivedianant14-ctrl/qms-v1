@@ -11,9 +11,10 @@ const [screen, setScreen] = useState('home')
 - The `/nprep` route must always open to the QBank home screen (subjects list, session card, AIR 15 banner).
 - Do NOT change this to `'solve'`, `'subject'`, or any other value.
 
-### 2. Profile / QueryTracker button — REMOVED
-- The `showTracker` state, `<QueryTracker>` render, and `tracker-tab-btn` button must NOT be added back to `NprepPrototype`.
-- This was deliberately removed. Do not restore it.
+### 2. Profile button — PRESENT
+- `showTracker` state and `<QueryTracker onClose={...} />` are active in `NprepPrototype`.
+- The "A" avatar button in `Home.jsx` header triggers `onOpenProfile` to open the profile overlay.
+- Do NOT remove the `onOpenProfile` prop from `sharedProps` or the avatar button click handler.
 
 ## Other rules
 - The `/nprep` route renders `<NprepPrototype />` directly — do NOT wrap it in `<RaiseAQueryLayout>` or any other layout component.
