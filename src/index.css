@@ -71,9 +71,9 @@ input { font-family: inherit; }
 }
 
 .query-sheet {
-  height: 58%;
+  height: auto;
   min-height: 430px;
-  max-height: 64%;
+  max-height: 268%;
 }
 
 .sheet-handle {
