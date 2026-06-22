@@ -4,12 +4,12 @@
 
 The following two settings in `src/App.jsx` are intentionally fixed and must never be modified:
 
-### 1. Default screen = `'home'`
+### 1. Default screen = `'solve'`
 ```js
-const [screen, setScreen] = useState('home')
+const [screen, setScreen] = useState('solve')
 ```
-- The `/nprep` route must always open to the QBank home screen (subjects list, session card, AIR 15 banner).
-- Do NOT change this to `'solve'`, `'subject'`, or any other value.
+- The `/nprep` route opens directly to the Solve (attempt) screen.
+- Do NOT change this to `'home'`, `'subject'`, or any other value.
 
 ### 2. Profile button — PRESENT
 - `showTracker` state and `<QueryTracker onClose={...} />` are active in `NprepPrototype`.
