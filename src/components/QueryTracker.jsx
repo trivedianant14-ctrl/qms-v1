@@ -615,6 +615,102 @@ function CallRequestSection({ agent }) {
   )
 }
 
+// ── Resolution Attachments ────────────────────────────────────────────────────
+const WAVE = [5,12,8,18,10,16,6,20,9,15,11,19,7,17,13,14,8,16,10,12]
+
+function ImageAttachment({ att }) {
+  const [big, setBig] = useState(false)
+  return (
+    <div style={{ borderRadius: 8, overflow: 'hidden', border: `1px solid ${GREEN_BORDER}` }}>
+      <img
+        src={att.url} alt={att.caption || 'Attachment'}
+        onClick={() => setBig(b => !b)}
+        style={{ width: '100%', display: 'block', maxHeight: big ? 'none' : 130, objectFit: 'cover', cursor: 'pointer', transition: 'max-height 0.2s' }}
+      />
+      {att.caption && (
+        <div style={{ padding: '5px 9px', fontSize: 10, color: '#166534', background: GREEN_BG }}>{att.caption}</div>
+      )}
+    </div>
+  )
+}
+
+function LinkAttachment({ att }) {
+  return (
+    <a href={att.url} target="_blank" rel="noreferrer"
+      style={{ display: 'flex', alignItems: 'flex-start', gap: 9, padding: '9px 10px', borderRadius: 8, background: 'white', border: `1px solid ${GREEN_BORDER}`, textDecoration: 'none' }}>
+      <div style={{ width: 28, height: 28, borderRadius: 7, background: GREEN_BG, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#14532D', marginBottom: 2 }}>{att.title}</div>
+        {att.description && <div style={{ fontSize: 10, color: '#166534', marginBottom: 2, lineHeight: 1.4 }}>{att.description}</div>}
+        <div style={{ fontSize: 9, color: T3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.url}</div>
+      </div>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+    </a>
+  )
+}
+
+function VoiceAttachment({ att }) {
+  const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8, background: 'white', border: `1px solid ${GREEN_BORDER}` }}>
+      <div style={{ width: 28, height: 28, borderRadius: 7, background: GREEN_BG, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round">
+          <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+          <path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', gap: 1.5, alignItems: 'center', height: 22, marginBottom: 3 }}>
+          {WAVE.map((h, i) => (
+            <div key={i} style={{ width: 2, borderRadius: 1, background: '#16A34A', opacity: 0.7, height: h }} />
+          ))}
+        </div>
+        {att.caption && <div style={{ fontSize: 10, color: '#166534', lineHeight: 1.3 }}>{att.caption}</div>}
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#14532D', fontFamily: 'monospace', flexShrink: 0 }}>{fmt(att.duration || 0)}</div>
+    </div>
+  )
+}
+
+function ResolutionAttachments({ attachments }) {
+  const [open, setOpen] = useState(false)
+  if (!attachments || attachments.length === 0) return null
+  return (
+    <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${GREEN_BORDER}` }}>
+      <button onClick={() => setOpen(o => !o)}
+        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%' }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#14532D', flex: 1, textAlign: 'left' }}>
+          {attachments.length} Attachment{attachments.length > 1 ? 's' : ''}
+        </span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round"
+          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      {open && (
+        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {attachments.map((att, i) => {
+            if (att.type === 'image') return <ImageAttachment key={i} att={att} />
+            if (att.type === 'link')  return <LinkAttachment  key={i} att={att} />
+            if (att.type === 'voice') return <VoiceAttachment key={i} att={att} />
+            return null
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Timeline Step ────────────────────────────────────────────────────────────
 function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, query }) {
   const status = idx < activeIdx ? 'done' : idx === activeIdx ? 'active' : 'pending'
@@ -701,6 +797,9 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
             <div style={{ marginTop: 8, paddingTop: 6, borderTop: `1px solid ${GREEN_BORDER}`, fontSize: 10, color: '#166534' }}>
               Resolved by {agent.name} · {agent.team}
             </div>
+            <ResolutionAttachments
+              attachments={Array.isArray(query.resolution_attachment) ? query.resolution_attachment : (query.resolution_attachment ? [query.resolution_attachment] : [])}
+            />
           </div>
         )}
       </div>
