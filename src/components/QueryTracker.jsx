@@ -325,12 +325,12 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <button onClick={() => setStep('prompt')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
         </button>
-        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>We'll have someone call you</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>We're here for you 💙</div>
       </div>
       <div style={{ background: PL, borderRadius: 10, padding: '10px 12px', marginBottom: 14, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <span style={{ fontSize: 18, lineHeight: 1.2 }}>📞</span>
         <div style={{ fontSize: 12, color: PD, lineHeight: 1.6 }}>
-          Since you're still confused, one of our team members will connect with you personally to help clear this up.
+          Some things are better explained on a call. One of our team members will reach out to you personally and take you through this step by step.
           <span style={{ fontWeight: 700 }}> Is this the right number to reach you?</span>
         </div>
       </div>
