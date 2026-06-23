@@ -313,19 +313,18 @@ function ThumbsFeedback({ resolvedAt, query }) {
     <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
       <div style={{ fontSize: 36, marginBottom: 10 }}>📞</div>
       <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>
-        {usedOwnNumber ? 'Ok cool!' : 'Got it!'}
+        {usedOwnNumber ? 'We\'ve got you.' : 'Got it!'}
       </div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.7, marginBottom: 14 }}>
         {usedOwnNumber
-          ? 'One of our agents will be reviewing your query and will shortly be contacting you.'
+          ? 'Someone from our team will go through your doubt and call you personally.'
           : 'Someone from our team will shortly be calling you on your updated number.'}
       </div>
       <div style={{ background: ORANGE_BG, border: `1px solid #FED7AA`, borderRadius: 10, padding: '12px 14px', textAlign: 'left' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }} />
           <span style={{ fontSize: 12, fontWeight: 700, color: '#92400E' }}>Our team will call you within 24 hours</span>
         </div>
-        <div style={{ fontSize: 11, color: '#92400E', paddingLeft: 16 }}>You'll get a notification before the call.</div>
       </div>
     </div>
   )
