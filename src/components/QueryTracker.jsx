@@ -532,8 +532,8 @@ function EscalationRating({ query }) {
 
   return (
     <div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Rate your call experience</div>
-      <div style={{ fontSize: 12, color: T2, marginBottom: 14, lineHeight: 1.5 }}>How was the call with our team? Your feedback helps us improve.</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Tell us how the call went</div>
+      <div style={{ fontSize: 12, color: T2, marginBottom: 14, lineHeight: 1.5 }}>Your experience matters to us</div>
       <StarRating rating={rating} onRate={(n) => {
         setRating(n)
         if (n >= 4) { setEscalationRating(query.ticket_id, n, ''); setSubmitted(true) }
@@ -1063,8 +1063,8 @@ function QueryDetailView({ query, onBack, onClose }) {
     { key: 'received',    title: 'Our team is working on it',              desc: 'A team member has started working on this' },
     { key: 'assigned',    title: 'In good hands',                          desc: null },
     { key: 'resolved',    title: 'Your question deserved a proper answer', desc: "We've gone through this carefully for you" },
-    ...(stage >= 4 ? [{ key: 'escalated',    title: 'Escalated',        desc: 'You requested a callback — our team is arranging a call' }] : []),
-    ...(stage >= 4 ? [{ key: 'call_closed',  title: 'Call completed',   desc: 'Our agent spoke with you to resolve your query' }] : []),
+    ...(stage >= 4 ? [{ key: 'escalated',    title: 'Going the extra mile for you', desc: 'We want to make sure this is fully clear for you' }] : []),
+    ...(stage >= 4 ? [{ key: 'call_closed',  title: "That's what we're here for",  desc: 'Our team connected with you to go through this' }] : []),
   ]
 
   const badgeMeta = stage >= 5 ? { bg: '#F5F3FF', color: '#7C3AED', border: '#DDD6FE' }
@@ -1362,7 +1362,7 @@ function QueryCard({ query, onClick, onLowRating }) {
             </div>
           ) : (
             <>
-              <div style={{ fontSize: 10, color: T2, fontWeight: 600, marginBottom: 6 }}>Rate your call experience</div>
+              <div style={{ fontSize: 10, color: T2, fontWeight: 600, marginBottom: 6 }}>Tell us how the call went</div>
               <div style={{ display: 'flex', gap: 3 }}>
                 {[1,2,3,4,5].map(n => (
                   <button key={n}
