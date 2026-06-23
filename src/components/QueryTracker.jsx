@@ -1485,7 +1485,7 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
   const STAT_ITEMS = [
     { label: 'Raised',    value: queries.length, key: 'all',      color: P,      bg: PL,        border: PB },
     { label: 'In Review', value: activeCount,     key: 'active',  color: ORANGE, bg: ORANGE_BG, border: '#FED7AA' },
-    { label: 'Resolved',  value: resolvedCount,   key: 'resolved', color: GREEN,  bg: GREEN_BG,  border: GREEN_BORDER },
+    { label: 'All done ✓', value: resolvedCount,   key: 'resolved', color: GREEN,  bg: GREEN_BG,  border: GREEN_BORDER },
   ]
 
   return (
@@ -1521,7 +1521,7 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
             {!searchOpen && <div style={{ fontSize: 11, color: T3, marginTop: 1 }}>Tap any query to see its full timeline</div>}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {!searchOpen && <span style={{ fontSize: 11, color: T3 }}>{filter === 'all' ? 'All' : filter === 'active' ? 'In review' : 'Resolved'} · {filtered.length}</span>}
+            {!searchOpen && <span style={{ fontSize: 11, color: T3 }}>{filter === 'all' ? 'All' : filter === 'active' ? 'In review' : 'All done ✓'} · {filtered.length}</span>}
             <button
               onClick={() => { setSearchOpen(o => !o); if (searchOpen) setSearch('') }}
               style={{ background: searchOpen ? PL : 'none', border: `1px solid ${searchOpen ? PB : BD}`, borderRadius: 8, padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: searchOpen ? P : T2, transition: 'all 0.15s' }}
