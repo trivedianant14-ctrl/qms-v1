@@ -1365,20 +1365,11 @@ function ProfileHome({ queries, onOpenQueries, onClose }) {
 }
 
 // ── Queries Sub-view ──────────────────────────────────────────────────────────
-const CATEGORY_CHIPS = [
-  'I Have a Doubt',
-  'Problem with this Question',
-  "Can't See Something",
-  'App Issue',
-  'Problem with the Answer',
-]
-
 function QueriesView({ queries, onBack, onClose, onSelect }) {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [ratingPopup, setRatingPopup] = useState(null)
-  const [categoryFilter, setCategoryFilter] = useState(null)
 
   const activeCount = queries.filter(q => q.status !== 'resolved').length
   const resolvedCount = queries.filter(q => q.status === 'resolved').length
@@ -1387,19 +1378,15 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
     : filter === 'active' ? queries.filter(q => q.status !== 'resolved')
     : queries.filter(q => q.status === 'resolved')
 
-  const byCat = categoryFilter && filter !== 'resolved'
-    ? byFilter.filter(x => x.category === categoryFilter)
-    : byFilter
-
   const sq = search.trim().toLowerCase()
   const filtered = sq
-    ? byCat.filter(x =>
+    ? byFilter.filter(x =>
         x.category?.toLowerCase().includes(sq) ||
         x.sub_option?.toLowerCase().includes(sq) ||
         x.query_text?.toLowerCase().includes(sq) ||
         ticketId(x.id).toLowerCase().includes(sq)
       )
-    : byCat
+    : byFilter
 
   const STAT_ITEMS = [
     { label: 'Raised',    value: queries.length, key: 'all',      color: P,      bg: PL,        border: PB },
@@ -1422,7 +1409,7 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
       <div style={{ flexShrink: 0, borderBottom: `1px solid ${BD}`, background: 'white' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
           {STAT_ITEMS.map((stat, i) => (
-            <button key={stat.key} onClick={() => { setFilter(stat.key); setCategoryFilter(null) }}
+            <button key={stat.key} onClick={() => setFilter(stat.key)}
               style={{ padding: '14px 6px', textAlign: 'center', cursor: 'pointer', border: 'none', background: filter === stat.key ? stat.bg : 'white', borderRight: i < 2 ? `1px solid ${BD}` : 'none', borderBottom: `3px solid ${filter === stat.key ? stat.color : 'transparent'}`, transition: 'all 0.15s' }}
             >
               <div style={{ fontSize: 26, fontWeight: 900, color: stat.color, letterSpacing: '-1px' }}>{stat.value}</div>
@@ -1431,23 +1418,6 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
           ))}
         </div>
       </div>
-
-      {/* Category chip filters — Raised and On it tabs only */}
-      {filter !== 'resolved' && (
-        <div style={{ flexShrink: 0, background: 'white', borderBottom: `1px solid ${BD}`, overflowX: 'auto', whiteSpace: 'nowrap', padding: '8px 14px' }}
-          className="scroll">
-          {CATEGORY_CHIPS.map(chip => {
-            const active = categoryFilter === chip
-            return (
-              <button key={chip}
-                onClick={() => setCategoryFilter(active ? null : chip)}
-                style={{ display: 'inline-flex', alignItems: 'center', marginRight: 6, padding: '4px 11px', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1.5px solid ${active ? P : BD}`, background: active ? PL : 'white', color: active ? PD : T2, transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
-                {chip}
-              </button>
-            )
-          })}
-        </div>
-      )}
 
       {/* Section label + search toggle */}
       <div style={{ padding: '10px 16px 8px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
