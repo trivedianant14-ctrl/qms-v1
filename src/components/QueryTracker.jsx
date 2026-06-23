@@ -129,42 +129,38 @@ function ThumbsFeedback({ resolvedAt }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Rate your experience</div>
       </div>
       <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>How helpful was the resolution?</div>
-      <StarRating rating={rating} onRate={setRating} />
+      <StarRating rating={rating} onRate={(n) => {
+        setRating(n)
+        if (n >= 4) setStep('up_done')
+      }} />
       {rating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: rating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
           {STAR_LABELS[rating]}
         </div>
       )}
-      {(() => {
-        const isLow = rating > 0 && rating <= 3
-        const canSubmit = rating > 0 && (!isLow || rateNote.trim().length > 0)
-        return (
-          <>
-            {isLow && (
-              <div style={{ fontSize: 11, fontWeight: 700, color: ORANGE, marginBottom: 6 }}>
-                Please tell us what was unclear — it's required for low ratings.
-              </div>
-            )}
-            <textarea
-              value={rateNote}
-              onChange={e => setRateNote(e.target.value)}
-              placeholder={isLow ? 'What didn\'t you understand? (required)' : 'Want to leave a note for our team? (optional)'}
-              rows={3}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${isLow ? (rateNote.trim() ? P : ORANGE) : BD}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 12 }}
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <button onClick={() => setStep('up_done')}
-                style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                Skip &amp; Submit
-              </button>
-              <button onClick={submitRating} disabled={!canSubmit}
-                style={{ padding: '11px', borderRadius: 10, background: canSubmit ? P : BG2, color: canSubmit ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: canSubmit ? 'pointer' : 'default' }}>
-                Submit
-              </button>
-            </div>
-          </>
-        )
-      })()}
+      {rating > 0 && rating <= 3 && (
+        <>
+          <div style={{ fontSize: 11, fontWeight: 700, color: ORANGE, marginBottom: 6 }}>
+            Please tell us what was unclear — required for low ratings.
+          </div>
+          <textarea
+            value={rateNote}
+            onChange={e => setRateNote(e.target.value)}
+            placeholder="What didn't you understand? (required)"
+            rows={3}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${rateNote.trim() ? P : ORANGE}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
+          />
+          <button
+            onClick={() => setStep('up_done')} disabled={!rateNote.trim()}
+            style={{ width: '100%', padding: '11px', borderRadius: 10, background: rateNote.trim() ? P : BG2, color: rateNote.trim() ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: rateNote.trim() ? 'pointer' : 'default', marginBottom: 8 }}>
+            Submit Feedback
+          </button>
+        </>
+      )}
+      <button onClick={() => setStep('up_done')}
+        style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+        Cancel
+      </button>
     </div>
   )
 
@@ -326,9 +322,16 @@ function EscalationRating({ query }) {
   const [rating, setRating] = useState(alreadyRated ? query.escalation_rating : 0)
   const [note, setNote] = useState(query.escalation_review || '')
   const [submitted, setSubmitted] = useState(alreadyRated)
+  const [dismissed, setDismissed] = useState(false)
 
   const isLow = rating > 0 && rating <= 3
   const canSubmit = rating > 0 && (!isLow || note.trim().length > 0)
+
+  if (dismissed) return (
+    <div style={{ textAlign: 'center', padding: '8px 0 4px', fontSize: 11, color: T3, lineHeight: 1.6 }}>
+      You can still rate your call experience anytime from the queries list.
+    </div>
+  )
 
   if (submitted) return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
@@ -349,40 +352,39 @@ function EscalationRating({ query }) {
     <div>
       <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Rate your call experience</div>
       <div style={{ fontSize: 12, color: T2, marginBottom: 14, lineHeight: 1.5 }}>How was the call with our team? Your feedback helps us improve.</div>
-      <StarRating rating={rating} onRate={setRating} />
+      <StarRating rating={rating} onRate={(n) => {
+        setRating(n)
+        if (n >= 4) { setEscalationRating(query.ticket_id, n, ''); setSubmitted(true) }
+      }} />
       {rating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: rating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
           {STAR_LABELS[rating]}
         </div>
       )}
-      {rating > 0 && (() => {
-        return (
-          <>
-            {isLow && (
-              <div style={{ fontSize: 11, fontWeight: 700, color: ORANGE, marginBottom: 6 }}>
-                Please tell us what we could have done better — required for low ratings.
-              </div>
-            )}
-            <textarea
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder={isLow ? "What could our team have done better? (required)" : "Any additional feedback? (optional)"}
-              rows={3}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${isLow ? (note.trim() ? P : ORANGE) : BD}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 12 }}
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <button onClick={() => { setEscalationRating(query.ticket_id, rating, ''); setSubmitted(true) }}
-                style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                Skip &amp; Submit
-              </button>
-              <button onClick={() => { setEscalationRating(query.ticket_id, rating, note.trim()); setSubmitted(true) }} disabled={!canSubmit}
-                style={{ padding: '11px', borderRadius: 10, background: canSubmit ? P : BG2, color: canSubmit ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: canSubmit ? 'pointer' : 'default' }}>
-                Submit
-              </button>
-            </div>
-          </>
-        )
-      })()}
+      {rating > 0 && rating <= 3 && (
+        <>
+          <div style={{ fontSize: 11, fontWeight: 700, color: ORANGE, marginBottom: 6 }}>
+            Please tell us what we could have done better — required for low ratings.
+          </div>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="What could our team have done better? (required)"
+            rows={3}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${note.trim() ? P : ORANGE}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
+          />
+          <button
+            onClick={() => { setEscalationRating(query.ticket_id, rating, note.trim()); setSubmitted(true) }}
+            disabled={!note.trim()}
+            style={{ width: '100%', padding: '11px', borderRadius: 10, background: note.trim() ? P : BG2, color: note.trim() ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: note.trim() ? 'pointer' : 'default', marginBottom: 8 }}>
+            Submit Feedback
+          </button>
+        </>
+      )}
+      <button onClick={() => setDismissed(true)}
+        style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+        Cancel
+      </button>
     </div>
   )
 }
