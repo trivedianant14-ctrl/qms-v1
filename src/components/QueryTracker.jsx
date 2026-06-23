@@ -992,7 +992,7 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
 
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: 0 }}>
           {step.key === 'assigned' && status !== 'pending'
-            ? <><strong>{agent.team}</strong> is working on this personally</>
+            ? <>{agent.name} · <strong>{agent.team}</strong> is working on this personally</>
             : step.desc}
         </p>
 
