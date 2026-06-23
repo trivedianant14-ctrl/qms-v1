@@ -22,6 +22,7 @@ import { QueryProvider } from './context/QueryContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { AuthProvider } from './context/AuthContext'
 import QueryTracker from './components/QueryTracker'
+import NotificationToast from './components/NotificationToast'
 import ResolverDashboard from './pages/ResolverDashboard'
 import ManagerDashboard from './pages/ManagerDashboard'
 import UnifiedDashboard from './pages/UnifiedDashboard'
@@ -208,6 +209,7 @@ function NprepPrototype() {
           </span>
         </button>
         <div className="phone" style={{ position: 'relative' }}>
+          <NotificationToast />
           {showTracker && (
             <QueryTracker onClose={() => setShowTracker(false)} />
           )}

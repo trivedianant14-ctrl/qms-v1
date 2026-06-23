@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { MAIN_OPTIONS, OTHERS_PLACEHOLDER, SUB_OPTIONS } from '../../data/formConfig'
 import { useQueries } from '../../context/QueryContext'
+import { useNotifications } from '../../context/NotificationContext'
 
 const progressMap = { 1: 20, '2A': 42, '2B': 42, '2C': 42, '2D': 42, 3: 35, 4: 62, 5: 80, 6: 100 }
 
 export default function FormShell({ embedded = false, onClose, onDone, questionContext = {} }) {
   const { addQuery } = useQueries()
+  const { queueNotification } = useNotifications()
   const [screen, setScreen] = useState('1')
   const [selectedOption, setSelectedOption] = useState(null)
   const [selectedSubOption, setSelectedSubOption] = useState(null)
@@ -61,6 +63,12 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
     })
     setSubmittedId(id)
     setScreen('6')
+    // #1 — immediate submit confirmation
+    queueNotification('Aye aye captain! 📬', 'Tumhara doubt mil gaya. Abhi team ko bhej rahe hain.')
+    // #2 — 10s later: query received by team
+    setTimeout(() => {
+      queueNotification('Arre, uthaa liya humne 👀', 'Team lag gayi hai tere sawal pe. Jaldi milega jawaab.')
+    }, 10000)
   }
 
   const submitOthers = () => {
@@ -73,6 +81,12 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
     })
     setSubmittedId(id)
     setScreen('6')
+    // #1 — immediate submit confirmation
+    queueNotification('Aye aye captain! 📬', 'Tumhara doubt mil gaya. Abhi team ko bhej rahe hain.')
+    // #2 — 10s later: query received by team
+    setTimeout(() => {
+      queueNotification('Arre, uthaa liya humne 👀', 'Team lag gayi hai tere sawal pe. Jaldi milega jawaab.')
+    }, 10000)
   }
 
   return (

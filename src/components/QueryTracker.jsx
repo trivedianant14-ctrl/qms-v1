@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { useQueries } from '../context/QueryContext'
+import { useNotifications } from '../context/NotificationContext'
 
 const P = '#534AB7', PL = '#EEEDFE', PB = '#AFA9EC', PD = '#3C3489'
 const T1 = '#1a1a2e', T2 = '#5a5a78', T3 = '#9898b0', BD = '#e8e8f2', BG2 = '#f5f5fb'
@@ -70,7 +71,10 @@ function EmojiRating({ rating, onRate }) {
 }
 
 function ThumbsFeedback({ resolvedAt, query }) {
-  const { setResolutionRating } = useQueries()
+  const { setResolutionRating, queries } = useQueries()
+  const { queueNotification } = useNotifications()
+  const queriesRef = useRef(queries)
+  queriesRef.current = queries
   const existingStars = query?.resolution_star ?? null
   const isHighRated = existingStars != null && existingStars >= 4
   const isLowRated = existingStars != null && existingStars <= 3
@@ -140,6 +144,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
       <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>Did {agentForQuery(query)?.name || 'our team'} clear your doubt?</div>
       <EmojiRating rating={rating} onRate={(n) => {
         setRating(n)
+        // #11 — 😔 selected
+        if (n === 1) queueNotification('Oops, sorry yaar 🙏', 'Team ko pata lag gaya. Jaldi better kaate hain.')
       }} />
       {rating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: rating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
@@ -473,14 +479,36 @@ function ThumbsFeedback({ resolvedAt, query }) {
         </>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-        <button onClick={() => setStep(isLowRated ? 'low_confirm' : 'rate')}
+        <button onClick={() => {
+          setStep(isLowRated ? 'low_confirm' : 'rate')
+          // #6 — 10s after thumbs up, skip if rating already given
+          const qId = query.ticket_id
+          setTimeout(() => {
+            const latest = queriesRef.current.find(q => q.ticket_id === qId)
+            if (latest && latest.resolution_star == null) {
+              queueNotification('Ek kaam aur banta hai 😏', 'Rating mat bhoolna yaar — ek second ka kaam hai.')
+            }
+          }, 10000)
+        }}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}
         >
           <span style={{ fontSize: 28 }}>👍</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, this helped!</span>
           <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Glad we could help</span>
         </button>
-        <button onClick={() => setStep('call_confirm')}
+        <button onClick={() => {
+          setStep('call_confirm')
+          // #7 — immediate on thumbs down
+          queueNotification('Noted, bilkul noted 🤝', 'Call arrange ho rahi hai. Hum khud samjhaayenge.')
+          // #8 — 15s later, skip if already escalation resolved
+          const qId = query.ticket_id
+          setTimeout(() => {
+            const latest = queriesRef.current.find(q => q.ticket_id === qId)
+            if (latest && !latest.escalation_resolved) {
+              queueNotification('Call aane waali hai, ready raho 📞', 'Team ne slot book kar liya hai. Phone paas rakhna.')
+            }
+          }, 15000)
+        }}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer' }}
         >
           <span style={{ fontSize: 28 }}>👎</span>
