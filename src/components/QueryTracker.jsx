@@ -49,11 +49,11 @@ function agentForQuery(query) {
 
 // ── Thumbs Feedback ──────────────────────────────────────────────────────────
 const EMOJI_OPTIONS = [
-  { value: 1, emoji: '😔', label: 'Not helpful' },
-  { value: 3, emoji: '😐', label: 'Could be better' },
-  { value: 5, emoji: '😊', label: 'Very helpful!' },
+  { value: 1, emoji: '😔', label: 'Not really' },
+  { value: 3, emoji: '😐', label: 'Somewhat' },
+  { value: 5, emoji: '😊', label: 'Completely!' },
 ]
-const EMOJI_LABELS = { 1: 'Not helpful', 3: 'Could be better', 5: 'Very helpful!' }
+const EMOJI_LABELS = { 1: 'Not really', 3: 'Somewhat', 5: 'Completely!' }
 
 function EmojiRating({ rating, onRate }) {
   return (
@@ -136,9 +136,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <button onClick={() => setStep('prompt')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
         </button>
-        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Rate your experience</div>
       </div>
-      <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>How helpful was the resolution?</div>
+      <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>Did {agentForQuery(query)?.name || 'our team'} clear your doubt?</div>
       <EmojiRating rating={rating} onRate={(n) => {
         setRating(n)
         if (n >= 4) setStep('up_done')
@@ -169,7 +168,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
       )}
       <button onClick={() => setStep('up_done')}
         style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-        Cancel
+        Skip
       </button>
     </div>
   )
