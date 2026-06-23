@@ -1043,8 +1043,13 @@ function QueryCard({ query, onClick, onLowRating }) {
 
   const handleCardStar = (n) => {
     if (alreadyRated || cardSubmitted) return
-    setPendingStar(n)
-    if (n >= 4) { setEscalationRating(query.ticket_id, n, ''); setCardSubmitted(true) }
+    if (n >= 4) {
+      setPendingStar(n)
+      setEscalationRating(query.ticket_id, n, '')
+      setCardSubmitted(true)
+    } else {
+      onLowRating?.(query, n, (note) => { setEscalationRating(query.ticket_id, n, note); setCardSubmitted(true) })
+    }
   }
 
   // ── Resolution (Resolved) rating state ──
@@ -1140,7 +1145,7 @@ function QueryCard({ query, onClick, onLowRating }) {
                         setResolutionRating(query.ticket_id, n, '')
                         setResLocal({ stars: n })
                       } else {
-                        onLowRating?.(query, n)
+                        onLowRating?.(query, n, (note) => setResolutionRating(query.ticket_id, n, note))
                       }
                     }}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', lineHeight: 1 }}
@@ -1186,23 +1191,8 @@ function QueryCard({ query, onClick, onLowRating }) {
                     </svg>
                   </button>
                 ))}
-                {pendingStar > 0 && <span style={{ fontSize: 10, color: pendingStar <= 3 ? ORANGE : GREEN, fontWeight: 700, marginLeft: 4, alignSelf: 'center' }}>{STAR_LABELS[pendingStar]}</span>}
+                {pendingStar > 0 && <span style={{ fontSize: 10, color: GREEN, fontWeight: 700, marginLeft: 4, alignSelf: 'center' }}>{STAR_LABELS[pendingStar]}</span>}
               </div>
-              {isLowCard && pendingStar > 0 && (
-                <div style={{ marginTop: 8 }}>
-                  <textarea
-                    value={pendingNote}
-                    onChange={e => setPendingNote(e.target.value)}
-                    placeholder="What could we have done better? (required)"
-                    rows={2}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: `1.5px solid ${pendingNote.trim() ? P : ORANGE}`, fontSize: 11, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: 'white', boxSizing: 'border-box', marginBottom: 7 }}
-                  />
-                  <button onClick={() => { setEscalationRating(query.ticket_id, pendingStar, pendingNote.trim()); setCardSubmitted(true) }} disabled={!canSubmitCard}
-                    style={{ width: '100%', padding: '9px', borderRadius: 8, background: canSubmitCard ? P : BG2, color: canSubmitCard ? 'white' : T3, border: 'none', fontSize: 11, fontWeight: 700, cursor: canSubmitCard ? 'pointer' : 'default' }}>
-                    Submit Feedback
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>
@@ -1286,7 +1276,6 @@ function ProfileHome({ queries, onOpenQueries, onClose }) {
 
 // ── Queries Sub-view ──────────────────────────────────────────────────────────
 function QueriesView({ queries, onBack, onClose, onSelect }) {
-  const { setResolutionRating } = useQueries()
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
@@ -1380,7 +1369,7 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
           filtered.map(q => (
             <QueryCard
               key={q.id} query={q} onClick={() => onSelect(q)}
-              onLowRating={(qry, stars) => setRatingPopup({ query: qry, stars })}
+              onLowRating={(qry, stars, saveFn) => setRatingPopup({ query: qry, stars, onSave: saveFn })}
             />
           ))
         )}
@@ -1391,7 +1380,7 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
         <ResolutionRatingPopup
           popup={ratingPopup}
           onSubmit={(note) => {
-            setResolutionRating(ratingPopup.query.ticket_id, ratingPopup.stars, note)
+            ratingPopup.onSave?.(note)
             setRatingPopup(null)
           }}
           onClose={() => setRatingPopup(null)}
