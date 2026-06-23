@@ -156,8 +156,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
             style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${P}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
           />
           <button
-            onClick={() => setStep('up_done')}
-            style={{ width: '100%', padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+            onClick={() => setStep('up_done')} disabled={!rateNote.trim()}
+            style={{ width: '100%', padding: '11px', borderRadius: 10, background: rateNote.trim() ? P : BG2, color: rateNote.trim() ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: rateNote.trim() ? 'pointer' : 'default', marginBottom: 8 }}>
             Submit
           </button>
         </>
