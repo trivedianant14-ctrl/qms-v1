@@ -67,11 +67,19 @@ function StarRating({ rating, onRate }) {
   )
 }
 
-function ThumbsFeedback({ resolvedAt }) {
+function ThumbsFeedback({ resolvedAt, query }) {
+  const { setResolutionRating } = useQueries()
+  const existingStars = query?.resolution_star ?? null
+  const isHighRated = existingStars != null && existingStars >= 4
+  const isLowRated = existingStars != null && existingStars <= 3
   // steps: 'prompt' | 'rate' | 'up_done' | 'call_confirm' | 'call_enter' | 'call_otp' | 'call_done'
+  //        'high_warn' | 'high_up' | 'low_confirm' | 're_rate'
   const [step, setStep] = useState('prompt')
   const [rating, setRating] = useState(0)
   const [rateNote, setRateNote] = useState('')
+  const [reRating, setReRating] = useState(0)
+  const [reNote, setReNote] = useState('')
+  const [highUpNote, setHighUpNote] = useState('')
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState(['', '', '', ''])
   const [otpError, setOtpError] = useState(false)
@@ -161,6 +169,130 @@ function ThumbsFeedback({ resolvedAt }) {
         style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
         Cancel
       </button>
+    </div>
+  )
+
+  if (step === 'high_warn') return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <button onClick={() => setStep('prompt')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Still confused?</div>
+      </div>
+      <div style={{ background: ORANGE_BG, border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
+        <div style={{ fontSize: 18, marginBottom: 6 }}>⚠️</div>
+        <div style={{ fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
+          You gave this resolution <strong>{existingStars}/5 stars</strong>. Are you sure you didn't understand the topic?
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <button onClick={() => setStep('high_up')}
+          style={{ padding: '11px', borderRadius: 10, background: GREEN_BG, color: '#14532D', border: `1.5px solid ${GREEN_BORDER}`, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+          I understood it
+        </button>
+        <button onClick={() => setStep('call_confirm')}
+          style={{ padding: '11px', borderRadius: 10, background: RED_BG, color: RED, border: `1.5px solid ${RED_BORDER}`, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+          Still confused
+        </button>
+      </div>
+    </div>
+  )
+
+  if (step === 'high_up') return (
+    <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
+      <div style={{ fontSize: 36, marginBottom: 8 }}>🎉</div>
+      <div style={{ fontSize: 14, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Glad it helped!</div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 8 }}>
+        {[1,2,3,4,5].map(n => (
+          <svg key={n} width="22" height="22" viewBox="0 0 24 24" fill={n <= existingStars ? '#F59E0B' : '#E5E7EB'} stroke={n <= existingStars ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+        ))}
+      </div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: 14 }}>Your {existingStars}-star rating is saved.</div>
+      <textarea
+        value={highUpNote}
+        onChange={e => setHighUpNote(e.target.value)}
+        placeholder="Want to add a note? (optional)"
+        rows={2}
+        style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${BD}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10, textAlign: 'left' }}
+      />
+      <button
+        onClick={() => {
+          if (highUpNote.trim()) setResolutionRating(query.ticket_id, existingStars, highUpNote.trim())
+          setStep('up_done')
+        }}
+        style={{ width: '100%', padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+        Done
+      </button>
+    </div>
+  )
+
+  if (step === 'low_confirm') return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <button onClick={() => setStep('prompt')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Did you understand the topic?</div>
+      </div>
+      <div style={{ background: ORANGE_BG, border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
+        <div style={{ fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
+          You previously gave <strong>{existingStars}/5 stars</strong> for this resolution. Did you fully understand after reviewing the explanation?
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <button onClick={() => setStep('call_confirm')}
+          style={{ padding: '11px', borderRadius: 10, background: RED_BG, color: RED, border: `1.5px solid ${RED_BORDER}`, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+          No, still confused
+        </button>
+        <button onClick={() => setStep('re_rate')}
+          style={{ padding: '11px', borderRadius: 10, background: GREEN_BG, color: '#14532D', border: `1.5px solid ${GREEN_BORDER}`, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+          Yes, I understood
+        </button>
+      </div>
+    </div>
+  )
+
+  if (step === 're_rate') return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <button onClick={() => setStep('low_confirm')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Update your rating</div>
+      </div>
+      <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>How would you rate the resolution now?</div>
+      <StarRating rating={reRating} onRate={(n) => {
+        setReRating(n)
+        if (n >= 4) { setResolutionRating(query.ticket_id, n, ''); setStep('up_done') }
+      }} />
+      {reRating > 0 && (
+        <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: reRating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
+          {STAR_LABELS[reRating]}
+        </div>
+      )}
+      {reRating > 0 && reRating <= 3 && (
+        <>
+          <div style={{ fontSize: 11, fontWeight: 700, color: ORANGE, marginBottom: 6 }}>
+            What did you really understand from this explanation?
+          </div>
+          <textarea
+            value={reNote}
+            onChange={e => setReNote(e.target.value)}
+            placeholder="Tell us what was still unclear (required)"
+            rows={3}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${reNote.trim() ? P : ORANGE}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
+          />
+          <button
+            onClick={() => { setResolutionRating(query.ticket_id, reRating, reNote.trim()); setStep('up_done') }}
+            disabled={!reNote.trim()}
+            style={{ width: '100%', padding: '11px', borderRadius: 10, background: reNote.trim() ? P : BG2, color: reNote.trim() ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: reNote.trim() ? 'pointer' : 'default', marginBottom: 8 }}>
+            Submit Feedback
+          </button>
+        </>
+      )}
     </div>
   )
 
@@ -282,13 +414,63 @@ function ThumbsFeedback({ resolvedAt }) {
     </div>
   )
 
-  // Step 1: Prompt (thumbs up / down)
+  // Step: Prompt — when user already gave a high card rating (≥4 stars)
+  if (isHighRated) return (
+    <div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did the resolution help?</div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: 10 }}>Your feedback helps us improve.</div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 3, marginBottom: 4 }}>
+        {[1,2,3,4,5].map(n => (
+          <svg key={n} width="20" height="20" viewBox="0 0 24 24" fill={n <= existingStars ? '#F59E0B' : '#E5E7EB'} stroke={n <= existingStars ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+        ))}
+      </div>
+      <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 14 }}>You rated this {existingStars}/5 from your queries list</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <button onClick={() => setStep('high_up')}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}>
+          <span style={{ fontSize: 28 }}>👍</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, got it!</span>
+          <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Issue is resolved</span>
+        </button>
+        <button onClick={() => setStep('high_warn')}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer' }}>
+          <span style={{ fontSize: 28 }}>👎</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Still confused</span>
+          <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>Need more help</span>
+        </button>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', background: remainingH <= 12 ? '#FFF7ED' : BG2, borderRadius: 8, border: `1px solid ${remainingH <= 12 ? '#FED7AA' : BD}` }}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={remainingH <= 12 ? ORANGE : T3} strokeWidth="2.5" strokeLinecap="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span style={{ fontSize: 10, color: remainingH <= 12 ? '#92400E' : T2, fontWeight: remainingH <= 12 ? 600 : 400 }}>
+          {remainingH}h left to respond · auto-closes if no action
+        </span>
+      </div>
+    </div>
+  )
+
+  // Step: Prompt (thumbs up / down) — default or low card rating (≤3 stars)
   return (
     <div>
       <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did this resolve your issue?</div>
-      <div style={{ fontSize: 11, color: T2, marginBottom: 12 }}>Your feedback helps us close the loop or escalate if needed.</div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: isLowRated ? 8 : 12 }}>Your feedback helps us close the loop or escalate if needed.</div>
+      {isLowRated && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 3, marginBottom: 3 }}>
+            {[1,2,3,4,5].map(n => (
+              <svg key={n} width="16" height="16" viewBox="0 0 24 24" fill={n <= existingStars ? '#F59E0B' : '#E5E7EB'} stroke={n <= existingStars ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
+                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+              </svg>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 12 }}>You gave {existingStars}/5 stars from your queries list</div>
+        </>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-        <button onClick={() => setStep('rate')}
+        <button onClick={() => setStep(isLowRated ? 'low_confirm' : 'rate')}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}
         >
           <span style={{ fontSize: 28 }}>👍</span>
@@ -1010,7 +1192,7 @@ function QueryDetailView({ query, onBack, onClose }) {
         {/* Thumbs feedback — only when resolved (not escalated) */}
         {stage === 3 && (
           <div style={{ padding: '14px', borderRadius: 12, border: `1px solid ${BD}`, background: 'white' }}>
-            <ThumbsFeedback resolvedAt={query.resolved_at} />
+            <ThumbsFeedback resolvedAt={query.resolved_at} query={query} />
           </div>
         )}
         {/* Escalation rating — when call is closed */}
