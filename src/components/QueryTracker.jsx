@@ -48,19 +48,21 @@ function agentForQuery(query) {
 }
 
 // ── Thumbs Feedback ──────────────────────────────────────────────────────────
-const STAR_LABELS = ['', 'Poor', 'Fair', 'Okay', 'Good', 'Excellent']
+const EMOJI_OPTIONS = [
+  { value: 1, emoji: '😔', label: 'Not helpful' },
+  { value: 3, emoji: '😐', label: 'Could be better' },
+  { value: 5, emoji: '😊', label: 'Very helpful!' },
+]
+const EMOJI_LABELS = { 1: 'Not helpful', 3: 'Could be better', 5: 'Very helpful!' }
 
-function StarRating({ rating, onRate }) {
-  const [hovered, setHovered] = useState(0)
-  const display = hovered || rating
+function EmojiRating({ rating, onRate }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 6 }}>
-      {[1,2,3,4,5].map(n => (
-        <button key={n} onClick={() => onRate(n)} onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px', lineHeight: 1 }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill={n <= display ? '#F59E0B' : 'none'} stroke={n <= display ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-          </svg>
+    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
+      {EMOJI_OPTIONS.map(({ value, emoji, label }) => (
+        <button key={value} onClick={() => onRate(value)}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: rating === value ? PL : 'transparent', border: `2px solid ${rating === value ? P : 'transparent'}`, borderRadius: 14, padding: '10px 14px', cursor: 'pointer', transition: 'all 0.15s' }}>
+          <span style={{ fontSize: 30 }}>{emoji}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: rating === value ? PD : T3 }}>{label}</span>
         </button>
       ))}
     </div>
@@ -137,13 +139,13 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Rate your experience</div>
       </div>
       <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>How helpful was the resolution?</div>
-      <StarRating rating={rating} onRate={(n) => {
+      <EmojiRating rating={rating} onRate={(n) => {
         setRating(n)
         if (n >= 4) setStep('up_done')
       }} />
       {rating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: rating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
-          {STAR_LABELS[rating]}
+          {EMOJI_LABELS[rating]}
         </div>
       )}
       {rating > 0 && rating <= 3 && (
@@ -183,7 +185,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
       <div style={{ background: ORANGE_BG, border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
         <div style={{ fontSize: 18, marginBottom: 6 }}>⚠️</div>
         <div style={{ fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
-          You gave this resolution <strong>{existingStars}/5 stars</strong>. Are you sure you didn't understand the topic?
+          You reacted with {existingStars >= 4 ? '😊' : existingStars === 3 ? '😐' : '😔'} to this resolution. Are you sure you didn't understand the topic?
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -203,14 +205,10 @@ function ThumbsFeedback({ resolvedAt, query }) {
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>🎉</div>
       <div style={{ fontSize: 14, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Glad it helped!</div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 8 }}>
-        {[1,2,3,4,5].map(n => (
-          <svg key={n} width="22" height="22" viewBox="0 0 24 24" fill={n <= existingStars ? '#F59E0B' : '#E5E7EB'} stroke={n <= existingStars ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-          </svg>
-        ))}
+      <div style={{ fontSize: 48, textAlign: 'center', marginBottom: 8 }}>
+        {existingStars >= 4 ? '😊' : existingStars === 3 ? '😐' : '😔'}
       </div>
-      <div style={{ fontSize: 11, color: T2, marginBottom: 14 }}>Your {existingStars}-star rating is saved.</div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: 14 }}>Your feedback is saved.</div>
       <textarea
         value={highUpNote}
         onChange={e => setHighUpNote(e.target.value)}
@@ -239,7 +237,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
       </div>
       <div style={{ background: ORANGE_BG, border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
         <div style={{ fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
-          You previously gave <strong>{existingStars}/5 stars</strong> for this resolution. Did you fully understand after reviewing the explanation?
+          You previously reacted with {existingStars === 3 ? '😐' : '😔'} to this resolution. Did you fully understand after reviewing the explanation?
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -263,14 +261,14 @@ function ThumbsFeedback({ resolvedAt, query }) {
         </button>
         <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Update your rating</div>
       </div>
-      <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>How would you rate the resolution now?</div>
-      <StarRating rating={reRating} onRate={(n) => {
+      <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>How do you feel about the resolution now?</div>
+      <EmojiRating rating={reRating} onRate={(n) => {
         setReRating(n)
         if (n >= 4) { setResolutionRating(query.ticket_id, n, ''); setStep('up_done') }
       }} />
       {reRating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: reRating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
-          {STAR_LABELS[reRating]}
+          {EMOJI_LABELS[reRating]}
         </div>
       )}
       {reRating > 0 && reRating <= 3 && (
@@ -419,14 +417,10 @@ function ThumbsFeedback({ resolvedAt, query }) {
     <div>
       <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did the resolution help?</div>
       <div style={{ fontSize: 11, color: T2, marginBottom: 10 }}>Your feedback helps us improve.</div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 3, marginBottom: 4 }}>
-        {[1,2,3,4,5].map(n => (
-          <svg key={n} width="20" height="20" viewBox="0 0 24 24" fill={n <= existingStars ? '#F59E0B' : '#E5E7EB'} stroke={n <= existingStars ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-          </svg>
-        ))}
+      <div style={{ fontSize: 40, textAlign: 'center', marginBottom: 4 }}>
+        {existingStars >= 4 ? '😊' : existingStars === 3 ? '😐' : '😔'}
       </div>
-      <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 14 }}>You rated this {existingStars}/5 from your queries list</div>
+      <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 14 }}>You reacted to this from your queries list</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
         <button onClick={() => setStep('high_up')}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}>
@@ -459,14 +453,10 @@ function ThumbsFeedback({ resolvedAt, query }) {
       <div style={{ fontSize: 11, color: T2, marginBottom: isLowRated ? 8 : 12 }}>Let us know and we'll take care of the rest</div>
       {isLowRated && (
         <>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 3, marginBottom: 3 }}>
-            {[1,2,3,4,5].map(n => (
-              <svg key={n} width="16" height="16" viewBox="0 0 24 24" fill={n <= existingStars ? '#F59E0B' : '#E5E7EB'} stroke={n <= existingStars ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-              </svg>
-            ))}
+          <div style={{ fontSize: 32, textAlign: 'center', marginBottom: 3 }}>
+            {existingStars === 3 ? '😐' : '😔'}
           </div>
-          <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 12 }}>You gave {existingStars}/5 stars from your queries list</div>
+          <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 12 }}>You reacted to this from your queries list</div>
         </>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
@@ -518,12 +508,8 @@ function EscalationRating({ query }) {
   if (submitted) return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
       <div style={{ fontSize: 34, marginBottom: 8 }}>🎉</div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 8 }}>
-        {[1,2,3,4,5].map(n => (
-          <svg key={n} width="22" height="22" viewBox="0 0 24 24" fill={n <= rating ? '#F59E0B' : '#E5E7EB'} stroke={n <= rating ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-          </svg>
-        ))}
+      <div style={{ fontSize: 48, textAlign: 'center', marginBottom: 8 }}>
+        {rating >= 4 ? '😊' : rating === 3 ? '😐' : '😔'}
       </div>
       <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Thanks for your feedback!</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>Your rating helps us improve our support quality.</div>
@@ -534,13 +520,13 @@ function EscalationRating({ query }) {
     <div>
       <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Tell us how the call went</div>
       <div style={{ fontSize: 12, color: T2, marginBottom: 14, lineHeight: 1.5 }}>Your experience matters to us</div>
-      <StarRating rating={rating} onRate={(n) => {
+      <EmojiRating rating={rating} onRate={(n) => {
         setRating(n)
         if (n >= 4) { setEscalationRating(query.ticket_id, n, ''); setSubmitted(true) }
       }} />
       {rating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: rating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
-          {STAR_LABELS[rating]}
+          {EMOJI_LABELS[rating]}
         </div>
       )}
       {rating > 0 && rating <= 3 && (
@@ -898,7 +884,6 @@ function ResolutionAttachments({ attachments }) {
 // ── Resolution Rating Popup ───────────────────────────────────────────────────
 const POPUP_MESSAGES = {
   1: "That's really disappointing — we'd like to understand what went wrong.",
-  2: "Sorry we fell short. What could we have done better?",
   3: "Seems like the explanation didn't fully help you.",
 }
 
@@ -910,13 +895,8 @@ function ResolutionRatingPopup({ popup, onSubmit, onClose }) {
   return (
     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }}>
       <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: 18, padding: '22px 18px', width: '100%', boxShadow: '0 12px 40px rgba(0,0,0,0.25)' }}>
-        {/* Stars display */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginBottom: 14 }}>
-          {[1,2,3,4,5].map(n => (
-            <svg key={n} width="26" height="26" viewBox="0 0 24 24" fill={n <= popup.stars ? '#F59E0B' : 'none'} stroke={n <= popup.stars ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-            </svg>
-          ))}
+        <div style={{ fontSize: 52, textAlign: 'center', marginBottom: 14 }}>
+          {popup.stars >= 4 ? '😊' : popup.stars === 3 ? '😐' : '😔'}
         </div>
         <div style={{ fontSize: 15, fontWeight: 800, color: T1, textAlign: 'center', marginBottom: 6 }}>Help us improve</div>
         <div style={{ fontSize: 12, color: T2, textAlign: 'center', lineHeight: 1.65, marginBottom: 16 }}>
@@ -1216,14 +1196,9 @@ function QueryCard({ query, onClick, onLowRating }) {
   // ── Escalation (Call Closed) rating state ──
   const isEscClosed = stage === 5
   const alreadyRated = query.escalation_rating != null
-  const [hoverStar, setHoverStar] = useState(0)
   const [pendingStar, setPendingStar] = useState(0)
   const [pendingNote, setPendingNote] = useState('')
   const [cardSubmitted, setCardSubmitted] = useState(false)
-
-  const displayStar = hoverStar || pendingStar || (alreadyRated ? query.escalation_rating : 0)
-  const isLowCard = pendingStar > 0 && pendingStar <= 3
-  const canSubmitCard = !isLowCard || pendingNote.trim().length > 0
 
   const handleCardStar = (n) => {
     if (alreadyRated || cardSubmitted) return
@@ -1239,7 +1214,6 @@ function QueryCard({ query, onClick, onLowRating }) {
   // ── Resolution (Resolved) rating state ──
   const isResolved = stage === 3
   const alreadyRatedResolved = query.resolution_star != null
-  const [resHover, setResHover] = useState(0)
   const [resLocal, setResLocal] = useState(null)
 
   const badgeColor = stage === 5 ? '#7C3AED' : stage === 4 ? RED : stage === 3 ? GREEN : stage === 2 ? P : stage === 1 ? ORANGE : T2
@@ -1305,41 +1279,23 @@ function QueryCard({ query, onClick, onLowRating }) {
         <div onClick={e => e.stopPropagation()} style={{ padding: '9px 13px', borderTop: `1px solid ${BD}`, background: '#FAFAFA' }}>
           {(alreadyRatedResolved || resLocal) ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 2 }}>
-                {[1,2,3,4,5].map(n => {
-                  const s = alreadyRatedResolved ? query.resolution_star : resLocal.stars
-                  return (
-                    <svg key={n} width="18" height="18" viewBox="0 0 24 24" fill={n <= s ? '#F59E0B' : '#E5E7EB'} stroke={n <= s ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-                      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-                    </svg>
-                  )
-                })}
-              </div>
+              <span style={{ fontSize: 26, lineHeight: 1 }}>
+                {(() => { const s = alreadyRatedResolved ? query.resolution_star : resLocal.stars; return s >= 4 ? '😊' : s === 3 ? '😐' : '😔' })()}
+              </span>
               <span style={{ fontSize: 10, color: GREEN, fontWeight: 700 }}>✓ Thanks for your feedback!</span>
             </div>
           ) : (
             <>
               <div style={{ fontSize: 10, color: T2, fontWeight: 600, marginBottom: 6 }}>Rate this resolution</div>
-              <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                {[1,2,3,4,5].map(n => (
-                  <button key={n}
-                    onMouseEnter={() => setResHover(n)} onMouseLeave={() => setResHover(0)}
-                    onClick={() => {
-                      if (n >= 4) {
-                        setResolutionRating(query.ticket_id, n, '')
-                        setResLocal({ stars: n })
-                      } else {
-                        onLowRating?.(query, n, (note) => setResolutionRating(query.ticket_id, n, note))
-                      }
-                    }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', lineHeight: 1 }}
-                  >
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill={n <= resHover ? '#F59E0B' : 'none'} stroke={n <= resHover ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-                      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-                    </svg>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                {EMOJI_OPTIONS.map(({ value, emoji }) => (
+                  <button key={value} onClick={() => {
+                    if (value >= 4) { setResolutionRating(query.ticket_id, value, ''); setResLocal({ stars: value }) }
+                    else { onLowRating?.(query, value, (note) => setResolutionRating(query.ticket_id, value, note)) }
+                  }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24, padding: '2px 4px', lineHeight: 1 }}>
+                    {emoji}
                   </button>
                 ))}
-                {resHover > 0 && <span style={{ fontSize: 10, color: resHover <= 3 ? ORANGE : GREEN, fontWeight: 700, marginLeft: 4 }}>{STAR_LABELS[resHover]}</span>}
               </div>
             </>
           )}
@@ -1351,31 +1307,21 @@ function QueryCard({ query, onClick, onLowRating }) {
         <div onClick={e => e.stopPropagation()} style={{ padding: '9px 13px', borderTop: `1px solid ${BD}`, background: '#FAFAFA' }}>
           {(cardSubmitted || alreadyRated) ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 2 }}>
-                {[1,2,3,4,5].map(n => (
-                  <svg key={n} width="18" height="18" viewBox="0 0 24 24" fill={n <= (alreadyRated ? query.escalation_rating : pendingStar) ? '#F59E0B' : '#E5E7EB'} stroke={n <= (alreadyRated ? query.escalation_rating : pendingStar) ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-                    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-                  </svg>
-                ))}
-              </div>
+              <span style={{ fontSize: 26, lineHeight: 1 }}>
+                {(() => { const s = alreadyRated ? query.escalation_rating : pendingStar; return s >= 4 ? '😊' : s === 3 ? '😐' : '😔' })()}
+              </span>
               <span style={{ fontSize: 10, color: GREEN, fontWeight: 700 }}>✓ Thanks for rating!</span>
             </div>
           ) : (
             <>
               <div style={{ fontSize: 10, color: T2, fontWeight: 600, marginBottom: 6 }}>Tell us how the call went</div>
-              <div style={{ display: 'flex', gap: 3 }}>
-                {[1,2,3,4,5].map(n => (
-                  <button key={n}
-                    onMouseEnter={() => setHoverStar(n)} onMouseLeave={() => setHoverStar(0)}
-                    onClick={() => handleCardStar(n)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', lineHeight: 1 }}
-                  >
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill={n <= displayStar ? '#F59E0B' : 'none'} stroke={n <= displayStar ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
-                      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-                    </svg>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                {EMOJI_OPTIONS.map(({ value, emoji }) => (
+                  <button key={value} onClick={() => handleCardStar(value)}
+                    style={{ background: 'none', border: 'none', cursor: alreadyRated || cardSubmitted ? 'default' : 'pointer', fontSize: 24, padding: '2px 4px', lineHeight: 1 }}>
+                    {emoji}
                   </button>
                 ))}
-                {pendingStar > 0 && <span style={{ fontSize: 10, color: GREEN, fontWeight: 700, marginLeft: 4, alignSelf: 'center' }}>{STAR_LABELS[pendingStar]}</span>}
               </div>
             </>
           )}
