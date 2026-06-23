@@ -310,7 +310,7 @@ function WrongAnswerEvidenceScreen({
         )}
       </div>
       <VoiceRecorder />
-      <button className="primary-btn" type="button" onClick={onSubmit}>Submit query</button>
+      <button className="primary-btn" type="button" disabled={!value.trim() && !referenceValue.trim() && !attachment} onClick={onSubmit}>Submit query</button>
       <button className="secondary-btn" type="button" onClick={onSkip}>Skip and submit</button>
     </>
   )
@@ -330,7 +330,7 @@ function CommentScreen({ value, prompt, onChange, onSubmit, onSkip, showVoice = 
         style={{ minHeight: 100 }}
       />
       {showVoice && <VoiceRecorder />}
-      <button className="primary-btn" type="button" onClick={onSubmit}>Submit query</button>
+      <button className="primary-btn" type="button" disabled={!value.trim()} onClick={onSubmit}>Submit query</button>
       <button className="secondary-btn" type="button" onClick={onSkip}>Skip and submit</button>
     </>
   )
