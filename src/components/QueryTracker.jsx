@@ -1287,59 +1287,6 @@ function QueryCard({ query, onClick, onLowRating }) {
         </div>
       </div>
 
-      {/* Inline star rating — for Resolved cards */}
-      {isResolved && (
-        <div onClick={e => e.stopPropagation()} style={{ padding: '9px 13px', borderTop: `1px solid ${BD}`, background: '#FAFAFA' }}>
-          {(alreadyRatedResolved || resLocal) ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 26, lineHeight: 1 }}>
-                {(() => { const s = alreadyRatedResolved ? query.resolution_star : resLocal.stars; return s >= 4 ? '😊' : s === 3 ? '😐' : '😔' })()}
-              </span>
-              <span style={{ fontSize: 10, color: GREEN, fontWeight: 700 }}>✓ Thanks for your feedback!</span>
-            </div>
-          ) : (
-            <>
-              <div style={{ fontSize: 10, color: T2, fontWeight: 600, marginBottom: 6 }}>Rate this resolution</div>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                {EMOJI_OPTIONS.map(({ value, emoji }) => (
-                  <button key={value} onClick={() => {
-                    if (value >= 4) { setResolutionRating(query.ticket_id, value, ''); setResLocal({ stars: value }) }
-                    else { onLowRating?.(query, value, (note) => setResolutionRating(query.ticket_id, value, note)) }
-                  }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24, padding: '2px 4px', lineHeight: 1 }}>
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Zomato-style inline rating — only for escalation_closed */}
-      {isEscClosed && (
-        <div onClick={e => e.stopPropagation()} style={{ padding: '9px 13px', borderTop: `1px solid ${BD}`, background: '#FAFAFA' }}>
-          {(cardSubmitted || alreadyRated) ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 26, lineHeight: 1 }}>
-                {(() => { const s = alreadyRated ? query.escalation_rating : pendingStar; return s >= 4 ? '😊' : s === 3 ? '😐' : '😔' })()}
-              </span>
-              <span style={{ fontSize: 10, color: GREEN, fontWeight: 700 }}>✓ Thanks for rating!</span>
-            </div>
-          ) : (
-            <>
-              <div style={{ fontSize: 10, color: T2, fontWeight: 600, marginBottom: 6 }}>Tell us how the call went</div>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                {EMOJI_OPTIONS.map(({ value, emoji }) => (
-                  <button key={value} onClick={() => handleCardStar(value)}
-                    style={{ background: 'none', border: 'none', cursor: alreadyRated || cardSubmitted ? 'default' : 'pointer', fontSize: 24, padding: '2px 4px', lineHeight: 1 }}>
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
     </div>
   )
 }
@@ -1418,11 +1365,20 @@ function ProfileHome({ queries, onOpenQueries, onClose }) {
 }
 
 // ── Queries Sub-view ──────────────────────────────────────────────────────────
+const CATEGORY_CHIPS = [
+  'I Have a Doubt',
+  'Problem with this Question',
+  "Can't See Something",
+  'App Issue',
+  'Problem with the Answer',
+]
+
 function QueriesView({ queries, onBack, onClose, onSelect }) {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [ratingPopup, setRatingPopup] = useState(null)
+  const [categoryFilter, setCategoryFilter] = useState(null)
 
   const activeCount = queries.filter(q => q.status !== 'resolved').length
   const resolvedCount = queries.filter(q => q.status === 'resolved').length
@@ -1431,15 +1387,19 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
     : filter === 'active' ? queries.filter(q => q.status !== 'resolved')
     : queries.filter(q => q.status === 'resolved')
 
+  const byCat = categoryFilter && filter !== 'resolved'
+    ? byFilter.filter(x => x.category === categoryFilter)
+    : byFilter
+
   const sq = search.trim().toLowerCase()
   const filtered = sq
-    ? byFilter.filter(x =>
+    ? byCat.filter(x =>
         x.category?.toLowerCase().includes(sq) ||
         x.sub_option?.toLowerCase().includes(sq) ||
         x.query_text?.toLowerCase().includes(sq) ||
         ticketId(x.id).toLowerCase().includes(sq)
       )
-    : byFilter
+    : byCat
 
   const STAT_ITEMS = [
     { label: 'Raised',    value: queries.length, key: 'all',      color: P,      bg: PL,        border: PB },
@@ -1462,7 +1422,7 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
       <div style={{ flexShrink: 0, borderBottom: `1px solid ${BD}`, background: 'white' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
           {STAT_ITEMS.map((stat, i) => (
-            <button key={stat.key} onClick={() => setFilter(stat.key)}
+            <button key={stat.key} onClick={() => { setFilter(stat.key); setCategoryFilter(null) }}
               style={{ padding: '14px 6px', textAlign: 'center', cursor: 'pointer', border: 'none', background: filter === stat.key ? stat.bg : 'white', borderRight: i < 2 ? `1px solid ${BD}` : 'none', borderBottom: `3px solid ${filter === stat.key ? stat.color : 'transparent'}`, transition: 'all 0.15s' }}
             >
               <div style={{ fontSize: 26, fontWeight: 900, color: stat.color, letterSpacing: '-1px' }}>{stat.value}</div>
@@ -1472,13 +1432,26 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
         </div>
       </div>
 
+      {/* Category chip filters — Raised and On it tabs only */}
+      {filter !== 'resolved' && (
+        <div style={{ flexShrink: 0, background: 'white', borderBottom: `1px solid ${BD}`, overflowX: 'auto', whiteSpace: 'nowrap', padding: '8px 14px' }}
+          className="scroll">
+          {CATEGORY_CHIPS.map(chip => {
+            const active = categoryFilter === chip
+            return (
+              <button key={chip}
+                onClick={() => setCategoryFilter(active ? null : chip)}
+                style={{ display: 'inline-flex', alignItems: 'center', marginRight: 6, padding: '4px 11px', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1.5px solid ${active ? P : BD}`, background: active ? PL : 'white', color: active ? PD : T2, transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
+                {chip}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Section label + search toggle */}
       <div style={{ padding: '10px 16px 8px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: searchOpen ? 8 : 0 }}>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Query History</div>
-            {!searchOpen && <div style={{ fontSize: 11, color: T3, marginTop: 1 }}>Tap any query to see its full timeline</div>}
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: searchOpen ? 8 : 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {!searchOpen && <span style={{ fontSize: 11, color: T3 }}>{filter === 'all' ? 'All' : filter === 'active' ? 'On it' : 'All done ✓'} · {filtered.length}</span>}
             <button
