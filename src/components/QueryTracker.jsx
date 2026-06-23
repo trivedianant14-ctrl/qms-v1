@@ -1368,7 +1368,6 @@ function ProfileHome({ queries, onOpenQueries, onClose }) {
 function QueriesView({ queries, onBack, onClose, onSelect }) {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
-  const [searchOpen, setSearchOpen] = useState(false)
   const [ratingPopup, setRatingPopup] = useState(null)
 
   const activeCount = queries.filter(q => q.status !== 'resolved').length
@@ -1419,32 +1418,18 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
         </div>
       </div>
 
-      {/* Section label + search toggle */}
-      <div style={{ padding: '10px 16px 8px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: searchOpen ? 8 : 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {!searchOpen && <span style={{ fontSize: 11, color: T3 }}>{filter === 'all' ? 'All' : filter === 'active' ? 'On it' : 'All done ✓'} · {filtered.length}</span>}
-            <button
-              onClick={() => { setSearchOpen(o => !o); if (searchOpen) setSearch('') }}
-              style={{ background: searchOpen ? PL : 'none', border: `1px solid ${searchOpen ? PB : BD}`, borderRadius: 8, padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: searchOpen ? P : T2, transition: 'all 0.15s' }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              {!searchOpen && <span style={{ fontSize: 11, fontWeight: 600 }}>Search</span>}
-            </button>
-          </div>
+      {/* Search bar — always visible */}
+      <div style={{ padding: '8px 14px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: BG2, border: `1.5px solid ${search ? PB : BD}`, borderRadius: 10, padding: '7px 10px' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}>
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by category, issue, or ID..." style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 12, color: T1, fontFamily: 'inherit' }} />
+          {search
+            ? <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, fontSize: 14, padding: 0, lineHeight: 1, display: 'flex' }}>✕</button>
+            : <span style={{ fontSize: 11, color: T3, flexShrink: 0, fontWeight: 500 }}>{filtered.length} {filter === 'all' ? 'total' : filter === 'active' ? 'active' : 'resolved'}</span>
+          }
         </div>
-        {searchOpen && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: BG2, border: `1.5px solid ${search ? PB : BD}`, borderRadius: 10, padding: '7px 10px' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}>
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by category, issue, or ticket ID..." style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 12, color: T1, fontFamily: 'inherit' }} />
-            {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, fontSize: 14, padding: 0, lineHeight: 1, display: 'flex' }}>✕</button>}
-          </div>
-        )}
-        {searchOpen && <div style={{ fontSize: 10, color: T3, marginTop: 5 }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}{search ? ` for "${search}"` : ''}</div>}
       </div>
 
       {/* Query list */}
