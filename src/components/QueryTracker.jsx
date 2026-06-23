@@ -431,14 +431,14 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <button onClick={() => setStep('high_up')}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}>
           <span style={{ fontSize: 28 }}>👍</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, got it!</span>
-          <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Issue is resolved</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, this helped!</span>
+          <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Glad we could help</span>
         </button>
         <button onClick={() => setStep('high_warn')}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer' }}>
           <span style={{ fontSize: 28 }}>👎</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Still confused</span>
-          <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>Need more help</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Want to talk it through</span>
+          <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>We'll reach out personally</span>
         </button>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', background: remainingH <= 12 ? '#FFF7ED' : BG2, borderRadius: 8, border: `1px solid ${remainingH <= 12 ? '#FED7AA' : BD}` }}>
@@ -446,7 +446,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
         <span style={{ fontSize: 10, color: remainingH <= 12 ? '#92400E' : T2, fontWeight: remainingH <= 12 ? 600 : 400 }}>
-          {remainingH}h left to respond · auto-closes if no action
+          No response in {remainingH}h · this will close automatically
         </span>
       </div>
     </div>
@@ -455,8 +455,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
   // Step: Prompt (thumbs up / down) — default or low card rating (≤3 stars)
   return (
     <div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did this resolve your issue?</div>
-      <div style={{ fontSize: 11, color: T2, marginBottom: isLowRated ? 8 : 12 }}>Your feedback helps us close the loop or escalate if needed.</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did we answer your question?</div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: isLowRated ? 8 : 12 }}>Let us know and we'll take care of the rest</div>
       {isLowRated && (
         <>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 3, marginBottom: 3 }}>
@@ -474,15 +474,15 @@ function ThumbsFeedback({ resolvedAt, query }) {
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}
         >
           <span style={{ fontSize: 28 }}>👍</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, got it!</span>
-          <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Issue is resolved</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, this helped!</span>
+          <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Glad we could help</span>
         </button>
         <button onClick={() => setStep('call_confirm')}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer' }}
         >
           <span style={{ fontSize: 28 }}>👎</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Still confused</span>
-          <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>Need more help</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Want to talk it through</span>
+          <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>We'll reach out personally</span>
         </button>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', background: remainingH <= 12 ? '#FFF7ED' : BG2, borderRadius: 8, border: `1px solid ${remainingH <= 12 ? '#FED7AA' : BD}` }}>
@@ -490,7 +490,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
         <span style={{ fontSize: 10, color: remainingH <= 12 ? '#92400E' : T2, fontWeight: remainingH <= 12 ? 600 : 400 }}>
-          {remainingH}h left to respond · auto-closes if no action
+          No response in {remainingH}h · this will close automatically
         </span>
       </div>
     </div>
