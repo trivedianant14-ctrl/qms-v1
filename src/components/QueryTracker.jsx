@@ -711,6 +711,57 @@ function ResolutionAttachments({ attachments }) {
   )
 }
 
+// ── Resolution Rating Popup ───────────────────────────────────────────────────
+const POPUP_MESSAGES = {
+  1: "That's really disappointing — we'd like to understand what went wrong.",
+  2: "Sorry we fell short. What could we have done better?",
+  3: "Seems like the explanation didn't fully help you.",
+}
+
+function ResolutionRatingPopup({ popup, onSubmit, onClose }) {
+  const [note, setNote] = useState('')
+  const canSubmit = note.trim().length > 0
+  const msg = POPUP_MESSAGES[popup.stars] || "We'd like to know what went wrong."
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: 18, padding: '22px 18px', width: '100%', boxShadow: '0 12px 40px rgba(0,0,0,0.25)' }}>
+        {/* Stars display */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginBottom: 14 }}>
+          {[1,2,3,4,5].map(n => (
+            <svg key={n} width="26" height="26" viewBox="0 0 24 24" fill={n <= popup.stars ? '#F59E0B' : 'none'} stroke={n <= popup.stars ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+            </svg>
+          ))}
+        </div>
+        <div style={{ fontSize: 15, fontWeight: 800, color: T1, textAlign: 'center', marginBottom: 6 }}>Help us improve</div>
+        <div style={{ fontSize: 12, color: T2, textAlign: 'center', lineHeight: 1.65, marginBottom: 16 }}>
+          {msg}<br/>
+          <span style={{ color: T3 }}>Was the explanation unclear? Did you disagree with the answer? Let us know — we'll try to reach out.</span>
+        </div>
+        <textarea
+          value={note}
+          onChange={e => setNote(e.target.value)}
+          placeholder="What didn't you understand or agree with? (required)"
+          rows={3}
+          autoFocus
+          style={{ width: '100%', padding: '9px 11px', borderRadius: 10, border: `1.5px solid ${note.trim() ? P : ORANGE}`, fontSize: 12, color: T1, resize: 'none', outline: 'none', fontFamily: 'inherit', lineHeight: 1.5, background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
+        />
+        <button
+          onClick={() => canSubmit && onSubmit(note)}
+          disabled={!canSubmit}
+          style={{ width: '100%', padding: '11px', borderRadius: 10, background: canSubmit ? P : BG2, color: canSubmit ? 'white' : T3, border: 'none', fontSize: 13, fontWeight: 700, cursor: canSubmit ? 'pointer' : 'default', marginBottom: 8, transition: 'background 0.15s' }}
+        >
+          Submit Feedback
+        </button>
+        <button onClick={onClose} style={{ width: '100%', padding: '9px', borderRadius: 10, background: 'none', border: `1px solid ${BD}`, fontSize: 12, color: T2, cursor: 'pointer' }}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Timeline Step ────────────────────────────────────────────────────────────
 function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, query }) {
   const status = idx < activeIdx ? 'done' : idx === activeIdx ? 'active' : 'pending'
@@ -973,11 +1024,12 @@ function QueryDetailView({ query, onBack, onClose }) {
 }
 
 // ── Query Card ───────────────────────────────────────────────────────────────
-function QueryCard({ query, onClick }) {
+function QueryCard({ query, onClick, onLowRating }) {
   const meta = CATEGORY_META[query.category] || CATEGORY_META['Others']
   const stage = STAGE_FROM_STATUS[query.timeline_status] ?? query.demo_stage ?? 0
-  const { setEscalationRating } = useQueries()
+  const { setEscalationRating, setResolutionRating } = useQueries()
 
+  // ── Escalation (Call Closed) rating state ──
   const isEscClosed = stage === 5
   const alreadyRated = query.escalation_rating != null
   const [hoverStar, setHoverStar] = useState(0)
@@ -994,6 +1046,12 @@ function QueryCard({ query, onClick }) {
     setPendingStar(n)
     if (n >= 4) { setEscalationRating(query.ticket_id, n, ''); setCardSubmitted(true) }
   }
+
+  // ── Resolution (Resolved) rating state ──
+  const isResolved = stage === 3
+  const alreadyRatedResolved = query.resolution_star != null
+  const [resHover, setResHover] = useState(0)
+  const [resLocal, setResLocal] = useState(null)
 
   const badgeColor = stage === 5 ? '#7C3AED' : stage === 4 ? RED : stage === 3 ? GREEN : stage === 2 ? P : stage === 1 ? ORANGE : T2
   const badgeBg    = stage === 5 ? '#F5F3FF' : stage === 4 ? RED_BG : stage === 3 ? GREEN_BG : stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2
@@ -1052,6 +1110,52 @@ function QueryCard({ query, onClick }) {
           </div>
         </div>
       </div>
+
+      {/* Inline star rating — for Resolved cards */}
+      {isResolved && (
+        <div onClick={e => e.stopPropagation()} style={{ padding: '9px 13px', borderTop: `1px solid ${BD}`, background: '#FAFAFA' }}>
+          {(alreadyRatedResolved || resLocal) ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 2 }}>
+                {[1,2,3,4,5].map(n => {
+                  const s = alreadyRatedResolved ? query.resolution_star : resLocal.stars
+                  return (
+                    <svg key={n} width="18" height="18" viewBox="0 0 24 24" fill={n <= s ? '#F59E0B' : '#E5E7EB'} stroke={n <= s ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
+                      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                    </svg>
+                  )
+                })}
+              </div>
+              <span style={{ fontSize: 10, color: GREEN, fontWeight: 700 }}>✓ Thanks for your feedback!</span>
+            </div>
+          ) : (
+            <>
+              <div style={{ fontSize: 10, color: T2, fontWeight: 600, marginBottom: 6 }}>Rate this resolution</div>
+              <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+                {[1,2,3,4,5].map(n => (
+                  <button key={n}
+                    onMouseEnter={() => setResHover(n)} onMouseLeave={() => setResHover(0)}
+                    onClick={() => {
+                      if (n >= 4) {
+                        setResolutionRating(query.ticket_id, n, '')
+                        setResLocal({ stars: n })
+                      } else {
+                        onLowRating?.(query, n)
+                      }
+                    }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', lineHeight: 1 }}
+                  >
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill={n <= resHover ? '#F59E0B' : 'none'} stroke={n <= resHover ? '#F59E0B' : '#D1D5DB'} strokeWidth="1.5">
+                      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                    </svg>
+                  </button>
+                ))}
+                {resHover > 0 && <span style={{ fontSize: 10, color: resHover <= 3 ? ORANGE : GREEN, fontWeight: 700, marginLeft: 4 }}>{STAR_LABELS[resHover]}</span>}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Zomato-style inline rating — only for escalation_closed */}
       {isEscClosed && (
@@ -1182,9 +1286,11 @@ function ProfileHome({ queries, onOpenQueries, onClose }) {
 
 // ── Queries Sub-view ──────────────────────────────────────────────────────────
 function QueriesView({ queries, onBack, onClose, onSelect }) {
+  const { setResolutionRating } = useQueries()
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
+  const [ratingPopup, setRatingPopup] = useState(null)
 
   const activeCount = queries.filter(q => q.status !== 'resolved').length
   const resolvedCount = queries.filter(q => q.status === 'resolved').length
@@ -1271,9 +1377,26 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: T3, fontSize: 13 }}>No queries found</div>
         ) : (
-          filtered.map(q => <QueryCard key={q.id} query={q} onClick={() => onSelect(q)} />)
+          filtered.map(q => (
+            <QueryCard
+              key={q.id} query={q} onClick={() => onSelect(q)}
+              onLowRating={(qry, stars) => setRatingPopup({ query: qry, stars })}
+            />
+          ))
         )}
       </div>
+
+      {/* Low-rating popup */}
+      {ratingPopup && (
+        <ResolutionRatingPopup
+          popup={ratingPopup}
+          onSubmit={(note) => {
+            setResolutionRating(ratingPopup.query.ticket_id, ratingPopup.stars, note)
+            setRatingPopup(null)
+          }}
+          onClose={() => setRatingPopup(null)}
+        />
+      )}
     </div>
   )
 }

@@ -250,6 +250,13 @@ export function QueryProvider({ children }) {
     }))
   }
 
+  const setResolutionRating = (ticketId, stars, reviewText) => {
+    setQueries(prev => prev.map(q => {
+      if (q.ticket_id !== ticketId) return q
+      return { ...q, resolution_star: stars, resolution_review: reviewText || null, satisfaction_score: stars }
+    }))
+  }
+
   const setCallRequested = (ticketId) => {
     setQueries(prev => prev.map(q =>
       q.ticket_id === ticketId ? { ...q, call_requested: true } : q
@@ -266,7 +273,7 @@ export function QueryProvider({ children }) {
       claimTicket, assignToFaculty, advanceStatus, resolveWithCode, resolveTicket,
       facultyResolve, approveResolution, requestRevision,
       addNote, escalateToEngineering, closeEscalation, recallFromFaculty,
-      setFeedback, setEscalationRating, setCallRequested,
+      setFeedback, setEscalationRating, setResolutionRating, setCallRequested,
     }}>
       {children}
     </QueryContext.Provider>
