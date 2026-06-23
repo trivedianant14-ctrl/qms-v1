@@ -140,12 +140,27 @@ function ThumbsFeedback({ resolvedAt, query }) {
       <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>Did {agentForQuery(query)?.name || 'our team'} clear your doubt?</div>
       <EmojiRating rating={rating} onRate={(n) => {
         setRating(n)
-        if (n >= 4) setStep('up_done')
       }} />
       {rating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: rating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
           {EMOJI_LABELS[rating]}
         </div>
+      )}
+      {rating >= 4 && (
+        <>
+          <textarea
+            value={rateNote}
+            onChange={e => setRateNote(e.target.value)}
+            placeholder="Anything you'd like to add? (optional)"
+            rows={3}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${P}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
+          />
+          <button
+            onClick={() => setStep('up_done')}
+            style={{ width: '100%', padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+            Submit
+          </button>
+        </>
       )}
       {rating > 0 && rating <= 3 && (
         <>
