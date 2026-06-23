@@ -19,7 +19,7 @@ const CATEGORY_META = {
 }
 
 const STAGE_FROM_STATUS = { raised: 0, received: 1, assigned: 2, resolved: 3, escalated: 4, escalation_closed: 5 }
-const STAGE_LABELS = ['Raised', 'In Review', 'Working', 'Resolved', 'Escalated', 'Call Closed']
+const STAGE_LABELS = ['Raised', 'In Review', 'Working', 'All done ✓', 'Escalated', 'Call Closed']
 const STAGE_COLORS = [P, ORANGE, '#0369A1', GREEN, RED, '#7C3AED']
 
 const AGENTS = [
@@ -992,7 +992,7 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
 
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: 0 }}>
           {step.key === 'assigned' && status !== 'pending'
-            ? <>{agent.name} · <strong>{agent.team}</strong></>
+            ? <><strong>{agent.team}</strong> is working on this personally</>
             : step.desc}
         </p>
 
@@ -1059,10 +1059,10 @@ function QueryDetailView({ query, onBack, onClose }) {
   ]
 
   const TIMELINE_STEPS = [
-    { key: 'raised',      title: 'Query raised',       desc: 'Your report has been logged' },
-    { key: 'received',    title: 'Received by team',    desc: 'Content team has picked this up' },
-    { key: 'assigned',    title: 'Agent assigned',      desc: null },
-    { key: 'resolved',    title: 'Query resolved',      desc: 'Issue addressed' },
+    { key: 'raised',      title: 'We heard you',                           desc: 'Your question is now with our team' },
+    { key: 'received',    title: 'Our team is working on it',              desc: 'A team member has started working on this' },
+    { key: 'assigned',    title: 'In good hands',                          desc: null },
+    { key: 'resolved',    title: 'Your question deserved a proper answer', desc: "We've gone through this carefully for you" },
     ...(stage >= 4 ? [{ key: 'escalated',    title: 'Escalated',        desc: 'You requested a callback — our team is arranging a call' }] : []),
     ...(stage >= 4 ? [{ key: 'call_closed',  title: 'Call completed',   desc: 'Our agent spoke with you to resolve your query' }] : []),
   ]
@@ -1121,8 +1121,8 @@ function QueryDetailView({ query, onBack, onClose }) {
           <div style={{ marginBottom: 16, padding: '10px 13px', borderRadius: 11, background: GREEN_BG, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 9 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Query resolved</div>
-              <div style={{ fontSize: 10, color: '#166534' }}>The question has been reviewed and updated</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>We've looked into this for you</div>
+              <div style={{ fontSize: 10, color: '#166534' }}>Your question has been reviewed and answered</div>
             </div>
           </div>
         )}
