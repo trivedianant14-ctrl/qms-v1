@@ -1363,7 +1363,6 @@ function ProfileHome({ queries, onOpenQueries, onClose }) {
   const activeCount = queries.filter(q => q.status !== 'resolved').length
   const resolvedCount = queries.filter(q => q.status === 'resolved').length
   const total = queries.length
-  const pct = total > 0 ? Math.round((resolvedCount / total) * 100) : 0
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -1392,34 +1391,6 @@ function ProfileHome({ queries, onOpenQueries, onClose }) {
           </div>
         </div>
       </div>
-
-      {/* Stats strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        {[
-          { emoji: '📤', val: total,         label: 'Raised' },
-          { emoji: '⏳', val: activeCount,   label: 'In review' },
-          { emoji: '✅', val: resolvedCount,  label: 'Solved' },
-        ].map((s, i) => (
-          <div key={i} style={{ padding: '12px 6px', textAlign: 'center', borderRight: i < 2 ? `1px solid ${BD}` : 'none' }}>
-            <div style={{ fontSize: 20 }}>{s.emoji}</div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: T1, lineHeight: 1.1 }}>{s.val}</div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: T3, marginTop: 2 }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Progress bar */}
-      {total > 0 && (
-        <div style={{ padding: '10px 16px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: T2 }}>Doubts cleared</span>
-            <span style={{ fontSize: 11, fontWeight: 800, color: GREEN }}>{pct}%</span>
-          </div>
-          <div style={{ height: 10, borderRadius: 10, background: BG2, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${pct}%`, borderRadius: 10, background: `linear-gradient(90deg, ${GREEN} 0%, #4ADE80 100%)`, transition: 'width 0.6s ease' }} />
-          </div>
-        </div>
-      )}
 
       {/* Menu cards */}
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
@@ -1498,6 +1469,21 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
           </div>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
+      </div>
+
+      {/* Stats strip */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
+        {[
+          { emoji: '📤', val: queries.length, label: 'Raised' },
+          { emoji: '⏳', val: activeCount,    label: 'In review' },
+          { emoji: '✅', val: resolvedCount,  label: 'Solved' },
+        ].map((s, i) => (
+          <div key={i} style={{ padding: '10px 6px', textAlign: 'center', borderRight: i < 2 ? `1px solid ${BD}` : 'none' }}>
+            <div style={{ fontSize: 18 }}>{s.emoji}</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: T1, lineHeight: 1.1 }}>{s.val}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: T3, marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
       </div>
 
       {/* Pill filters */}
