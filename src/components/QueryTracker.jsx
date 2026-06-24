@@ -1009,7 +1009,7 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
 
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: 0 }}>
           {step.key === 'assigned' && status !== 'pending'
-            ? <>{agent.name} · <strong>{agent.team}</strong> is working on this personally</>
+            ? <><strong>{agent.name}</strong> personally le raha hai 🎯<br/><span style={{ fontWeight: 400 }}>Hote hi notify kar denge tujhe!</span></>
             : step.desc}
         </p>
 
@@ -1078,7 +1078,7 @@ function QueryDetailView({ query, onBack, onClose }) {
   const TIMELINE_STEPS = [
     { key: 'raised',      title: 'We heard you',                           desc: 'Your question is now with our team' },
     { key: 'received',    title: 'Our team is working on it',              desc: 'A team member has started working on this' },
-    { key: 'assigned',    title: 'In good hands',                          desc: null },
+    { key: 'assigned',    title: 'Expert haath mein 🎯',                   desc: null },
     { key: 'resolved',    title: 'Your question deserved a proper answer', desc: "We've gone through this carefully for you" },
     ...(stage >= 4 ? [{ key: 'escalated',    title: 'Going the extra mile for you', desc: 'We want to make sure this is fully clear for you' }] : []),
     ...(stage >= 4 ? [{ key: 'call_closed',  title: "That's what we're here for",  desc: 'Our team connected with you to go through this' }] : []),
