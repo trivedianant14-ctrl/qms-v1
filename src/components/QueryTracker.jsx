@@ -1041,14 +1041,14 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
 
   // ── Blurred teaser for assigned step not yet reached ──────────────────────
   if (step.key === 'assigned' && status === 'pending') return (
-    <div style={{ display: 'flex', gap: 12 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, opacity: 0.35 }}>
+    <div style={{ display: 'flex', gap: 12, opacity: 0.35 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
         <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'white', border: `2px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: BD }} />
         </div>
         {!isLast && <div style={{ width: 2, flex: 1, minHeight: 40, background: BD, marginTop: 2, borderRadius: 1 }} />}
       </div>
-      <div style={{ paddingBottom: isLast ? 0 : 18, flex: 1, minWidth: 0, filter: 'blur(3.5px)', userSelect: 'none', pointerEvents: 'none' }}>
+      <div style={{ paddingBottom: isLast ? 0 : 18, flex: 1, minWidth: 0 }}>
         <span style={{ fontSize: 12, fontWeight: 700, color: T1 }}>Our team will take it personally 🎯</span>
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: '2px 0 0' }}>We'll find the right person just for this</p>
       </div>
