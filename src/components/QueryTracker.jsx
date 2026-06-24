@@ -503,7 +503,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
   return (
     <div>
       <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did we answer your question?</div>
-      <div style={{ fontSize: 11, color: T2, marginBottom: isLowRated ? 8 : 12 }}>Let us know and we'll take care of the rest</div>
+      <div style={{ fontSize: 11, color: T2, marginBottom: isLowRated ? 8 : 12 }}>Tap to tell us more — we'll reach out personally</div>
       {isLowRated && (
         <>
           <div style={{ fontSize: 32, textAlign: 'center', marginBottom: 3 }}>
@@ -1068,7 +1068,9 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
 
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: 0 }}>
           {step.key === 'assigned' && status !== 'pending'
-            ? <><strong>{agent.name}</strong> personally le raha hai 🎯<br/><span style={{ fontWeight: 400 }}>Hote hi tumhe notify kar denge!</span></>
+            ? (step.title.includes('🔧')
+                ? 'They\'ll get back to you as soon as it\'s ready'
+                : 'Carefully reviewed and responded just for you')
             : step.desc}
         </p>
 
@@ -1137,10 +1139,10 @@ function QueryDetailView({ query, onBack, onClose }) {
   const TIMELINE_STEPS = [
     { key: 'raised',      title: 'We heard you',                           desc: 'Your question is now with our team' },
     { key: 'received',    title: 'Our team is working on it',              desc: 'A team member has started working on this' },
-    { key: 'assigned',    title: 'Expert haath mein 🎯',                   desc: null },
+    { key: 'assigned',    title: stage >= 4 ? (agent.name ? `${agent.name} is working on this 🔧` : 'Our team is working on this 🔧') : (agent.name ? `${agent.name} took it personally 🎯` : 'Our expert took it personally 🎯'), desc: null },
     { key: 'resolved',    title: 'Your question deserved a proper answer', desc: "We've gone through this carefully for you" },
     ...(stage >= 4 ? [{ key: 'escalated',    title: 'Going the extra mile for you', desc: 'We want to make sure this is fully clear for you' }] : []),
-    ...(stage >= 4 ? [{ key: 'call_closed',  title: "That's what we're here for",  desc: 'Our team connected with you to go through this' }] : []),
+    ...(stage >= 4 ? [{ key: 'call_closed',  title: 'Your experience matters to us', desc: null }] : []),
   ]
 
   const badgeMeta = stage >= 5 ? { bg: '#F5F3FF', color: '#7C3AED', border: '#DDD6FE' }
@@ -1197,8 +1199,8 @@ function QueryDetailView({ query, onBack, onClose }) {
           <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: GREEN_BG, border: `2px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 28 }}>🎉</span>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D' }}>Doubt cleared! Dekho neeche 👇</div>
-              <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>Team ne personally review karke jawab diya</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D' }}>Cleared! ✅</div>
+              <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>Your doubt has been resolved</div>
             </div>
           </div>
         )}
