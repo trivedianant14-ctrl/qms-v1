@@ -26,6 +26,20 @@
   --radius-xl: 24px;
 }
 
+@keyframes thumbWiggle {
+  0%   { transform: scale(1)    rotate(0deg); }
+  25%  { transform: scale(1.28) rotate(-14deg); }
+  55%  { transform: scale(1.18) rotate(9deg); }
+  75%  { transform: scale(1.22) rotate(-6deg); }
+  100% { transform: scale(1)    rotate(0deg); }
+}
+@keyframes emojiPop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.45); }
+  65%  { transform: scale(0.88); }
+  85%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
 @keyframes toastSlideDown {
   from { transform: translateY(-100%); opacity: 0; }
   to   { transform: translateY(0);     opacity: 1; }

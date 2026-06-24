@@ -57,15 +57,44 @@ const EMOJI_OPTIONS = [
 const EMOJI_LABELS = { 1: 'Not really', 3: 'Somewhat', 5: 'Completely!' }
 
 function EmojiRating({ rating, onRate }) {
+  const [hovered, setHovered] = useState(null)
+  const [lastSelected, setLastSelected] = useState(null)
+
+  const handleRate = (value) => {
+    setLastSelected(value)
+    onRate(value)
+    setTimeout(() => setLastSelected(null), 450)
+  }
+
   return (
     <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
-      {EMOJI_OPTIONS.map(({ value, emoji, label }) => (
-        <button key={value} onClick={() => onRate(value)}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: rating === value ? PL : 'transparent', border: `2px solid ${rating === value ? P : 'transparent'}`, borderRadius: 14, padding: '10px 14px', cursor: 'pointer', transition: 'all 0.15s' }}>
-          <span style={{ fontSize: 30 }}>{emoji}</span>
-          <span style={{ fontSize: 10, fontWeight: 600, color: rating === value ? PD : T3 }}>{label}</span>
-        </button>
-      ))}
+      {EMOJI_OPTIONS.map(({ value, emoji, label }) => {
+        const isSelected = rating === value
+        const isHov = hovered === value
+        return (
+          <button key={value}
+            onClick={() => handleRate(value)}
+            onMouseEnter={() => setHovered(value)}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              background: isSelected ? PL : isHov ? `${PL}88` : 'transparent',
+              border: `2px solid ${isSelected ? P : isHov ? PB : 'transparent'}`,
+              borderRadius: 14, padding: '10px 14px', cursor: 'pointer',
+              transform: isHov && !isSelected ? 'translateY(-3px) scale(1.06)' : 'translateY(0) scale(1)',
+              boxShadow: isHov ? `0 6px 18px rgba(83,74,183,0.18)` : 'none',
+              transition: 'all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}>
+            <span style={{
+              fontSize: isHov ? 36 : 30,
+              display: 'block',
+              transition: 'font-size 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              animation: lastSelected === value ? 'emojiPop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
+            }}>{emoji}</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: isSelected ? PD : isHov ? P : T3, transition: 'color 0.15s' }}>{label}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -81,6 +110,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
   // steps: 'prompt' | 'rate' | 'up_done' | 'call_confirm' | 'call_enter' | 'call_otp' | 'call_done'
   //        'high_warn' | 'high_up' | 'low_confirm' | 're_rate'
   const [step, setStep] = useState('prompt')
+  const [hoveredThumb, setHoveredThumb] = useState(null) // 'up' | 'down' | null
   const [rating, setRating] = useState(0)
   const [rateNote, setRateNote] = useState('')
   const [reRating, setReRating] = useState(0)
@@ -442,14 +472,18 @@ function ThumbsFeedback({ resolvedAt, query }) {
       <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 14 }}>You reacted to this from your queries list</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
         <button onClick={() => setStep('high_up')}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}>
-          <span style={{ fontSize: 28 }}>👍</span>
+          onMouseEnter={() => setHoveredThumb('up')}
+          onMouseLeave={() => setHoveredThumb(null)}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 14, border: `2px solid ${hoveredThumb === 'up' ? GREEN : GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer', transform: hoveredThumb === 'up' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)', boxShadow: hoveredThumb === 'up' ? '0 8px 20px rgba(34,197,94,0.3)' : '0 2px 0 #86EFAC', transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+          <span style={{ fontSize: 28, display: 'block', animation: hoveredThumb === 'up' ? 'thumbWiggle 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none' }}>👍</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, this helped!</span>
           <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Glad we could help</span>
         </button>
         <button onClick={() => setStep('high_warn')}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer' }}>
-          <span style={{ fontSize: 28 }}>👎</span>
+          onMouseEnter={() => setHoveredThumb('down')}
+          onMouseLeave={() => setHoveredThumb(null)}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 14, border: `2px solid ${hoveredThumb === 'down' ? RED : RED_BORDER}`, background: RED_BG, cursor: 'pointer', transform: hoveredThumb === 'down' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)', boxShadow: hoveredThumb === 'down' ? '0 8px 20px rgba(220,38,38,0.25)' : '0 2px 0 #FECACA', transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+          <span style={{ fontSize: 28, display: 'block', animation: hoveredThumb === 'down' ? 'thumbWiggle 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none' }}>👎</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Want to talk it through</span>
           <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>We'll reach out personally</span>
         </button>
@@ -479,39 +513,64 @@ function ThumbsFeedback({ resolvedAt, query }) {
         </>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-        <button onClick={() => {
-          setStep(isLowRated ? 'low_confirm' : 'rate')
-          // #6 — 10s after thumbs up, skip if rating already given
-          const qId = query.ticket_id
-          setTimeout(() => {
-            const latest = queriesRef.current.find(q => q.ticket_id === qId)
-            if (latest && latest.resolution_star == null) {
-              queueNotification('Ek kaam aur banta hai 😏', 'Rating mat bhoolna yaar — ek second ka kaam hai.')
-            }
-          }, 10000)
-        }}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer' }}
+        <button
+          onClick={() => {
+            setStep(isLowRated ? 'low_confirm' : 'rate')
+            const qId = query.ticket_id
+            setTimeout(() => {
+              const latest = queriesRef.current.find(q => q.ticket_id === qId)
+              if (latest && latest.resolution_star == null) {
+                queueNotification('Ek kaam aur banta hai 😏', 'Rating mat bhoolna yaar — ek second ka kaam hai.')
+              }
+            }, 10000)
+          }}
+          onMouseEnter={() => setHoveredThumb('up')}
+          onMouseLeave={() => setHoveredThumb(null)}
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+            padding: '14px 10px', borderRadius: 14,
+            border: `2px solid ${hoveredThumb === 'up' ? GREEN : GREEN_BORDER}`,
+            background: GREEN_BG, cursor: 'pointer',
+            transform: hoveredThumb === 'up' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)',
+            boxShadow: hoveredThumb === 'up' ? `0 8px 20px rgba(34,197,94,0.3)` : '0 2px 0 #86EFAC',
+            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
         >
-          <span style={{ fontSize: 28 }}>👍</span>
+          <span style={{
+            fontSize: 28, display: 'block',
+            animation: hoveredThumb === 'up' ? 'thumbWiggle 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
+          }}>👍</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, this helped!</span>
           <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Glad we could help</span>
         </button>
-        <button onClick={() => {
-          setStep('call_confirm')
-          // #7 — immediate on thumbs down
-          queueNotification('Noted, bilkul noted 🤝', 'Call arrange ho rahi hai. Hum khud samjhaayenge.')
-          // #8 — 15s later, skip if already escalation resolved
-          const qId = query.ticket_id
-          setTimeout(() => {
-            const latest = queriesRef.current.find(q => q.ticket_id === qId)
-            if (latest && !latest.escalation_resolved) {
-              queueNotification('Call aane waali hai, ready raho 📞', 'Team ne slot book kar liya hai. Phone paas rakhna.')
-            }
-          }, 15000)
-        }}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${RED_BORDER}`, background: RED_BG, cursor: 'pointer' }}
+        <button
+          onClick={() => {
+            setStep('call_confirm')
+            queueNotification('Noted, bilkul noted 🤝', 'Call arrange ho rahi hai. Hum khud samjhaayenge.')
+            const qId = query.ticket_id
+            setTimeout(() => {
+              const latest = queriesRef.current.find(q => q.ticket_id === qId)
+              if (latest && !latest.escalation_resolved) {
+                queueNotification('Call aane waali hai, ready raho 📞', 'Team ne slot book kar liya hai. Phone paas rakhna.')
+              }
+            }, 15000)
+          }}
+          onMouseEnter={() => setHoveredThumb('down')}
+          onMouseLeave={() => setHoveredThumb(null)}
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+            padding: '14px 10px', borderRadius: 14,
+            border: `2px solid ${hoveredThumb === 'down' ? RED : RED_BORDER}`,
+            background: RED_BG, cursor: 'pointer',
+            transform: hoveredThumb === 'down' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)',
+            boxShadow: hoveredThumb === 'down' ? `0 8px 20px rgba(220,38,38,0.25)` : '0 2px 0 #FECACA',
+            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
         >
-          <span style={{ fontSize: 28 }}>👎</span>
+          <span style={{
+            fontSize: 28, display: 'block',
+            animation: hoveredThumb === 'down' ? 'thumbWiggle 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
+          }}>👎</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Want to talk it through</span>
           <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>We'll reach out personally</span>
         </button>
