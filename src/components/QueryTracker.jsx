@@ -1023,7 +1023,7 @@ function ResolutionRatingPopup({ popup, onSubmit, onClose }) {
 }
 
 // ── Timeline Step ────────────────────────────────────────────────────────────
-function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, query }) {
+function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, query, onViewResolution }) {
   const status = idx < activeIdx ? 'done' : idx === activeIdx ? 'active' : 'pending'
   const meta = CATEGORY_META[query?.category] || CATEGORY_META['Others']
   const isExpandable = (step.key === 'raised' || step.key === 'resolved') && status !== 'pending'
@@ -1122,9 +1122,16 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
         {expanded && step.key === 'resolved' && query?.resolution_text && (
           <div style={{ marginTop: 8, background: GREEN_BG, borderRadius: 9, border: `1px solid ${GREEN_BORDER}`, padding: '10px 12px' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Resolution</div>
-            <p style={{ fontSize: 11, color: '#14532D', lineHeight: 1.6, margin: 0 }}>{query.resolution_text}</p>
-            <div style={{ marginTop: 8, paddingTop: 6, borderTop: `1px solid ${GREEN_BORDER}`, fontSize: 10, color: '#166534' }}>
-              Resolved by {agent.name} · {agent.team}
+            <p style={{ fontSize: 11, color: '#14532D', lineHeight: 1.6, margin: 0,
+              display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {query.resolution_text}
+            </p>
+            <div style={{ marginTop: 8, paddingTop: 6, borderTop: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: 10, color: '#166534' }}>Resolved by {agent.name} · {agent.team}</div>
+              <button onClick={onViewResolution} style={{ fontSize: 11, fontWeight: 700, color: GREEN, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 3 }}>
+                Read more
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9,18 15,12 9,6"/></svg>
+              </button>
             </div>
             <ResolutionAttachments
               attachments={Array.isArray(query.resolution_attachment) ? query.resolution_attachment : (query.resolution_attachment ? [query.resolution_attachment] : [])}
@@ -1136,10 +1143,80 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
   )
 }
 
+// ── Resolution Detail View ────────────────────────────────────────────────────
+function ResolutionDetailView({ query, agent, onBack, onClose }) {
+  const attachments = Array.isArray(query.resolution_attachment)
+    ? query.resolution_attachment
+    : (query.resolution_attachment ? [query.resolution_attachment] : [])
+  const meta = CATEGORY_META[query.category] || CATEGORY_META['Others']
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Header */}
+      <div style={{ background: `linear-gradient(140deg, ${GREEN}cc 0%, #166534 100%)`, padding: '12px 16px 16px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+          </button>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>Resolution</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>{ticketId(query.id)}</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: '10px 12px', border: '1px solid rgba(255,255,255,0.25)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+            <span style={{ fontSize: 18 }}>{meta.abbr}</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>{query.category}</span>
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{query.sub_option}</div>
+        </div>
+      </div>
+
+      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+        {/* Question context */}
+        {query.question_text && (
+          <div style={{ marginBottom: 16, padding: '10px 12px', borderRadius: 10, background: BG2, border: `1px solid ${BD}` }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Your Question</div>
+            <p style={{ fontSize: 12, color: T1, lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>"{query.question_text}"</p>
+          </div>
+        )}
+
+        {/* Full resolution */}
+        <div style={{ background: GREEN_BG, borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, padding: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+            <span style={{ fontSize: 16 }}>✅</span>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Resolution</div>
+          </div>
+          <p style={{ fontSize: 13, color: '#14532D', lineHeight: 1.7, margin: 0 }}>{query.resolution_text}</p>
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 24, height: 24, borderRadius: '50%', background: GREEN, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'white', fontWeight: 800, flexShrink: 0 }}>
+              {agent.name?.[0] || 'T'}
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#166534' }}>Resolved by {agent.name}</div>
+              <div style={{ fontSize: 10, color: '#166534', opacity: 0.7 }}>{agent.team}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Attachments */}
+        {attachments.length > 0 && (
+          <div style={{ marginTop: 12 }}>
+            <ResolutionAttachments attachments={attachments} />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Query Detail View ─────────────────────────────────────────────────────────
 function QueryDetailView({ query, onBack, onClose }) {
+  const [showResolution, setShowResolution] = useState(false)
   const stage = STAGE_FROM_STATUS[query.timeline_status] ?? query.demo_stage ?? 0
   const agent = agentForQuery(query)
+
+  if (showResolution) return <ResolutionDetailView query={query} agent={agent} onBack={() => setShowResolution(false)} onClose={onClose} />
   const meta = CATEGORY_META[query.category] || CATEGORY_META['Others']
 
   const raised = new Date(query.timestamp).getTime()
@@ -1279,7 +1356,7 @@ function QueryDetailView({ query, onBack, onClose }) {
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 14 }}>Timeline</div>
           {TIMELINE_STEPS.map((step, idx) => (
-            <TimelineStep key={step.key} step={step} idx={idx} activeIdx={stage} agent={agent} stepTimestamps={stepTimestamps} isLast={idx === TIMELINE_STEPS.length - 1} query={query} />
+            <TimelineStep key={step.key} step={step} idx={idx} activeIdx={stage} agent={agent} stepTimestamps={stepTimestamps} isLast={idx === TIMELINE_STEPS.length - 1} query={query} onViewResolution={() => setShowResolution(true)} />
           ))}
         </div>
 
