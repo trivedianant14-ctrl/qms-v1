@@ -1039,6 +1039,33 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
   })()
   const [expanded, setExpanded] = useState(defaultExpanded)
 
+  // ── Blurred teaser for assigned step not yet reached ──────────────────────
+  if (step.key === 'assigned' && status === 'pending') return (
+    <div style={{ display: 'flex', gap: 12 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, opacity: 0.35 }}>
+        <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'white', border: `2px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: BD }} />
+        </div>
+        {!isLast && <div style={{ width: 2, flex: 1, minHeight: 56, background: BD, marginTop: 2, borderRadius: 1 }} />}
+      </div>
+      <div style={{ paddingBottom: isLast ? 0 : 18, flex: 1, minWidth: 0 }}>
+        <div style={{ borderRadius: 12, border: `1.5px dashed ${PB}`, background: PL, overflow: 'hidden', position: 'relative' }}>
+          {/* Blurred background text */}
+          <div style={{ padding: '10px 12px', filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: T1, marginBottom: 4 }}>Our expert took it personally 🎯</div>
+            <div style={{ fontSize: 11, color: T2 }}>Carefully reviewed and responded just for you</div>
+          </div>
+          {/* Clear overlay label */}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: P, background: 'white', padding: '5px 12px', borderRadius: 20, border: `1.5px solid ${PB}`, boxShadow: '0 2px 8px rgba(83,74,183,0.15)' }}>
+              ✨ Our team will take it personally
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <div style={{ display: 'flex', gap: 12, opacity: status === 'pending' ? 0.35 : 1 }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
