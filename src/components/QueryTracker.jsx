@@ -1068,7 +1068,7 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
 
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: 0 }}>
           {step.key === 'assigned' && status !== 'pending'
-            ? <><strong>{agent.name}</strong> personally le raha hai 🎯<br/><span style={{ fontWeight: 400 }}>Hote hi notify kar denge tujhe!</span></>
+            ? <><strong>{agent.name}</strong> personally le raha hai 🎯<br/><span style={{ fontWeight: 400 }}>Hote hi tumhe notify kar denge!</span></>
             : step.desc}
         </p>
 
@@ -1188,7 +1188,7 @@ function QueryDetailView({ query, onBack, onClose }) {
               <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>
                 {stage === 0 && '48 ghante ke andar jawab milega'}
                 {stage === 1 && 'Thodi der mein expert assign hoga'}
-                {stage === 2 && 'Hote hi notify kar denge tujhe!'}
+                {stage === 2 && 'Hote hi tumhe notify kar denge!'}
               </div>
             </div>
           </div>

@@ -67,7 +67,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
     queueNotification('Aye aye captain! 📬', 'Tumhara doubt mil gaya. Abhi team ko bhej rahe hain.')
     // #2 — 10s later: query received by team
     setTimeout(() => {
-      queueNotification('Arre, uthaa liya humne 👀', 'Team lag gayi hai tere sawal pe. Jaldi milega jawaab.')
+      queueNotification('Arre, uthaa liya humne 👀', 'Team lag gayi hai tumhare sawal pe. Jaldi milega jawaab.')
     }, 10000)
   }
 
@@ -85,7 +85,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
     queueNotification('Aye aye captain! 📬', 'Tumhara doubt mil gaya. Abhi team ko bhej rahe hain.')
     // #2 — 10s later: query received by team
     setTimeout(() => {
-      queueNotification('Arre, uthaa liya humne 👀', 'Team lag gayi hai tere sawal pe. Jaldi milega jawaab.')
+      queueNotification('Arre, uthaa liya humne 👀', 'Team lag gayi hai tumhare sawal pe. Jaldi milega jawaab.')
     }, 10000)
   }
 
