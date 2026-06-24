@@ -392,7 +392,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
           No, use different
         </button>
         <button onClick={() => { setUsedOwnNumber(true); setStep('call_done') }} style={{ padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
-          Yes, call me
+          Schedule a call
         </button>
       </div>
     </div>
@@ -762,7 +762,7 @@ function CallRequestFlow({ agent, onClose }) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <button onClick={() => setStep('enter')} style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>No, use different</button>
-        <button onClick={() => setStep('done')} style={{ padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Yes, call me</button>
+        <button onClick={() => setStep('done')} style={{ padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Schedule a call</button>
       </div>
     </div>
   )
