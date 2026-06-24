@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { QUESTIONS, SAVE_TAGS } from '../data'
 import FormShell from '../components/form/FormShell'
 
@@ -39,7 +39,8 @@ function TimerRing({ timeLeft, timerPerQ }) {
   )
 }
 
-export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, answers, setAnswers, timerPerQ, setTimerPerQ, autoAdvance, setAutoAdvance, isReviewMode, savedQs, saveQuestion, submitTest, setShowReattemptConfirm, attemptCount }) {
+export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, answers, setAnswers, timerPerQ, setTimerPerQ, autoAdvance, setAutoAdvance, isReviewMode, savedQs, saveQuestion, submitTest, setShowReattemptConfirm, attemptCount, reattemptQIds = [] }) {
+  const ACTIVE_QS = reattemptQIds.length ? QUESTIONS.filter(q => reattemptQIds.includes(q.id)) : QUESTIONS
   const [showSettings, setShowSettings] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
@@ -64,10 +65,10 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   const [nudgeShownThisAttempt, setNudgeShownThisAttempt] = useState(false)
   const [showBlockMsg, setShowBlockMsg] = useState(false)
 
-  const q = QUESTIONS[currentQ]
+  const q = ACTIVE_QS[currentQ]
   const answered = answers[q?.id] !== undefined
   const selected = answers[q?.id]
-  const isLastQ = currentQ === QUESTIONS.length - 1
+  const isLastQ = currentQ === ACTIVE_QS.length - 1
   const isCorrect = answered && selected === q?.correct
   const alreadySaved = savedQs.find(s => s.qId === q?.id)
 
@@ -104,7 +105,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
     if (answered || timedOut || isReviewMode) return
     setAnswers(a => ({ ...a, [q.id]: optId }))
     setTimedOut(false)
-    if (autoAdvance && currentQ < QUESTIONS.length - 1) {
+    if (autoAdvance && currentQ < ACTIVE_QS.length - 1) {
       setTimeout(() => setCurrentQ(c => c + 1), 800)
     }
   }
@@ -122,7 +123,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
   }
 
   const getDotColor = (idx) => {
-    const qItem = QUESTIONS[idx]
+    const qItem = ACTIVE_QS[idx]
     if (!answers[qItem.id]) return { bg: idx === currentQ ? PL : BG2, c: idx === currentQ ? P : T3, border: idx === currentQ ? PB : BD }
     if (answers[qItem.id] === 'timeout') return { bg: '#FFF3E0', c: '#E65100', border: '#FFB74D' }
     if (showFeedback) {
@@ -151,8 +152,8 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
     }
   }
 
-  const skipped = QUESTIONS.filter(q => answers[q.id] === 'timeout').length
-  const unanswered = QUESTIONS.filter(q => !answers[q.id]).length
+  const skipped = ACTIVE_QS.filter(q => answers[q.id] === 'timeout').length
+  const unanswered = ACTIVE_QS.filter(q => !answers[q.id]).length
 
   const showFeedback = mode === 'guide' || isReviewMode
   const showGuideContent = isReviewMode || (answered && mode === 'guide')
@@ -224,7 +225,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
         {/* Question dots — fills full width, no scroll */}
         <div style={{ padding: '0 16px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            {QUESTIONS.map((_, i) => {
+            {ACTIVE_QS.map((_, i) => {
               const dc = getDotColor(i)
               return (
                 <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: `1.5px solid ${dc.border}`, background: dc.bg, color: dc.c, fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -658,13 +659,13 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
 
       {/* Question grid — half-sheet */}
       {showGrid && (() => {
-        const gridCorrect = QUESTIONS.filter(q => answers[q.id] && answers[q.id] === q.correct).length
-        const gridIncorrect = QUESTIONS.filter(q => answers[q.id] && answers[q.id] !== q.correct && answers[q.id] !== 'timeout').length
-        const gridMissed = QUESTIONS.filter(q => answers[q.id] === 'timeout').length
-        const gridAttempted = QUESTIONS.filter(q => !!answers[q.id]).length
-        const gridUnattempted = QUESTIONS.length - gridAttempted
+        const gridCorrect = ACTIVE_QS.filter(q => answers[q.id] && answers[q.id] === q.correct).length
+        const gridIncorrect = ACTIVE_QS.filter(q => answers[q.id] && answers[q.id] !== q.correct && answers[q.id] !== 'timeout').length
+        const gridMissed = ACTIVE_QS.filter(q => answers[q.id] === 'timeout').length
+        const gridAttempted = ACTIVE_QS.filter(q => !!answers[q.id]).length
+        const gridUnattempted = ACTIVE_QS.length - gridAttempted
         const gridAccuracy = gridAttempted > 0 ? Math.round((gridCorrect / gridAttempted) * 100) : 0
-        const gridAttemptedPct = Math.round((gridAttempted / QUESTIONS.length) * 100)
+        const gridAttemptedPct = Math.round((gridAttempted / ACTIVE_QS.length) * 100)
         return (
           <div className="overlay" onClick={() => setShowGrid(false)}>
             <div className="sheet" style={{ maxHeight: '64%' }} onClick={e => e.stopPropagation()}>
@@ -698,11 +699,11 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
                       <div style={{ fontSize: 10, color: T3, marginTop: 2 }}>accuracy</div>
                     </div>
                   </div>
-                  {/* Progress bar — questions attempted */}
+                  {/* Progress bar — ACTIVE_QS attempted */}
                   <div style={{ marginTop: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontSize: 10, color: T3 }}>Questions attempted</span>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: T2 }}>{gridAttempted} / {QUESTIONS.length}</span>
+                      <span style={{ fontSize: 10, color: T3 }}>ACTIVE_QS attempted</span>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: T2 }}>{gridAttempted} / {ACTIVE_QS.length}</span>
                     </div>
                     <div style={{ height: 5, background: BG2, borderRadius: 3 }}>
                       <div style={{ height: 5, width: `${gridAttemptedPct}%`, background: P, borderRadius: 3, transition: 'width 0.3s' }} />
@@ -713,10 +714,10 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
                 {/* Summary + grid */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Summary</span>
-                  <span style={{ fontSize: 11, color: T3 }}>{gridAttempted} / {QUESTIONS.length} attempted</span>
+                  <span style={{ fontSize: 11, color: T3 }}>{gridAttempted} / {ACTIVE_QS.length} attempted</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                  {QUESTIONS.map((_, i) => {
+                  {ACTIVE_QS.map((_, i) => {
                     const dc = getDotColor(i)
                     const isCurrent = i === currentQ
                     return (

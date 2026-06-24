@@ -338,18 +338,71 @@ export default function Result({ navigate, answers, mode, viewSolution, setShowR
         <button onClick={viewSolution} className="btn-primary" style={{ flex: 2 }}>View Solutions →</button>
       </div>
 
-      {/* Re-attempt confirm */}
+      {/* Re-attempt mode selector */}
       {showReattemptConfirm && (
         <div className="popup-overlay">
-          <div className="popup">
-            <div style={{ fontSize: 17, fontWeight: 700, color: T1, marginBottom: 8 }}>Re-attempt this test?</div>
-            <div style={{ fontSize: 13, color: T2, marginBottom: 20, lineHeight: 1.5, background: '#FFF3E0', border: '1px solid #FFE082', borderRadius: 10, padding: '10px 12px' }}>
-              ⚠️ Only your <strong>first attempt</strong> scores are marked for review and analysis.
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setShowReattemptConfirm(false)} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
-              <button onClick={handleReattempt} className="btn-primary" style={{ flex: 1 }}>Try Again</button>
-            </div>
+          <div className="popup" style={{ padding: '22px 18px 18px' }}>
+            {wrongQs.length === 0 ? (
+              <>
+                <div style={{ textAlign: 'center', marginBottom: 18 }}>
+                  <div style={{ fontSize: 40, marginBottom: 10 }}>🏆</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: T1, marginBottom: 10 }}>Absolutely Brilliant!</div>
+                  <div style={{ fontSize: 13, color: T2, lineHeight: 1.65 }}>
+                    You answered <strong>every single question correctly</strong> — don't hold back that smile, you genuinely earned it! 🌟
+                    <br /><br />
+                    There are no wrong questions to retry right now. Go celebrate this win — you've worked hard for it!
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: '#7a5c00', background: '#FFF8E1', border: '1px solid #FFE082', borderRadius: 8, padding: '8px 12px', marginBottom: 16, lineHeight: 1.5 }}>
+                  ⚠️ Only your <strong>first attempt</strong> scores are saved for analysis.
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={() => setShowReattemptConfirm(false)} className="btn-outline" style={{ flex: 1 }}>Back</button>
+                  <button onClick={() => handleReattempt('full')} className="btn-primary" style={{ flex: 1 }}>Full Quiz Again</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 17, fontWeight: 700, color: T1, marginBottom: 4 }}>Choose Your Mode</div>
+                <div style={{ fontSize: 12, color: T2, marginBottom: 16 }}>How would you like to try again?</div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
+                  <button
+                    onClick={() => handleReattempt('full')}
+                    style={{ background: PL, border: `1.5px solid ${PB}`, borderRadius: 12, padding: '14px', textAlign: 'left', cursor: 'pointer', width: '100%' }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: PD, marginBottom: 3 }}>Full Quiz</div>
+                        <div style={{ fontSize: 12, color: T2, lineHeight: 1.4 }}>All {QUESTIONS.length} questions from the start</div>
+                        <div style={{ fontSize: 11, color: T3, marginTop: 2 }}>Start fresh and attempt the complete test again</div>
+                      </div>
+                      <div style={{ fontSize: 24, marginLeft: 12 }}>🔄</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleReattempt('wrong-only', wrongQs.map(q => q.id))}
+                    style={{ background: RED_BG, border: `1.5px solid ${RED_BD}`, borderRadius: 12, padding: '14px', textAlign: 'left', cursor: 'pointer', width: '100%' }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: RED, marginBottom: 3 }}>Wrong Ones Only</div>
+                        <div style={{ fontSize: 12, color: T2, lineHeight: 1.4 }}>{wrongQs.length} question{wrongQs.length !== 1 ? 's' : ''} you missed or skipped</div>
+                        <div style={{ fontSize: 11, color: T3, marginTop: 2 }}>Focus on the ones that need more practice</div>
+                      </div>
+                      <div style={{ fontSize: 24, marginLeft: 12 }}>🎯</div>
+                    </div>
+                  </button>
+                </div>
+
+                <div style={{ fontSize: 12, color: '#7a5c00', background: '#FFF8E1', border: '1px solid #FFE082', borderRadius: 8, padding: '8px 12px', marginBottom: 14, lineHeight: 1.5 }}>
+                  ⚠️ Only your <strong>first attempt</strong> scores are saved for analysis.
+                </div>
+
+                <button onClick={() => setShowReattemptConfirm(false)} className="btn-outline" style={{ width: '100%' }}>Cancel</button>
+              </>
+            )}
           </div>
         </div>
       )}
