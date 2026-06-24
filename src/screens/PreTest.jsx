@@ -38,10 +38,15 @@ export default function PreTest({ navigate, startAttempt, mode, setMode }) {
             <div style={{ fontSize: 12, fontWeight: 600, color: T2, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Select Mode</div>
             <div style={{ display: 'flex', gap: 10 }}>
               {[
-                { id: 'guide', label: 'Guide Mode', desc: 'Solution will be visible immediately after you attempt the question.' },
+                { id: 'guide', label: 'Guide Mode', desc: 'Solution will be visible immediately after you attempt the question.', recommended: true },
                 { id: 'exam', label: 'Exam Mode', desc: 'Solution will be visible after you attempt all the question.' },
               ].map(m => (
-                <button key={m.id} onClick={() => setLocalMode(m.id)} style={{ flex: 1, padding: '12px 10px', borderRadius: 12, border: `2px solid ${localMode === m.id ? P : BD}`, background: localMode === m.id ? PL : 'white', cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}>
+                <button key={m.id} onClick={() => setLocalMode(m.id)} style={{ flex: 1, padding: '12px 10px', borderRadius: 12, border: `2px solid ${localMode === m.id ? P : BD}`, background: localMode === m.id ? PL : 'white', cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s', position: 'relative' }}>
+                  {m.recommended && (
+                    <div style={{ position: 'absolute', top: -9, right: 8, background: P, color: 'white', fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 20, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                      Recommended
+                    </div>
+                  )}
                   <div style={{ fontSize: 13, fontWeight: 700, color: localMode === m.id ? PD : T1, marginBottom: 5 }}>{m.label}</div>
                   <div style={{ fontSize: 11, color: localMode === m.id ? P : T3, lineHeight: 1.4 }}>{m.desc}</div>
                 </button>
