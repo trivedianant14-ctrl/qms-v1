@@ -9,18 +9,18 @@ const ORANGE = '#E07B2A', ORANGE_BG = '#FFF3E8'
 const RED = '#DC2626', RED_BG = '#FEF2F2', RED_BORDER = '#FECACA'
 
 const CATEGORY_META = {
-  'Problem with the Answer':    { color: '#DC2626', bg: '#FEF2F2', abbr: '✗' },
-  "Can't See Something":        { color: '#2563EB', bg: '#EFF6FF', abbr: '👁' },
-  'I Have a Doubt':             { color: '#16A34A', bg: '#F0FDF4', abbr: '?' },
-  'Problem with this Question': { color: '#EA580C', bg: '#FFF7ED', abbr: '!' },
-  Others:                       { color: '#7C3AED', bg: '#F5F3FF', abbr: '…' },
-  'Wrong Answer':               { color: '#DC2626', bg: '#FEF2F2', abbr: '✗' },
-  'Explanation Gap':            { color: '#16A34A', bg: '#F0FDF4', abbr: '?' },
-  'Not the Right Question':     { color: '#EA580C', bg: '#FFF7ED', abbr: '!' },
+  'Problem with the Answer':    { color: '#DC2626', bg: '#FEF2F2', abbr: '❌' },
+  "Can't See Something":        { color: '#2563EB', bg: '#EFF6FF', abbr: '🔍' },
+  'I Have a Doubt':             { color: '#16A34A', bg: '#F0FDF4', abbr: '🤔' },
+  'Problem with this Question': { color: '#EA580C', bg: '#FFF7ED', abbr: '⚠️' },
+  Others:                       { color: '#7C3AED', bg: '#F5F3FF', abbr: '💬' },
+  'Wrong Answer':               { color: '#DC2626', bg: '#FEF2F2', abbr: '❌' },
+  'Explanation Gap':            { color: '#16A34A', bg: '#F0FDF4', abbr: '💡' },
+  'Not the Right Question':     { color: '#EA580C', bg: '#FFF7ED', abbr: '⚠️' },
 }
 
 const STAGE_FROM_STATUS = { raised: 0, received: 1, assigned: 2, resolved: 3, escalated: 4, escalation_closed: 5 }
-const STAGE_LABELS = ['We heard you', 'On it', 'In good hands', 'All done ✓', 'Extra mile', 'We called you']
+const STAGE_LABELS = ['Sent! 📨', 'Team on it 👀', 'Expert on it 🎯', 'Solved! 🎉', 'Extra mile 🔥', 'Called! ✨']
 const STAGE_COLORS = [P, ORANGE, '#0369A1', GREEN, RED, '#7C3AED']
 
 const AGENTS = [
@@ -1092,72 +1092,72 @@ function QueryDetailView({ query, onBack, onClose }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
-      <div style={{ padding: '12px 16px', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T1, display: 'flex', padding: 2 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+      <div style={{ background: `linear-gradient(140deg, ${badgeMeta.color}ee 0%, ${badgeMeta.color} 100%)`, padding: '12px 16px 16px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
           </button>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: T1 }}>{ticketId(query.id)}</div>
-            <div style={{ fontSize: 10, color: T3 }}>Raised {timeAgo(query.timestamp)}</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.9)', fontFamily: 'monospace' }}>{ticketId(query.id)}</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>Raised {timeAgo(query.timestamp)}</div>
           </div>
-          <div style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, background: badgeMeta.bg, color: badgeMeta.color, border: `1px solid ${badgeMeta.border}` }}>
+          <div style={{ padding: '5px 12px', borderRadius: 20, fontSize: 11, fontWeight: 800, background: 'rgba(255,255,255,0.22)', color: 'white', border: '1.5px solid rgba(255,255,255,0.45)' }}>
             {STAGE_LABELS[stage] || 'Unknown'}
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: T3, padding: 2, lineHeight: 1 }}>✕</button>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
-        <div style={{ background: BG2, borderRadius: 9, padding: '8px 11px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
-            <div style={{ width: 16, height: 16, borderRadius: 4, background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 800, color: meta.color }}>{meta.abbr}</div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: meta.color }}>{query.category}</span>
+        <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', borderRadius: 12, padding: '10px 12px', border: '1px solid rgba(255,255,255,0.25)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+            <span style={{ fontSize: 18 }}>{meta.abbr}</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>{query.category}</span>
           </div>
-          <div style={{ fontSize: 11, color: T2 }}>{query.sub_option}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{query.sub_option}</div>
         </div>
       </div>
 
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
         {/* Status banner */}
         {stage < 3 && (
-          <div style={{ marginBottom: 16, padding: '10px 13px', borderRadius: 11, background: stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2, border: `1px solid ${stage === 2 ? PB : stage === 1 ? '#FED7AA' : BD}`, display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{ width: 9, height: 9, borderRadius: '50%', background: STAGE_COLORS[stage], flexShrink: 0, animation: 'tl-pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2, border: `2px solid ${stage === 2 ? PB : stage === 1 ? '#FED7AA' : BD}`, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 22, flexShrink: 0 }}>{stage === 2 ? '🎯' : stage === 1 ? '👀' : '📨'}</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: stage === 2 ? PD : stage === 1 ? '#92400E' : T1 }}>
-                {stage === 0 && 'Your query has been received'}
-                {stage === 1 && 'Our team is reviewing this'}
-                {stage === 2 && `${agent.name} is working on your query`}
+              <div style={{ fontSize: 13, fontWeight: 800, color: stage === 2 ? PD : stage === 1 ? '#92400E' : T1 }}>
+                {stage === 0 && 'Doubt bheja! Ab wait karo 📬'}
+                {stage === 1 && 'Team dekh rahi hai isko 👀'}
+                {stage === 2 && `${agent.name} personally le raha hai 🎯`}
               </div>
-              <div style={{ fontSize: 10, color: T2, marginTop: 1 }}>
-                {stage === 0 && 'Estimated response within 48 hours'}
-                {stage === 1 && 'An agent will be assigned shortly'}
-                {stage === 2 && "You'll be notified once resolved"}
+              <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>
+                {stage === 0 && '48 ghante ke andar jawab milega'}
+                {stage === 1 && 'Thodi der mein expert assign hoga'}
+                {stage === 2 && 'Hote hi notify kar denge tujhe!'}
               </div>
             </div>
           </div>
         )}
         {stage === 3 && (
-          <div style={{ marginBottom: 16, padding: '10px 13px', borderRadius: 11, background: GREEN_BG, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 9 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: GREEN_BG, border: `2px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 28 }}>🎉</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>We've looked into this for you</div>
-              <div style={{ fontSize: 10, color: '#166534' }}>Your question has been reviewed and answered</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D' }}>Doubt cleared! Dekho neeche 👇</div>
+              <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>Team ne personally review karke jawab diya</div>
             </div>
           </div>
         )}
         {stage === 4 && (
-          <div style={{ marginBottom: 16, padding: '10px 13px', borderRadius: 11, background: RED_BG, border: `1px solid ${RED_BORDER}`, display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{ width: 9, height: 9, borderRadius: '50%', background: RED, flexShrink: 0, animation: 'tl-pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: RED_BG, border: `2px solid ${RED_BORDER}`, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 22, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }}>🔥</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: RED }}>Call being scheduled</div>
-              <div style={{ fontSize: 10, color: '#B91C1C', marginTop: 1 }}>Our team is arranging a call — you'll be notified shortly</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: RED }}>Extra mile pe chal rahe hain!</div>
+              <div style={{ fontSize: 11, color: '#B91C1C', marginTop: 2 }}>Call schedule ho rahi hai — phone paas rakhna</div>
             </div>
           </div>
         )}
         {stage === 5 && (
-          <div style={{ marginBottom: 16, padding: '10px 13px', borderRadius: 11, background: '#F5F3FF', border: `1px solid #DDD6FE`, display: 'flex', alignItems: 'center', gap: 9 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: '#F5F3FF', border: `2px solid #DDD6FE`, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 28 }}>✨</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#5B21B6' }}>Escalation closed</div>
-              <div style={{ fontSize: 10, color: '#7C3AED', marginTop: 1 }}>Our agent called you — we hope your query is fully resolved!</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6' }}>Ek extra call bhi ho gaya!</div>
+              <div style={{ fontSize: 11, color: '#7C3AED', marginTop: 2 }}>Humein umeed hai ab sab clear ho gaya hoga</div>
             </div>
           </div>
         )}
@@ -1228,89 +1228,73 @@ function QueryDetailView({ query, onBack, onClose }) {
 function QueryCard({ query, onClick, onLowRating }) {
   const meta = CATEGORY_META[query.category] || CATEGORY_META['Others']
   const stage = STAGE_FROM_STATUS[query.timeline_status] ?? query.demo_stage ?? 0
-  const { setEscalationRating, setResolutionRating } = useQueries()
-
-  // ── Escalation (Call Closed) rating state ──
-  const isEscClosed = stage === 5
-  const alreadyRated = query.escalation_rating != null
-  const [pendingStar, setPendingStar] = useState(0)
-  const [pendingNote, setPendingNote] = useState('')
-  const [cardSubmitted, setCardSubmitted] = useState(false)
+  const { setEscalationRating } = useQueries()
 
   const handleCardStar = (n) => {
-    if (alreadyRated || cardSubmitted) return
+    if (query.escalation_rating != null) return
     if (n >= 4) {
-      setPendingStar(n)
       setEscalationRating(query.ticket_id, n, '')
-      setCardSubmitted(true)
     } else {
-      onLowRating?.(query, n, (note) => { setEscalationRating(query.ticket_id, n, note); setCardSubmitted(true) })
+      onLowRating?.(query, n, (note) => setEscalationRating(query.ticket_id, n, note))
     }
   }
 
-  // ── Resolution (Resolved) rating state ──
-  const isResolved = stage === 3
-  const alreadyRatedResolved = query.resolution_star != null
-  const [resLocal, setResLocal] = useState(null)
-
-  const badgeColor = stage === 5 ? '#7C3AED' : stage === 4 ? RED : stage === 3 ? GREEN : stage === 2 ? P : stage === 1 ? ORANGE : T2
-  const badgeBg    = stage === 5 ? '#F5F3FF' : stage === 4 ? RED_BG : stage === 3 ? GREEN_BG : stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2
-  const badgeBdr   = stage === 5 ? '#DDD6FE' : stage === 4 ? RED_BORDER : stage === 3 ? GREEN_BORDER : stage === 2 ? PB : stage === 1 ? '#FED7AA' : BD
+  const accentColor = stage >= 5 ? '#7C3AED' : stage === 4 ? RED : stage === 3 ? GREEN : stage === 2 ? P : stage === 1 ? ORANGE : T3
+  const badgeBg     = stage >= 5 ? '#F5F3FF' : stage === 4 ? RED_BG : stage === 3 ? GREEN_BG : stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2
 
   return (
     <div
-      style={{ width: '100%', textAlign: 'left', background: 'white', border: `1px solid ${BD}`, borderRadius: 11, transition: 'box-shadow 0.15s, border-color 0.15s' }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = PB; e.currentTarget.style.boxShadow = `0 2px 10px rgba(83,74,183,0.08)` }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = BD; e.currentTarget.style.boxShadow = 'none' }}
+      onClick={onClick}
+      style={{
+        background: 'white',
+        borderRadius: 16,
+        border: `2px solid ${accentColor}22`,
+        borderLeftColor: accentColor, borderLeftWidth: 5,
+        boxShadow: `0 4px 0 ${accentColor}22, 0 1px 8px rgba(0,0,0,0.05)`,
+        cursor: 'pointer',
+        padding: '14px 14px 14px 12px',
+        display: 'flex', gap: 12, alignItems: 'flex-start',
+        transition: 'transform 0.1s, box-shadow 0.1s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 6px 0 ${accentColor}22, 0 4px 16px rgba(0,0,0,0.08)` }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 0 ${accentColor}22, 0 1px 8px rgba(0,0,0,0.05)` }}
     >
-      {/* Main clickable area */}
-      <div onClick={onClick} style={{ padding: '13px 14px', cursor: 'pointer' }}>
-        {/* Row 1: category icon + name + status badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: meta.color, flexShrink: 0 }}>{meta.abbr}</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: meta.color }}>{query.category}</span>
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 9px', borderRadius: 20, background: badgeBg, color: badgeColor, border: `1px solid ${badgeBdr}`, flexShrink: 0, whiteSpace: 'nowrap' }}>
-                {STAGE_LABELS[stage] || 'Unknown'}
-              </span>
-            </div>
-            <div style={{ fontSize: 12, color: T1, fontWeight: 600, marginTop: 2, lineHeight: 1.4 }}>{query.sub_option}</div>
-          </div>
+      {/* Big emoji icon */}
+      <div style={{ width: 48, height: 48, borderRadius: 14, background: meta.bg, border: `2px solid ${accentColor}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
+        {meta.abbr}
+      </div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Status badge top-right */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6, marginBottom: 4 }}>
+          <span style={{ fontSize: 13, fontWeight: 800, color: T1, lineHeight: 1.3, flex: 1 }}>
+            {query.sub_option}
+          </span>
+          <span style={{ fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 20, background: badgeBg, color: accentColor, border: `1.5px solid ${accentColor}55`, flexShrink: 0, whiteSpace: 'nowrap' }}>
+            {STAGE_LABELS[stage] || '?'}
+          </span>
         </div>
 
-        {/* Row 2: query text preview (JS slice avoids broken webkit clamp) */}
-        {query.query_text && (
-          <div style={{ fontSize: 11, color: T2, lineHeight: 1.6, fontStyle: 'italic', marginBottom: 10, padding: '9px 11px', background: BG2, borderRadius: 8, borderLeft: `3px solid ${PB}` }}>
-            {query.query_text.length > 130 ? query.query_text.slice(0, 127) + '…' : query.query_text}
+        <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, color: meta.color, background: meta.bg, padding: '2px 7px', borderRadius: 6, marginBottom: 8 }}>
+          {query.category}
+        </span>
+
+        {/* Subject chip */}
+        {query.subject_name && (
+          <div style={{ marginBottom: 8 }}>
+            <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 20, background: PL, color: P, border: `1px solid ${PB}` }}>{query.subject_name}</span>
           </div>
         )}
 
-        {/* Row 3: subject / test / question chips */}
-        {(query.subject_name || query.test_name || query.question_num) && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
-            {query.subject_name && (
-              <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 20, background: PL, color: P, border: `1px solid ${PB}` }}>{query.subject_name}</span>
-            )}
-            {query.test_name && (
-              <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 20, background: BG2, color: T2, border: `1px solid ${BD}` }}>{query.test_name}</span>
-            )}
-            {query.question_num && (
-              <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 20, background: BG2, color: T3, border: `1px solid ${BD}` }}>Q{query.question_num}</span>
-            )}
-          </div>
-        )}
-
-        {/* Row 4: ticket ID + timestamp + chevron */}
+        {/* Footer */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: T3, fontFamily: 'monospace', letterSpacing: '0.04em' }}>{ticketId(query.id)}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: T3, fontFamily: 'monospace' }}>{ticketId(query.id)}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             <span style={{ fontSize: 10, color: T3 }}>{timeAgo(query.timestamp)}</span>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round"><polyline points="9,18 15,12 9,6"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2.5" strokeLinecap="round"><polyline points="9,18 15,12 9,6"/></svg>
           </div>
         </div>
       </div>
-
     </div>
   )
 }
@@ -1319,70 +1303,94 @@ function QueryCard({ query, onClick, onLowRating }) {
 function ProfileHome({ queries, onOpenQueries, onClose }) {
   const activeCount = queries.filter(q => q.status !== 'resolved').length
   const resolvedCount = queries.filter(q => q.status === 'resolved').length
-
-  const MenuRow = ({ icon, title, subtitle, badge, onClick, disabled }) => (
-    <button
-      onClick={disabled ? undefined : onClick}
-      style={{ width: '100%', textAlign: 'left', background: 'white', border: `1px solid ${BD}`, borderRadius: 14, padding: '14px 16px', cursor: disabled ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 14, transition: 'box-shadow 0.15s, border-color 0.15s', opacity: disabled ? 0.5 : 1 }}
-      onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = PB; e.currentTarget.style.boxShadow = `0 2px 12px rgba(83,74,183,0.1)` } }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = BD; e.currentTarget.style.boxShadow = 'none' }}
-    >
-      <div style={{ width: 40, height: 40, borderRadius: 11, background: PL, border: `1px solid ${PB}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        {icon}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: T1 }}>{title}</div>
-        <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>{subtitle}</div>
-      </div>
-      {badge && (
-        <div style={{ padding: '3px 9px', borderRadius: 20, background: PL, border: `1px solid ${PB}`, fontSize: 11, fontWeight: 700, color: P, flexShrink: 0 }}>{badge}</div>
-      )}
-      {!disabled && (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
-          <polyline points="9,18 15,12 9,6"/>
-        </svg>
-      )}
-    </button>
-  )
+  const total = queries.length
+  const pct = total > 0 ? Math.round((resolvedCount / total) * 100) : 0
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: T1 }}>My Profile</div>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: T2, padding: 4, lineHeight: 1, display: 'flex', alignItems: 'center' }}>✕</button>
-      </div>
-
-      {/* Avatar + name */}
-      <div style={{ padding: '20px 18px 18px', display: 'flex', alignItems: 'center', gap: 14, background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <div style={{ width: 60, height: 60, borderRadius: '50%', background: `linear-gradient(135deg, ${P} 0%, ${PD} 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 16px rgba(83,74,183,0.3)` }}>
-          <span style={{ fontSize: 24, fontWeight: 900, color: 'white' }}>A</span>
+      {/* Hero header — gradient */}
+      <div style={{ background: `linear-gradient(140deg, ${P} 0%, ${PD} 100%)`, padding: '18px 16px 22px', flexShrink: 0, position: 'relative' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
         </div>
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: T1, letterSpacing: '-0.3px' }}>Anant Trivedi</div>
-          <div style={{ fontSize: 12, color: T2, marginTop: 2 }}>NORCET Gold 2024</div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 5, padding: '2px 8px', background: PL, borderRadius: 20, border: `1px solid ${PB}` }}>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN }} />
-            <span style={{ fontSize: 10, fontWeight: 600, color: P }}>Student · STU-2024-1429</span>
+        {/* Avatar + name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{ width: 66, height: 66, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: '3px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 28, fontWeight: 900, color: 'white' }}>A</span>
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 18, height: 18, borderRadius: '50%', background: GREEN, border: '2px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>Anant Trivedi</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', marginTop: 2 }}>NORCET Gold 2024 · STU-2024-1429</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 6, padding: '3px 10px', background: 'rgba(255,255,255,0.2)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.35)' }}>
+              <span style={{ fontSize: 13 }}>⚡</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>Active learner</span>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Stats strip */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
+        {[
+          { emoji: '📤', val: total,         label: 'Raised' },
+          { emoji: '⏳', val: activeCount,   label: 'In review' },
+          { emoji: '✅', val: resolvedCount,  label: 'Solved' },
+        ].map((s, i) => (
+          <div key={i} style={{ padding: '12px 6px', textAlign: 'center', borderRight: i < 2 ? `1px solid ${BD}` : 'none' }}>
+            <div style={{ fontSize: 20 }}>{s.emoji}</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: T1, lineHeight: 1.1 }}>{s.val}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: T3, marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Progress bar */}
+      {total > 0 && (
+        <div style={{ padding: '10px 16px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T2 }}>Doubts cleared</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: GREEN }}>{pct}%</span>
+          </div>
+          <div style={{ height: 10, borderRadius: 10, background: BG2, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, borderRadius: 10, background: `linear-gradient(90deg, ${GREEN} 0%, #4ADE80 100%)`, transition: 'width 0.6s ease' }} />
+          </div>
+        </div>
+      )}
+
       {/* Menu cards */}
-      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
-        <MenuRow
-          icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2" strokeLinecap="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>}
-          title="Your Queries"
-          subtitle={`${queries.length} total · ${activeCount} in review · ${resolvedCount} resolved`}
-          badge={activeCount > 0 ? `${activeCount} active` : undefined}
+      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
+        {/* Your Queries card */}
+        <button
           onClick={onOpenQueries}
-        />
-        <MenuRow
-          icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2" strokeLinecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>}
-          title="Your Collection"
-          subtitle="Bookmarks, saved questions and notes"
-          disabled
-        />
+          style={{ width: '100%', textAlign: 'left', background: 'white', border: `2px solid ${PB}`, borderRadius: 16, padding: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14, boxShadow: `0 4px 0 ${PB}`, transition: 'transform 0.1s, box-shadow 0.1s' }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 6px 0 ${PB}` }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 0 ${PB}` }}
+        >
+          <div style={{ width: 46, height: 46, borderRadius: 14, background: PL, border: `2px solid ${PB}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>📋</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: T1 }}>My Doubts</div>
+            <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>{total} total · {activeCount} in review · {resolvedCount} solved</div>
+          </div>
+          {activeCount > 0 && (
+            <div style={{ padding: '4px 10px', borderRadius: 20, background: ORANGE_BG, border: `1.5px solid ${ORANGE}`, fontSize: 11, fontWeight: 800, color: ORANGE, flexShrink: 0 }}>{activeCount} active</div>
+          )}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}><polyline points="9,18 15,12 9,6"/></svg>
+        </button>
+
+        {/* Collection card (disabled) */}
+        <div style={{ background: 'white', border: `2px solid ${BD}`, borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 14, opacity: 0.55 }}>
+          <div style={{ width: 46, height: 46, borderRadius: 14, background: BG2, border: `2px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>🔖</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: T1 }}>My Collection</div>
+            <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>Bookmarks, notes & saved Qs</div>
+          </div>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: BG2, color: T3, border: `1px solid ${BD}` }}>Soon</span>
+        </div>
       </div>
     </div>
   )
@@ -1420,46 +1428,52 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T1, display: 'flex', padding: 2 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
-        </button>
-        <div style={{ flex: 1, fontSize: 16, fontWeight: 700, color: T1 }}>Your Queries</div>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: T2, padding: 4, lineHeight: 1, display: 'flex', alignItems: 'center' }}>✕</button>
+      <div style={{ background: `linear-gradient(140deg, ${P} 0%, ${PD} 100%)`, padding: '12px 16px 14px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+          </button>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 17, fontWeight: 900, color: 'white', letterSpacing: '-0.3px' }}>My Doubts</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 1 }}>{queries.length} total · {resolvedCount} cleared 🎯</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+        </div>
       </div>
 
-      {/* Stats — clickable filters */}
-      <div style={{ flexShrink: 0, borderBottom: `1px solid ${BD}`, background: 'white' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
-          {STAT_ITEMS.map((stat, i) => (
-            <button key={stat.key} onClick={() => setFilter(stat.key)}
-              style={{ padding: '14px 6px', textAlign: 'center', cursor: 'pointer', border: 'none', background: filter === stat.key ? stat.bg : 'white', borderRight: i < 2 ? `1px solid ${BD}` : 'none', borderBottom: `3px solid ${filter === stat.key ? stat.color : 'transparent'}`, transition: 'all 0.15s' }}
-            >
-              <div style={{ fontSize: 26, fontWeight: 900, color: stat.color, letterSpacing: '-1px' }}>{stat.value}</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: T3, marginTop: 3 }}>{stat.label}</div>
-            </button>
-          ))}
-        </div>
+      {/* Pill filters */}
+      <div style={{ padding: '10px 14px', background: 'white', borderBottom: `1px solid ${BD}`, display: 'flex', gap: 8, flexShrink: 0 }}>
+        {STAT_ITEMS.map(stat => (
+          <button key={stat.key} onClick={() => setFilter(stat.key)}
+            style={{ padding: '6px 14px', borderRadius: 20, border: `2px solid ${filter === stat.key ? stat.color : BD}`, background: filter === stat.key ? stat.bg : 'white', color: filter === stat.key ? stat.color : T2, fontSize: 12, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
+            {stat.label}
+            <span style={{ fontSize: 11, fontWeight: 900, background: filter === stat.key ? stat.color : BD, color: filter === stat.key ? 'white' : T3, borderRadius: 20, padding: '0px 6px', minWidth: 20, textAlign: 'center' }}>{stat.value}</span>
+          </button>
+        ))}
       </div>
 
       {/* Search bar — always visible */}
       <div style={{ padding: '8px 14px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: BG2, border: `1.5px solid ${search ? PB : BD}`, borderRadius: 10, padding: '7px 10px' }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: BG2, border: `2px solid ${search ? P : BD}`, borderRadius: 12, padding: '8px 11px' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={search ? P : T3} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}>
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by category, issue, or ID..." style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 12, color: T1, fontFamily: 'inherit' }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search doubts..." style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 13, color: T1, fontFamily: 'inherit', fontWeight: 500 }} />
           {search
             ? <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, fontSize: 14, padding: 0, lineHeight: 1, display: 'flex' }}>✕</button>
-            : <span style={{ fontSize: 11, color: T3, flexShrink: 0, fontWeight: 500 }}>{filtered.length} {filter === 'all' ? 'total' : filter === 'active' ? 'active' : 'resolved'}</span>
+            : <span style={{ fontSize: 11, color: T3, flexShrink: 0, fontWeight: 600 }}>{filtered.length}</span>
           }
         </div>
       </div>
 
       {/* Query list */}
-      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '10px 14px 24px', display: 'flex', flexDirection: 'column', gap: 8, background: BG2 }}>
+      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 14px 24px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: T3, fontSize: 13 }}>No queries found</div>
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <div style={{ fontSize: 40, marginBottom: 10 }}>🔍</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>Kuch nahi mila</div>
+            <div style={{ fontSize: 12, color: T3, marginTop: 4 }}>Try a different search or filter</div>
+          </div>
         ) : (
           filtered.map(q => (
             <QueryCard
