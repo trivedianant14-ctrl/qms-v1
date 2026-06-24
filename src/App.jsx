@@ -44,8 +44,7 @@ const EXISTING_USER_SAVES = [
 ]
 
 function NprepPrototype() {
-  const [screen, setScreen] = useState('solve')
-  const [showTracker, setShowTracker] = useState(false)
+  const [screen, setScreen] = useState('home')
   const [currentLiveTest, setCurrentLiveTest] = useState(null)
   const [mode, setMode] = useState('guide')
   const [currentQ, setCurrentQ] = useState(0)
@@ -173,7 +172,7 @@ function NprepPrototype() {
   const lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null
 
   const sharedProps = {
-    navigate, onOpenProfile: () => setShowTracker(true), mode, setMode,
+    navigate, mode, setMode,
     currentQ, setCurrentQ,
     answers, setAnswers,
     timerPerQ, setTimerPerQ,
@@ -194,25 +193,7 @@ function NprepPrototype() {
   return (
     <div className="desktop-wrapper">
       <div className="phone-wrapper">
-        <button
-          id="tracker-tab-btn"
-          className="tracker-tab-btn"
-          onClick={() => setShowTracker(t => !t)}
-          title="My Profile"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-          </svg>
-          <span style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontSize: 9 }}>
-            {showTracker ? 'Close' : 'Profile'}
-          </span>
-        </button>
-        <div className="phone" style={{ position: 'relative' }}>
-          <NotificationToast />
-          {showTracker && (
-            <QueryTracker onClose={() => setShowTracker(false)} />
-          )}
+        <div className="phone">
           <div key={screen} className={`screen-trans screen-${animDirRef.current}`}>
             {screen === 'home' && <Home {...sharedProps} />}
             {screen === 'subject' && <Subject {...sharedProps} />}
