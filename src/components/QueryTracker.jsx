@@ -590,10 +590,6 @@ function EscalationRating({ query }) {
           </button>
         </>
       )}
-      <button onClick={() => setDismissed(true)}
-        style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-        Cancel
-      </button>
     </div>
   )
 }
