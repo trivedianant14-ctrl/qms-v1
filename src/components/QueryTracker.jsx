@@ -1450,9 +1450,9 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
     : byFilter
 
   const STAT_ITEMS = [
-    { label: 'Raised',    value: queries.length, key: 'all',      color: P,      bg: PL,        border: PB },
-    { label: 'On it',     value: activeCount,     key: 'active',  color: ORANGE, bg: ORANGE_BG, border: '#FED7AA' },
-    { label: 'All done ✓', value: resolvedCount,   key: 'resolved', color: GREEN,  bg: GREEN_BG,  border: GREEN_BORDER },
+    { label: 'Raised',    emoji: '📤', value: queries.length, key: 'all',      color: P,      bg: PL,        border: PB },
+    { label: 'In review', emoji: '⏳', value: activeCount,    key: 'active',   color: ORANGE, bg: ORANGE_BG, border: '#FED7AA' },
+    { label: 'Solved',    emoji: '✅', value: resolvedCount,  key: 'resolved', color: GREEN,  bg: GREEN_BG,  border: GREEN_BORDER },
   ]
 
   return (
@@ -1471,30 +1471,19 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
         </div>
       </div>
 
-      {/* Stats strip */}
+      {/* Stats strip — each card is the filter */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        {[
-          { emoji: '📤', val: queries.length, label: 'Raised' },
-          { emoji: '⏳', val: activeCount,    label: 'In review' },
-          { emoji: '✅', val: resolvedCount,  label: 'Solved' },
-        ].map((s, i) => (
-          <div key={i} style={{ padding: '10px 6px', textAlign: 'center', borderRight: i < 2 ? `1px solid ${BD}` : 'none' }}>
-            <div style={{ fontSize: 18 }}>{s.emoji}</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: T1, lineHeight: 1.1 }}>{s.val}</div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: T3, marginTop: 2 }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Pill filters */}
-      <div style={{ padding: '10px 14px', background: 'white', borderBottom: `1px solid ${BD}`, display: 'flex', gap: 8, flexShrink: 0 }}>
-        {STAT_ITEMS.map(stat => (
-          <button key={stat.key} onClick={() => setFilter(stat.key)}
-            style={{ padding: '6px 14px', borderRadius: 20, border: `2px solid ${filter === stat.key ? stat.color : BD}`, background: filter === stat.key ? stat.bg : 'white', color: filter === stat.key ? stat.color : T2, fontSize: 12, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
-            {stat.label}
-            <span style={{ fontSize: 11, fontWeight: 900, background: filter === stat.key ? stat.color : BD, color: filter === stat.key ? 'white' : T3, borderRadius: 20, padding: '0px 6px', minWidth: 20, textAlign: 'center' }}>{stat.value}</span>
-          </button>
-        ))}
+        {STAT_ITEMS.map((s, i) => {
+          const active = filter === s.key
+          return (
+            <button key={s.key} onClick={() => setFilter(s.key)}
+              style={{ padding: '12px 6px', textAlign: 'center', cursor: 'pointer', border: 'none', borderRight: i < 2 ? `1px solid ${BD}` : 'none', borderBottom: `3px solid ${active ? s.color : 'transparent'}`, background: active ? s.bg : 'white', transition: 'all 0.18s' }}>
+              <div style={{ fontSize: 20 }}>{s.emoji}</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: active ? s.color : T1, lineHeight: 1.1, transition: 'color 0.18s' }}>{s.value}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: active ? s.color : T3, marginTop: 2, transition: 'color 0.18s' }}>{s.label}</div>
+            </button>
+          )
+        })}
       </div>
 
       {/* Search bar — always visible */}
