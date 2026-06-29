@@ -48,6 +48,45 @@ function agentForQuery(query) {
   return AGENTS[(query.id || 0) % AGENTS.length]
 }
 
+// ── Schedule-a-call slot helpers ─────────────────────────────────────────────
+const CALL_SLOTS = [
+  { label: '10:00 AM', hour: 10 },
+  { label: '11:00 AM', hour: 11 },
+  { label: '12:00 PM', hour: 12 },
+  { label: '1:00 PM',  hour: 13 },
+  { label: '2:00 PM',  hour: 14 },
+  { label: '3:00 PM',  hour: 15 },
+  { label: '4:00 PM',  hour: 16 },
+  { label: '5:00 PM',  hour: 17 },
+  { label: '6:00 PM',  hour: 18 },
+]
+
+function getScheduleDays() {
+  const now  = new Date()
+  const day  = now.getDay()    // 0=Sun … 6=Sat
+  const hour = now.getHours()
+  const addDays = (n) => {
+    const d = new Date(now); d.setDate(d.getDate() + n); d.setHours(0, 0, 0, 0); return d
+  }
+  if (day === 0)               return [addDays(1), addDays(2)]  // Sun  → Mon, Tue
+  if (day === 6 && hour >= 19) return [addDays(2), addDays(3)]  // Sat late night → Mon, Tue
+  if (day === 5)               return [addDays(1), addDays(3)]  // Fri  → Sat, Mon (skip Sun)
+  if (day === 6)               return [addDays(0), addDays(2)]  // Sat daytime → Sat, Mon
+  return [addDays(0), addDays(1)]                               // Mon–Thu → Today, Tomorrow
+}
+
+function slotDayLabel(date) {
+  const now = new Date(); now.setHours(0, 0, 0, 0)
+  const tom = new Date(now); tom.setDate(tom.getDate() + 1)
+  if (date.getTime() === now.getTime()) return 'Today'
+  if (date.getTime() === tom.getTime()) return 'Tomorrow'
+  return date.toLocaleDateString('en-US', { weekday: 'short' })
+}
+
+function slotDateSub(date) {
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 // ── Thumbs Feedback ──────────────────────────────────────────────────────────
 const EMOJI_OPTIONS = [
   { value: 1, emoji: '😔', label: 'Not really' },
@@ -120,6 +159,9 @@ function ThumbsFeedback({ resolvedAt, query }) {
   const [otp, setOtp] = useState(['', '', '', ''])
   const [otpError, setOtpError] = useState(false)
   const [usedOwnNumber, setUsedOwnNumber] = useState(true)
+  const [schedDays] = useState(getScheduleDays)
+  const [schedDay, setSchedDay]   = useState(0)
+  const [schedSlot, setSchedSlot] = useState(null)
   const otpInputRefs = [
     React.useRef(), React.useRef(), React.useRef(), React.useRef()
   ]
@@ -143,7 +185,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
     if (e.key === 'Backspace' && !otp[idx] && idx > 0) otpInputRefs[idx - 1].current?.focus()
   }
   const verifyOtp = () => {
-    if (otp.join('') === '0000') { setStep('call_done') }
+    if (otp.join('') === '0000') { setStep('slot_pick') }
     else { setOtpError(true); setOtp(['', '', '', '']); otpInputRefs[0].current?.focus() }
   }
 
@@ -344,26 +386,124 @@ function ThumbsFeedback({ resolvedAt, query }) {
     </div>
   )
 
+  // Slot picker step
+  if (step === 'slot_pick') {
+    const now2 = new Date()
+    const todayMid = new Date(now2); todayMid.setHours(0, 0, 0, 0)
+    const chosenDate = schedDays[schedDay]
+    const isToday = chosenDate.getTime() === todayMid.getTime()
+    const isPast = (slotHour) => isToday && now2.getHours() >= slotHour
+    return (
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <button onClick={() => setStep('call_confirm')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+          </button>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Pick a time slot</div>
+            <div style={{ fontSize: 10, color: T2 }}>We'll call you at your chosen time</div>
+          </div>
+        </div>
+
+        {/* Day tabs */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
+          {schedDays.map((date, idx) => {
+            const active = schedDay === idx
+            return (
+              <button key={idx}
+                onClick={() => { setSchedDay(idx); setSchedSlot(null) }}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                  padding: '10px 8px', borderRadius: 10,
+                  border: `2px solid ${active ? P : BD}`,
+                  background: active ? PL : 'white',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.15s, background 0.15s',
+                }}>
+                <strong style={{ fontSize: 13, color: active ? PD : T1 }}>{slotDayLabel(date)}</strong>
+                <span style={{ fontSize: 10, color: active ? P : T2 }}>{slotDateSub(date)}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Slot grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7, marginBottom: 14 }}>
+          {CALL_SLOTS.map((slot, idx) => {
+            const past = isPast(slot.hour)
+            const sel  = schedSlot === idx
+            return (
+              <button key={slot.label}
+                disabled={past}
+                onClick={() => !past && setSchedSlot(idx)}
+                style={{
+                  padding: '10px 4px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                  border: `1.5px solid ${sel ? P : BD}`,
+                  background: sel ? P : past ? BG2 : 'white',
+                  color: sel ? 'white' : past ? T3 : T1,
+                  cursor: past ? 'not-allowed' : 'pointer',
+                  textDecoration: past ? 'line-through' : 'none',
+                  opacity: past ? 0.5 : 1,
+                  transition: 'border-color 0.15s, background 0.15s, color 0.15s',
+                }}>
+                {slot.label}
+              </button>
+            )
+          })}
+        </div>
+
+        <button
+          disabled={schedSlot === null}
+          onClick={() => setStep('call_done')}
+          style={{
+            width: '100%', padding: '12px', borderRadius: 10, border: 'none',
+            background: schedSlot !== null ? P : BG2,
+            color: schedSlot !== null ? 'white' : T3,
+            fontSize: 13, fontWeight: 700,
+            cursor: schedSlot !== null ? 'pointer' : 'default',
+          }}>
+          Confirm Slot
+        </button>
+      </div>
+    )
+  }
+
   // Call confirmed — no agent details shown
-  if (step === 'call_done') return (
-    <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-      <div style={{ fontSize: 36, marginBottom: 10 }}>📞</div>
-      <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>
-        {usedOwnNumber ? 'We\'ve got you.' : 'Got it!'}
-      </div>
-      <div style={{ fontSize: 12, color: T2, lineHeight: 1.7, marginBottom: 14 }}>
-        {usedOwnNumber
-          ? 'Someone from our team will go through your doubt and call you personally.'
-          : 'Someone from our team will shortly be calling you on your updated number.'}
-      </div>
-      <div style={{ background: ORANGE_BG, border: `1px solid #FED7AA`, borderRadius: 10, padding: '12px 14px', textAlign: 'left' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }} />
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#92400E' }}>Our team will call you within 24 hours</span>
+  if (step === 'call_done') {
+    const bookedSlot  = schedSlot !== null ? CALL_SLOTS[schedSlot] : null
+    const bookedDate  = schedDays[schedDay]
+    return (
+      <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
+        <div style={{ fontSize: 36, marginBottom: 10 }}>📞</div>
+        <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>
+          {usedOwnNumber ? "We've got you." : 'Got it!'}
+        </div>
+        <div style={{ fontSize: 12, color: T2, lineHeight: 1.7, marginBottom: 14 }}>
+          {usedOwnNumber
+            ? 'Someone from our team will go through your doubt and call you personally.'
+            : 'Someone from our team will shortly be calling you on your updated number.'}
+        </div>
+        <div style={{ background: ORANGE_BG, border: `1px solid #FED7AA`, borderRadius: 10, padding: '12px 14px', textAlign: 'left' }}>
+          {bookedSlot ? (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#92400E' }}>Call scheduled</span>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#92400E' }}>
+                {slotDayLabel(bookedDate)}, {slotDateSub(bookedDate)} · {bookedSlot.label}
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#92400E' }}>Our team will call you within 24 hours</span>
+            </div>
+          )}
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   // "Is this the correct number?"
   if (step === 'call_confirm') return (
@@ -391,7 +531,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <button onClick={() => { setUsedOwnNumber(false); setStep('call_enter') }} style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
           No, use different
         </button>
-        <button onClick={() => { setUsedOwnNumber(true); setStep('call_done') }} style={{ padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+        <button onClick={() => { setUsedOwnNumber(true); setStep('slot_pick') }} style={{ padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
           Schedule a call
         </button>
       </div>
