@@ -5,6 +5,9 @@ import { useNotifications } from '../../context/NotificationContext'
 
 const progressMap = { 1: 20, '2A': 42, '2B': 42, '2C': 42, '2D': 42, 3: 35, 4: 62, 5: 80, 6: 100 }
 
+const MAX_PHOTO_BYTES = 1 * 1024 * 1024  // 1 MB
+const MAX_REC_SECS   = 30                 // 30 seconds
+
 export default function FormShell({ embedded = false, onClose, onDone, questionContext = {} }) {
   const { addQuery } = useQueries()
   const { queueNotification } = useNotifications()
@@ -281,14 +284,30 @@ function WrongAnswerEvidenceScreen({
   onSubmit,
   onSkip
 }) {
-  const handleFile = (type, fileList) => {
+  const [showPhotoWarn, setShowPhotoWarn] = useState(false)
+  const [photoError, setPhotoError]       = useState(null)
+  const fileInputRef = useRef(null)
+
+  const handleFile = (fileList) => {
     const file = fileList?.[0]
     if (!file) return
-    onAttachmentChange({ type, name: file.name })
+    if (file.size > MAX_PHOTO_BYTES) {
+      setPhotoError(`File too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Max allowed is 1 MB — please compress and retry.`)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+    setPhotoError(null)
+    onAttachmentChange({ type: 'Photo', name: file.name })
   }
 
   return (
     <>
+      {showPhotoWarn && (
+        <AbusePolicyModal
+          onConfirm={() => { setShowPhotoWarn(false); fileInputRef.current?.click() }}
+          onCancel={() => setShowPhotoWarn(false)}
+        />
+      )}
       <div className="comment-title">
         <h1 className="form-title small">Why do you feel this is wrong?</h1>
         <span className="optional">(optional)</span>
@@ -311,15 +330,22 @@ function WrongAnswerEvidenceScreen({
       <div className="evidence-block">
         <div className="evidence-label">Add evidence <span>(optional)</span></div>
         <div className="evidence-actions">
-          <label className="evidence-btn">
-            <input type="file" accept="image/*" onChange={(event) => handleFile('Photo', event.target.files)} />
-            Photo
-          </label>
+          <button type="button" className="evidence-btn" onClick={() => setShowPhotoWarn(true)}>Photo</button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={(event) => handleFile(event.target.files)}
+          />
         </div>
-        {attachment && (
+        {photoError && (
+          <div style={{ fontSize: 11.5, color: '#DC2626', marginTop: 5, lineHeight: 1.4 }}>{photoError}</div>
+        )}
+        {attachment && !photoError && (
           <div className="attachment-pill">
             {attachment.type}: {attachment.name}
-            <button type="button" onClick={() => onAttachmentChange(null)}>Remove</button>
+            <button type="button" onClick={() => { onAttachmentChange(null); setPhotoError(null) }}>Remove</button>
           </div>
         )}
       </div>
@@ -350,7 +376,39 @@ function CommentScreen({ value, prompt, onChange, onSubmit, onSkip, showVoice = 
   )
 }
 
+function AbusePolicyModal({ onConfirm, onCancel }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 28px' }}>
+      <div style={{ background: '#fff', borderRadius: 18, padding: '28px 22px 20px', maxWidth: 310, width: '100%', boxShadow: '0 12px 40px rgba(0,0,0,0.22)' }}>
+        <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, margin: '0 auto 14px' }}>⚠️</div>
+        <h2 style={{ fontSize: 15, fontWeight: 800, color: '#1a1a2e', textAlign: 'center', margin: '0 0 10px' }}>Content Policy</h2>
+        <p style={{ fontSize: 12.5, color: '#5a5a78', lineHeight: 1.65, margin: '0 0 6px', textAlign: 'center' }}>
+          This attachment is <strong>only for reporting your doubt</strong>. Any irrelevant, offensive, or abusive content will result in your account being <strong style={{ color: '#DC2626' }}>permanently blocked</strong>.
+        </p>
+        <p style={{ fontSize: 11.5, color: '#9898b0', textAlign: 'center', margin: '0 0 20px' }}>
+          By continuing you agree to our fair-use policy.
+        </p>
+        <button
+          type="button"
+          onClick={onConfirm}
+          style={{ width: '100%', background: '#534AB7', color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontSize: 14, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}
+        >
+          I understand, continue
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{ width: '100%', background: 'none', border: 'none', color: '#9898b0', fontSize: 13, cursor: 'pointer', padding: '6px' }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function VoiceRecorder({ onDurationChange }) {
+  const [showVoiceWarn, setShowVoiceWarn] = useState(false)
   const [recState, setRecState] = useState('idle')
   const [audioURL, setAudioURL] = useState(null)
   const [duration, setDuration] = useState(0)
@@ -384,8 +442,13 @@ function VoiceRecorder({ onDurationChange }) {
       finalDurationRef.current = 0
       timerRef.current = setInterval(() => {
         setDuration(d => {
-          finalDurationRef.current = d + 1
-          return d + 1
+          const next = d + 1
+          finalDurationRef.current = next
+          if (next >= MAX_REC_SECS) {
+            if (mrRef.current?.state === 'recording') mrRef.current.stop()
+            clearInterval(timerRef.current)
+          }
+          return next
         })
       }, 1000)
     } catch {
@@ -408,21 +471,34 @@ function VoiceRecorder({ onDurationChange }) {
   }
 
   const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+  const remaining = MAX_REC_SECS - duration
+  const isUrgent  = duration >= MAX_REC_SECS - 10
 
   if (recState === 'idle') return (
-    <button type="button" className="voice-idle-btn" onClick={start}>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
-        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
-      </svg>
-      Add voice note
-    </button>
+    <>
+      {showVoiceWarn && (
+        <AbusePolicyModal
+          onConfirm={() => { setShowVoiceWarn(false); start() }}
+          onCancel={() => setShowVoiceWarn(false)}
+        />
+      )}
+      <button type="button" className="voice-idle-btn" onClick={() => setShowVoiceWarn(true)}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+          <path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        Add voice note
+      </button>
+    </>
   )
 
   if (recState === 'recording') return (
     <div className="voice-recording-bar">
-      <span className="voice-dot" />
-      <span className="voice-timer">{fmt(duration)}</span>
+      <span className="voice-dot" style={isUrgent ? { background: '#DC2626' } : {}} />
+      <span className="voice-timer" style={isUrgent ? { color: '#DC2626' } : {}}>{fmt(duration)}</span>
+      <span style={{ fontSize: 10, color: isUrgent ? '#DC2626' : '#9898b0', marginRight: 'auto' }}>
+        {isUrgent ? `${remaining}s left` : `/ ${fmt(MAX_REC_SECS)} max`}
+      </span>
       <button type="button" className="voice-stop-btn" onClick={stop}>Stop</button>
     </div>
   )
