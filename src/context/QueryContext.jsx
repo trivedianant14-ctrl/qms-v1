@@ -39,8 +39,6 @@ export const CONTENT_ROUTED = {
 }
 
 export function deriveRouting(category, subOption) {
-  if (FACULTY_ROUTED[category]?.includes(subOption)) return 'faculty'
-  if (category === 'Others') return 'support'
   return 'content'
 }
 
@@ -287,20 +285,9 @@ export function useQueries() {
 }
 
 function getResolverTeam(category) {
-  const map = {
-    'Wrong Answer': 'Content QA', 'Problem with the Answer': 'Content QA',
-    "Can't See Something": 'Engineering', 'Need Help': 'Educator',
-    'I Have a Doubt': 'Educator', 'Not the Right Question': 'Content QA',
-    'Problem with this Question': 'Content QA', Others: 'Ops Triage',
-  }
-  return map[category] || 'Ops Triage'
+  return 'Content QA'
 }
 
 function getSLA(category) {
-  const map = {
-    'Wrong Answer': 48, 'Problem with the Answer': 48, "Can't See Something": 24,
-    'Need Help': 72, 'I Have a Doubt': 72, 'Not the Right Question': 48,
-    'Problem with this Question': 48, Others: 24,
-  }
-  return map[category] || 48
+  return 48
 }

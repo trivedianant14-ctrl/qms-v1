@@ -732,24 +732,18 @@ function EscalationRating({ query }) {
   const { setEscalationRating } = useQueries()
   const alreadyRated = query.escalation_rating != null
   const [rating, setRating] = useState(alreadyRated ? query.escalation_rating : 0)
-  const [note, setNote] = useState(query.escalation_review || '')
+  const [note, setNote]     = useState(query.escalation_review || '')
   const [submitted, setSubmitted] = useState(alreadyRated)
-  const [dismissed, setDismissed] = useState(false)
 
-  const isLow = rating > 0 && rating <= 3
-  const canSubmit = rating > 0 && (!isLow || note.trim().length > 0)
-
-  if (dismissed) return (
-    <div style={{ textAlign: 'center', padding: '8px 0 4px', fontSize: 11, color: T3, lineHeight: 1.6 }}>
-      You can still rate your call experience anytime from the queries list.
-    </div>
-  )
+  const isLow   = rating > 0 && rating <= 3
+  const submit  = () => { setEscalationRating(query.ticket_id, rating, note.trim()); setSubmitted(true) }
+  const skip    = () => { setEscalationRating(query.ticket_id, rating, '');          setSubmitted(true) }
 
   if (submitted) return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
       <div style={{ fontSize: 34, marginBottom: 8 }}>🎉</div>
-      <div style={{ fontSize: 48, textAlign: 'center', marginBottom: 8 }}>
-        {rating >= 4 ? '😊' : rating === 3 ? '😐' : '😔'}
+      <div style={{ fontSize: 48, marginBottom: 8 }}>
+        {rating === 5 ? '😊' : rating === 3 ? '😐' : '😔'}
       </div>
       <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Thanks for your feedback!</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>Your rating helps us improve our support quality.</div>
@@ -758,18 +752,30 @@ function EscalationRating({ query }) {
 
   return (
     <div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Tell us how the call went</div>
-      <div style={{ fontSize: 12, color: T2, marginBottom: 14, lineHeight: 1.5 }}>Your experience matters to us</div>
-      <EmojiRating rating={rating} onRate={(n) => {
-        setRating(n)
-        if (n >= 4) { setEscalationRating(query.ticket_id, n, ''); setSubmitted(true) }
-      }} />
+      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>How did the call go?</div>
+      <div style={{ fontSize: 12, color: T2, marginBottom: 14, lineHeight: 1.5 }}>Your experience helps us improve</div>
+      <EmojiRating rating={rating} onRate={setRating} />
       {rating > 0 && (
-        <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: rating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
+        <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: isLow ? ORANGE : GREEN, marginBottom: 10 }}>
           {EMOJI_LABELS[rating]}
         </div>
       )}
-      {rating > 0 && rating <= 3 && (
+      {rating > 0 && !isLow && (
+        <>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Anything you'd like to add? (optional)"
+            rows={3}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${P}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
+          />
+          <button onClick={submit}
+            style={{ width: '100%', padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+            Submit
+          </button>
+        </>
+      )}
+      {rating > 0 && isLow && (
         <>
           <div style={{ fontSize: 11, fontWeight: 700, color: ORANGE, marginBottom: 6 }}>
             Please tell us what we could have done better — required for low ratings.
@@ -781,13 +787,17 @@ function EscalationRating({ query }) {
             rows={3}
             style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${note.trim() ? P : ORANGE}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
           />
-          <button
-            onClick={() => { setEscalationRating(query.ticket_id, rating, note.trim()); setSubmitted(true) }}
-            disabled={!note.trim()}
+          <button onClick={submit} disabled={!note.trim()}
             style={{ width: '100%', padding: '11px', borderRadius: 10, background: note.trim() ? P : BG2, color: note.trim() ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: note.trim() ? 'pointer' : 'default', marginBottom: 8 }}>
             Submit Feedback
           </button>
         </>
+      )}
+      {rating > 0 && (
+        <button onClick={skip}
+          style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+          Skip
+        </button>
       )}
     </div>
   )
