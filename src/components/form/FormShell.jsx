@@ -245,6 +245,7 @@ function OthersInterstitial({ onChoose, onNone }) {
 
 function OthersText({ value, onChange, onSubmit }) {
   const [voiceDuration, setVoiceDuration] = useState(0)
+  const [showGateError, setShowGateError] = useState(false)
   const hasText = value.trim().length >= 20
   const hasVoice = voiceDuration >= 10
   const canSubmit = hasText || hasVoice
@@ -268,7 +269,19 @@ function OthersText({ value, onChange, onSubmit }) {
       {hasVoice && !hasText && (
         <div className="char-counter complete" style={{ marginTop: -6 }}>Voice note ready ✓</div>
       )}
-      <button className="primary-btn" type="button" disabled={!canSubmit} onClick={onSubmit}>Submit query</button>
+      {showGateError && !canSubmit && (
+        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '10px 13px', fontSize: 12.5, color: '#B91C1C', lineHeight: 1.55, marginTop: 2 }}>
+          To submit, please add at least <strong>20 characters of text</strong> or a <strong>voice note of 10+ seconds</strong>.
+        </div>
+      )}
+      <button
+        className="primary-btn"
+        type="button"
+        style={!canSubmit ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+        onClick={() => { if (!canSubmit) { setShowGateError(true); return } onSubmit() }}
+      >
+        Submit query
+      </button>
     </>
   )
 }
