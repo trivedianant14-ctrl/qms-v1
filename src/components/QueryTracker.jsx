@@ -13,6 +13,7 @@ const CATEGORY_META = {
   "Can't See Something":        { color: '#2563EB', bg: '#EFF6FF', abbr: '🔍' },
   'I Have a Doubt':             { color: '#16A34A', bg: '#F0FDF4', abbr: '🤔' },
   'Problem with this Question': { color: '#EA580C', bg: '#FFF7ED', abbr: '⚠️' },
+  'Problem with the Audio Solution': { color: '#9333EA', bg: '#FAF5FF', abbr: '🎧' },
   Others:                       { color: '#7C3AED', bg: '#F5F3FF', abbr: '💬' },
   'Wrong Answer':               { color: '#DC2626', bg: '#FEF2F2', abbr: '❌' },
   'Explanation Gap':            { color: '#16A34A', bg: '#F0FDF4', abbr: '💡' },

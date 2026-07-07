@@ -3,7 +3,7 @@ import { MAIN_OPTIONS, OTHERS_PLACEHOLDER, SUB_OPTIONS } from '../../data/formCo
 import { useQueries } from '../../context/QueryContext'
 import { useNotifications } from '../../context/NotificationContext'
 
-const progressMap = { 1: 20, '2A': 42, '2B': 42, '2C': 42, '2D': 42, 3: 35, 4: 62, 5: 80, 6: 100 }
+const progressMap = { 1: 20, '2A': 42, '2B': 42, '2C': 42, '2D': 42, '2E': 42, 3: 35, 4: 62, 5: 80, 6: 100 }
 
 const MAX_PHOTO_BYTES = 1 * 1024 * 1024  // 1 MB
 const MAX_REC_SECS   = 30                 // 30 seconds
@@ -45,7 +45,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
   const goBack = () => {
     if (screen === '4') setScreen('3')
     else if (screen === '5') setScreen(selectedOption?.screenKey || '1')
-    else if (['2A', '2B', '2C', '2D'].includes(screen)) setScreen('1')
+    else if (['2A', '2B', '2C', '2D', '2E'].includes(screen)) setScreen('1')
     else if (screen === '3') setScreen('1')
   }
 
@@ -110,7 +110,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
         <div className="form-body">
 
         {screen === '1' && <Screen1 selectedOption={selectedOption} onChoose={chooseMain} onOthers={() => setScreen('3')} />}
-        {['2A', '2B', '2C', '2D'].includes(screen) && (
+        {['2A', '2B', '2C', '2D', '2E'].includes(screen) && (
           <SubOptionScreen
             screenKey={screen}
             selectedSubOption={selectedSubOption}
