@@ -47,6 +47,7 @@ function NprepPrototype() {
   const [screen, setScreen] = useState('solve')
   const [showTracker, setShowTracker] = useState(false)
   const [currentLiveTest, setCurrentLiveTest] = useState(null)
+  const [liveTestInterface, setLiveTestInterface] = useState('nprep')
   const [mode, setMode] = useState('guide')
   const [currentQ, setCurrentQ] = useState(0)
   const [answers, setAnswers] = useState({})
@@ -164,6 +165,18 @@ function NprepPrototype() {
     goTo('solve')
   }
 
+  // Persistent PYQ storage: every PYQ answered across any completed session, accumulated for later untimed review
+  const pyqBankIds = [...new Set(
+    sessions.flatMap(s => QUESTIONS.filter(q => q.isPYQ && s.answers[q.id] !== undefined).map(q => q.id))
+  )]
+
+  const viewPYQBank = (startQId) => {
+    setReattemptQIds(pyqBankIds)
+    setIsReviewMode(true)
+    setCurrentQ(startQId != null ? Math.max(0, pyqBankIds.indexOf(startQId)) : 0)
+    goTo('solve')
+  }
+
   // Derived stats from real sessions
   const todayStr = new Date().toDateString()
   const todayQs = sessions
@@ -187,6 +200,7 @@ function NprepPrototype() {
     startAttempt, submitTest,
     showReattemptConfirm, setShowReattemptConfirm,
     handleReattempt, viewSolution,
+    pyqBankIds, viewPYQBank,
     sessions, todayQs, overallAcc, lastSession,
     isReattempt, viewAnalysis,
     attemptCount,
@@ -228,8 +242,8 @@ function NprepPrototype() {
             {screen === 'videosubject' && <VideoSubject navigate={navigate} setCurrentVideo={setCurrentVideo} />}
             {screen === 'videoplayer' && <VideoPlayer navigate={navigate} currentVideo={currentVideo} savedVideos={savedVideos} saveVideo={saveVideo} unsaveVideo={unsaveVideo} savedResources={savedResources} saveResource={saveResource} unsaveResource={unsaveResource} />}
             {screen === 'livetest' && <LiveTest navigate={navigate} onJoinNow={(test) => { setCurrentLiveTest(test); navigate('livetestpretest') }} variant="full" />}
-            {screen === 'livetestpretest' && <LiveTestPreTest navigate={navigate} test={currentLiveTest} />}
-            {screen === 'livetestsolve' && <LiveTestSolve navigate={navigate} test={currentLiveTest} />}
+            {screen === 'livetestpretest' && <LiveTestPreTest navigate={navigate} test={currentLiveTest} onInterfaceSelect={setLiveTestInterface} />}
+            {screen === 'livetestsolve' && <LiveTestSolve navigate={navigate} test={currentLiveTest} interfaceMode={liveTestInterface} />}
           </div>
         </div>
       </div>
