@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { useNotifications } from '../context/NotificationContext'
 
-const P = '#534AB7'
+const P = '#131B63'
+const SKY = '#15CAE8'
 
 export default function NotificationToast() {
   const { activeToast, dismissToast } = useNotifications()
@@ -19,16 +20,20 @@ function Toast({ toast, onDismiss }) {
   return (
     <div style={{
       position: 'absolute', top: 10, left: 10, right: 10, zIndex: 999,
-      background: 'rgba(20, 20, 30, 0.96)',
+      background: 'rgba(11, 16, 66, 0.94)',
+      backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+      border: `1px solid ${SKY}33`,
       borderRadius: 18,
       padding: '11px 10px 11px 10px',
       display: 'flex', alignItems: 'flex-start', gap: 10,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
-      animation: 'toastSlideDown 0.28s cubic-bezier(0.22,1,0.36,1)',
+      boxShadow: `0 8px 32px rgba(11,16,66,0.5), 0 0 0 1px rgba(21,202,232,0.08)`,
+      fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif",
+      animation: 'toastSlideDown 0.5s cubic-bezier(0.34,1.56,0.64,1)',
     }}>
       {/* App icon */}
       <div style={{
-        width: 38, height: 38, borderRadius: 10, background: P, flexShrink: 0,
+        width: 38, height: 38, borderRadius: 10,
+        background: `linear-gradient(135deg, ${P}, ${SKY})`, flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
