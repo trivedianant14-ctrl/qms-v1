@@ -200,7 +200,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
             />
           )
         })()}
-        {screen === '6' && <SuccessScreen onReset={reset} onDone={finish} queryId={submittedId} />}
+        {screen === '6' && <SuccessScreen onDone={finish} queryId={submittedId} />}
         </div>
       </section>
     </main>
@@ -569,73 +569,90 @@ const LOCKED_STATUS_LABELS = {
 }
 
 function QuestionLockedScreen({ query, onDone }) {
+  const { addNote } = useQueries()
+  const [note, setNote] = useState('')
+  const [sent, setSent] = useState(false)
   const ticketDisplay = query.ticket_id ? `#${query.ticket_id}` : null
   const statusLabel = LOCKED_STATUS_LABELS[query.timeline_status] || 'In progress'
 
+  const handleSend = () => {
+    if (!note.trim()) return
+    addNote(query.ticket_id, note.trim(), 'student')
+    setSent(true)
+  }
+
   return (
     <div className="success-screen">
-      <div className="success-icon" style={{ background: 'var(--primary-light, #EEEDFE)' }}>🔒</div>
-      <h1 className="form-title" style={{ marginTop: 16 }}>You already have an open query here</h1>
+      <div className="success-icon" style={{ background: '#E5F0F8', borderColor: '#15CAE8', color: '#131B63' }}>🔒</div>
+      <h1 className="form-title" style={{ marginTop: 16, color: '#131B63' }}>You already have an open query here</h1>
       <p className="success-body">
-        We're still working on your last question about this — raising another one for it will have to wait until that's resolved.
+        We're still working on your last question about this — raising a new one for it will have to wait until that's resolved.
       </p>
 
-      <div style={{ width: '100%', margin: '14px 0 10px', background: 'var(--primary-light)', border: '1.5px dashed var(--primary-border)', borderRadius: 12, padding: '12px 16px', textAlign: 'left' }}>
+      <div style={{ width: '100%', margin: '16px 0 0', background: '#E5F0F8', border: '1.5px dashed #15CAE8', borderRadius: 12, padding: '13px 16px', textAlign: 'left' }}>
         {ticketDisplay && (
-          <>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>YOUR OPEN QUERY</div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary-dark)', letterSpacing: '1px', fontFamily: 'monospace', marginBottom: 6 }}>{ticketDisplay}</div>
-          </>
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#131B63', letterSpacing: '1px', fontFamily: 'monospace', marginBottom: 4 }}>{ticketDisplay}</div>
         )}
-        <div style={{ fontSize: 12, color: '#3C3489', fontWeight: 700 }}>{statusLabel}</div>
+        <div style={{ fontSize: 12, color: '#131B63', fontWeight: 700 }}>{statusLabel}</div>
         {query.category && (
-          <div style={{ fontSize: 11, color: '#7070a0', marginTop: 2 }}>{query.category}{query.sub_option ? ` — ${query.sub_option}` : ''}</div>
+          <div style={{ fontSize: 11, color: '#5B6088', marginTop: 2 }}>{query.category}{query.sub_option ? ` — ${query.sub_option}` : ''}</div>
         )}
       </div>
 
-      <div style={{ width: '100%', background: '#f0f7ff', border: '1px solid #c7deff', borderRadius: 10, padding: '10px 13px', textAlign: 'left', fontSize: 12, color: '#1e3a5f', lineHeight: 1.6 }}>
-        <span style={{ fontWeight: 700 }}>To follow this:</span> open your profile and tap{' '}
-        <span style={{ background: 'white', border: '1px solid #c7deff', borderRadius: 5, padding: '0 5px', fontWeight: 600, fontSize: 11 }}>My Doubts</span>
-      </div>
+      {!sent ? (
+        <div style={{ width: '100%', marginTop: 12 }}>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Anything changed, or want to add more context? (optional)"
+            rows={2}
+            style={{ width: '100%', padding: '9px 11px', borderRadius: 10, border: '1.5px solid #E1E6F2', fontSize: 12, color: '#131B63', resize: 'none', fontFamily: 'inherit', outline: 'none', background: '#EDF5FA', boxSizing: 'border-box' }}
+          />
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!note.trim()}
+            style={{ marginTop: 6, background: 'none', border: 'none', color: note.trim() ? '#131B63' : '#8790B8', fontWeight: 700, fontSize: 12, cursor: note.trim() ? 'pointer' : 'default', padding: 0 }}
+          >
+            Send →
+          </button>
+        </div>
+      ) : (
+        <div style={{ width: '100%', marginTop: 12, fontSize: 12, color: '#16794C', fontWeight: 600, textAlign: 'left' }}>
+          ✓ Added — the team will see this too.
+        </div>
+      )}
 
-      <button className="primary-btn" type="button" style={{ background: 'var(--navy)', marginTop: 20 }} onClick={onDone}>
+      <button className="primary-btn" type="button" style={{ background: '#131B63', marginTop: 20 }} onClick={onDone}>
         Got it
       </button>
     </div>
   )
 }
 
-function SuccessScreen({ onReset, onDone, queryId }) {
+function SuccessScreen({ onDone, queryId }) {
   const ticketDisplay = queryId
     ? '#NP-' + String(queryId).slice(-5).padStart(5, '0')
     : null
 
   return (
     <div className="success-screen">
-      <div className="success-icon">✓</div>
-      <h1 className="form-title" style={{ marginTop: 16 }}>We've got this</h1>
+      <div className="success-icon" style={{ background: '#E5F0F8', borderColor: '#15CAE8', color: '#131B63' }}>✓</div>
+      <h1 className="form-title" style={{ marginTop: 16, color: '#131B63' }}>We've got this</h1>
       <p className="success-body">Our team will take a proper look and respond</p>
 
       {ticketDisplay && (
-        <div style={{ width: '100%', margin: '14px 0 10px', background: 'var(--primary-light)', border: '1.5px dashed var(--primary-border)', borderRadius: 12, padding: '12px 16px', textAlign: 'left' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>YOUR QUERY ID</div>
-          <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--primary-dark)', letterSpacing: '1px', fontFamily: 'monospace' }}>{ticketDisplay}</div>
-          <div style={{ fontSize: 10, color: '#7070a0', marginTop: 4 }}>Keep this to track your query anytime</div>
+        <div style={{ width: '100%', margin: '18px 0 0', background: '#E5F0F8', border: '1.5px dashed #15CAE8', borderRadius: 12, padding: '14px 16px', textAlign: 'left' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#131B63', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>YOUR QUERY ID</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#131B63', letterSpacing: '1px', fontFamily: 'monospace' }}>{ticketDisplay}</div>
+          <div style={{ fontSize: 11, color: '#5B6088', marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(19,27,99,0.12)' }}>
+            🔔 Track it anytime from your profile under <strong>My Doubts</strong> — we'll notify you the moment it's ready.
+          </div>
         </div>
       )}
 
-      <div style={{ width: '100%', background: '#f0f7ff', border: '1px solid #c7deff', borderRadius: 10, padding: '10px 13px', textAlign: 'left', fontSize: 12, color: '#1e3a5f', lineHeight: 1.6 }}>
-        <span style={{ fontWeight: 700 }}>To follow this:</span> open your profile and tap{' '}
-        <span style={{ background: 'white', border: '1px solid #c7deff', borderRadius: 5, padding: '0 5px', fontWeight: 600, fontSize: 11 }}>My Queries</span>
-      </div>
-
-      <div className="notify-banner" style={{ marginTop: 10 }}>🔔 Sit back, we'll notify you when this is ready</div>
-
-      <button className="primary-btn" type="button" style={{ background: 'var(--navy)', marginTop: 20 }} onClick={onDone}>
+      <button className="primary-btn" type="button" style={{ background: '#131B63', marginTop: 22 }} onClick={onDone}>
         Continue practice
-      </button>
-      <button className="link-btn" type="button" style={{ marginTop: 10, fontSize: 13 }} onClick={onReset}>
-        Got another question?
       </button>
     </div>
   )
