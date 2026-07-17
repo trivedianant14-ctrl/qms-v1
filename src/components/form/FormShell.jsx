@@ -9,8 +9,14 @@ const MAX_PHOTO_BYTES = 1 * 1024 * 1024  // 1 MB
 const MAX_REC_SECS   = 30                 // 30 seconds
 
 export default function FormShell({ embedded = false, onClose, onDone, questionContext = {} }) {
-  const { addQuery } = useQueries()
+  const { addQuery, queries } = useQueries()
   const { queueNotification } = useNotifications()
+  // One-open-query-per-question lock: a student can't raise a new query against a
+  // question that already has a query in flight (raised/received/assigned) for it,
+  // regardless of category. The lock releases once that query reaches 'resolved'.
+  const openBlockingQuery = questionContext.questionId
+    ? queries.find(q => q.question_ref === questionContext.questionId && q.timeline_status !== 'resolved')
+    : null
   const [screen, setScreen] = useState('1')
   const [selectedOption, setSelectedOption] = useState(null)
   const [selectedSubOption, setSelectedSubOption] = useState(null)
@@ -63,6 +69,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
       testName: questionContext.testName,
       questionText: questionContext.questionText,
       questionNum: questionContext.questionNum,
+      questionRef: questionContext.questionId,
     })
     setSubmittedId(id)
     setScreen('6')
@@ -81,6 +88,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
       testName: questionContext.testName,
       questionText: questionContext.questionText,
       questionNum: questionContext.questionNum,
+      questionRef: questionContext.questionId,
     })
     setSubmittedId(id)
     setScreen('6')
@@ -90,6 +98,32 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
     setTimeout(() => {
       queueNotification('Arre, uthaa liya humne 👀', 'Team lag gayi hai tumhare sawal pe. Jaldi milega jawaab.')
     }, 10000)
+  }
+
+  // One-open-query-per-question lock: skip the whole wizard and show the existing
+  // ticket's status instead. Excludes screen '6' so a just-completed submission
+  // (which itself now satisfies the "blocking query" condition) still shows the
+  // success screen rather than immediately locking the student out.
+  if (openBlockingQuery && screen !== '6') {
+    return (
+      <main className={embedded ? 'raq-form-page embedded' : 'raq-form-page'}>
+        <section className={embedded ? 'form-shell embedded' : 'form-shell'}>
+          <div className="form-head">
+            <span className="form-head-spacer" />
+            <div className="form-head-title">Raise a Query</div>
+            {embedded ? (
+              <button className="form-head-btn" type="button" onClick={onClose} aria-label="Close">×</button>
+            ) : <span className="form-head-spacer" />}
+          </div>
+          <div className="form-body">
+            <QuestionLockedScreen
+              query={openBlockingQuery}
+              onDone={() => { onClose?.(); onDone?.() }}
+            />
+          </div>
+        </section>
+      </main>
+    )
   }
 
   return (
@@ -524,6 +558,49 @@ function VoiceRecorder({ onDurationChange }) {
       </svg>
       <audio src={audioURL} controls className="voice-audio" />
       <button type="button" className="voice-delete-btn" onClick={remove} aria-label="Remove voice note">✕</button>
+    </div>
+  )
+}
+
+const LOCKED_STATUS_LABELS = {
+  raised: 'Sent to our team',
+  received: 'Team is on it',
+  assigned: 'An expert is on it',
+}
+
+function QuestionLockedScreen({ query, onDone }) {
+  const ticketDisplay = query.ticket_id ? `#${query.ticket_id}` : null
+  const statusLabel = LOCKED_STATUS_LABELS[query.timeline_status] || 'In progress'
+
+  return (
+    <div className="success-screen">
+      <div className="success-icon" style={{ background: 'var(--primary-light, #EEEDFE)' }}>🔒</div>
+      <h1 className="form-title" style={{ marginTop: 16 }}>You already have an open query here</h1>
+      <p className="success-body">
+        We're still working on your last question about this — raising another one for it will have to wait until that's resolved.
+      </p>
+
+      <div style={{ width: '100%', margin: '14px 0 10px', background: 'var(--primary-light)', border: '1.5px dashed var(--primary-border)', borderRadius: 12, padding: '12px 16px', textAlign: 'left' }}>
+        {ticketDisplay && (
+          <>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>YOUR OPEN QUERY</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary-dark)', letterSpacing: '1px', fontFamily: 'monospace', marginBottom: 6 }}>{ticketDisplay}</div>
+          </>
+        )}
+        <div style={{ fontSize: 12, color: '#3C3489', fontWeight: 700 }}>{statusLabel}</div>
+        {query.category && (
+          <div style={{ fontSize: 11, color: '#7070a0', marginTop: 2 }}>{query.category}{query.sub_option ? ` — ${query.sub_option}` : ''}</div>
+        )}
+      </div>
+
+      <div style={{ width: '100%', background: '#f0f7ff', border: '1px solid #c7deff', borderRadius: 10, padding: '10px 13px', textAlign: 'left', fontSize: 12, color: '#1e3a5f', lineHeight: 1.6 }}>
+        <span style={{ fontWeight: 700 }}>To follow this:</span> open your profile and tap{' '}
+        <span style={{ background: 'white', border: '1px solid #c7deff', borderRadius: 5, padding: '0 5px', fontWeight: 600, fontSize: 11 }}>My Doubts</span>
+      </div>
+
+      <button className="primary-btn" type="button" style={{ background: 'var(--navy)', marginTop: 20 }} onClick={onDone}>
+        Got it
+      </button>
     </div>
   )
 }

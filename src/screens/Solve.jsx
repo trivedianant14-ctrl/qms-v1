@@ -567,6 +567,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
             <FormShell
               embedded
               questionContext={{
+                questionId: q?.id,
                 questionText: q?.text,
                 questionNum: currentQ + 1,
                 subjectName: 'Applied Anatomy',
