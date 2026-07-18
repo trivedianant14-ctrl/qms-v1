@@ -522,6 +522,12 @@ body:has(.raq-app),
   margin: 24px 0 22px;
 }
 
+/* An odd chip count would strand the last chip alone in the left column —
+   stretch it across both so the grid stays balanced. */
+.chip-grid > .chip:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
 .chip {
   min-height: 48px;
   border: 1px solid var(--border);
