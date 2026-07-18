@@ -549,6 +549,7 @@ export default function LiveTestSolve({ navigate, test }) {
             <FormShell
               embedded
               questionContext={{
+                questionId: q?.id,
                 questionText: q?.text,
                 questionNum: curGlobalIdx + 1,
                 subjectName: section?.name,

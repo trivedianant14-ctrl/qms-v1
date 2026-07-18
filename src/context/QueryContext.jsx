@@ -99,6 +99,7 @@ export function QueryProvider({ children }) {
       id,
       ticket_id: 'NP-' + id.toString(36).toUpperCase().slice(-6),
       question_id: questionId,
+      question_ref: newQuery.questionRef || null,
       subject_name: newQuery.subjectName || 'QBank Practice',
       test_name: newQuery.testName || 'Chapter Practice',
       question_text: newQuery.questionText || '',

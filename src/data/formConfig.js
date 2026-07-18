@@ -34,6 +34,15 @@ export const MAIN_OPTIONS = [
     title: 'Problem with this question',
     subtitle: "This question doesn't match my syllabus or exam",
     screenKey: '2D'
+  },
+  {
+    id: 'audio-issue',
+    icon: '!',
+    iconBg: 'rgba(147,51,234,0.1)',
+    iconColor: '#9333EA',
+    title: 'Problem with the audio solution',
+    subtitle: "The audio explanation isn't working or doesn't sound right",
+    screenKey: '2E'
   }
 ]
 
@@ -78,6 +87,17 @@ export const SUB_OPTIONS = {
       { id: 'wrong-language', label: 'Question is in the wrong language',               prompt: 'What language were you expecting?' },
       { id: 'not-syllabus',   label: 'This is not in my syllabus',                     prompt: 'What exam or syllabus are you preparing for?' },
       { id: 'wrong-topic',    label: 'This belongs to a different topic or chapter',   prompt: 'What topic or chapter should this be under?' }
+    ]
+  },
+  '2E': {
+    header: "What's wrong with the audio?",
+    category: 'Problem with the Audio Solution',
+    options: [
+      { id: 'audio-not-playing', label: "Audio doesn't play at all",                    prompt: 'What happens when you try to play it — nothing, a spinner, or an error?' },
+      { id: 'audio-unclear',     label: 'Audio is unclear or hard to understand',        prompt: 'What part was hard to understand?' },
+      { id: 'audio-mismatch',    label: "Audio doesn't match the explanation shown",     prompt: 'What does the audio say instead?' },
+      { id: 'audio-cutoff',      label: 'Audio stops or cuts off before finishing',      prompt: 'At what point does it stop?' },
+      { id: 'audio-wrong-lang',  label: 'Audio is in the wrong language',                prompt: 'What language were you expecting?' }
     ]
   }
 }

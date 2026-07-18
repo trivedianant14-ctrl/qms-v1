@@ -2,32 +2,40 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useQueries } from '../context/QueryContext'
 import { useNotifications } from '../context/NotificationContext'
 
-const P = '#534AB7', PL = '#EEEDFE', PB = '#AFA9EC', PD = '#3C3489'
-const T1 = '#1a1a2e', T2 = '#5a5a78', T3 = '#9898b0', BD = '#e8e8f2', BG2 = '#f5f5fb'
-const GREEN = '#22C55E', GREEN_BG = '#F0FDF4', GREEN_BORDER = '#86EFAC'
-const ORANGE = '#E07B2A', ORANGE_BG = '#FFF3E8'
-const RED = '#DC2626', RED_BG = '#FEF2F2', RED_BORDER = '#FECACA'
+// NPrep brand system: Midnight Blue / Clear Sky Blue / Ice Blue, plus a small
+// semantic status set kept separate from the 6-color brand palette and used
+// only inside status pills (per the brand's own "don't mix hues" rule).
+const P = '#131B63', PL = '#E5F0F8', PB = '#15CAE8', PD = '#0B1042'
+const T1 = '#131B63', T2 = '#5B6088', T3 = '#8790B8', BD = '#E1E6F2', BG2 = '#EDF5FA'
+const GREEN = '#16794C', GREEN_BG = '#E1F5EA', GREEN_BORDER = '#8FD6B2'
+const ORANGE = '#8A5A0F', ORANGE_BG = '#FCEFD7'
+const RED = '#B23A3A', RED_BG = '#FBE6E6', RED_BORDER = '#EFC0C0'
+const EXPERT = '#4B3B9E', CALLED = '#0E7C93'
 
+// Category identity is icon + label only (no per-category hue) — status pills
+// carry the semantic color instead, so the palette never exceeds the brand's
+// approved set on any one card.
 const CATEGORY_META = {
-  'Problem with the Answer':    { color: '#DC2626', bg: '#FEF2F2', abbr: '❌' },
-  "Can't See Something":        { color: '#2563EB', bg: '#EFF6FF', abbr: '🔍' },
-  'I Have a Doubt':             { color: '#16A34A', bg: '#F0FDF4', abbr: '🤔' },
-  'Problem with this Question': { color: '#EA580C', bg: '#FFF7ED', abbr: '⚠️' },
-  Others:                       { color: '#7C3AED', bg: '#F5F3FF', abbr: '💬' },
-  'Wrong Answer':               { color: '#DC2626', bg: '#FEF2F2', abbr: '❌' },
-  'Explanation Gap':            { color: '#16A34A', bg: '#F0FDF4', abbr: '💡' },
-  'Not the Right Question':     { color: '#EA580C', bg: '#FFF7ED', abbr: '⚠️' },
+  'Problem with the Answer':    { color: P, bg: PL, abbr: '❌' },
+  "Can't See Something":        { color: P, bg: PL, abbr: '🔍' },
+  'I Have a Doubt':             { color: P, bg: PL, abbr: '🤔' },
+  'Problem with this Question': { color: P, bg: PL, abbr: '⚠️' },
+  'Problem with the Audio Solution': { color: P, bg: PL, abbr: '🎧' },
+  Others:                       { color: P, bg: PL, abbr: '💬' },
+  'Wrong Answer':               { color: P, bg: PL, abbr: '❌' },
+  'Explanation Gap':            { color: P, bg: PL, abbr: '💡' },
+  'Not the Right Question':     { color: P, bg: PL, abbr: '⚠️' },
 }
 
 const STAGE_FROM_STATUS = { raised: 0, received: 1, assigned: 2, resolved: 3, escalated: 4, escalation_closed: 5 }
 const STAGE_LABELS = ['Sent! 📨', 'Team on it 👀', 'Expert on it 🎯', 'Solved! 🎉', 'Extra mile 🔥', 'Called! ✨']
-const STAGE_COLORS = [P, ORANGE, '#0369A1', GREEN, RED, '#7C3AED']
+const STAGE_COLORS = [PB, ORANGE, EXPERT, GREEN, RED, CALLED]
 
 const AGENTS = [
-  { name: 'Priya S.',  team: 'Content QA',  avatar: 'P', color: '#7C3AED' },
-  { name: 'Rahul M.',  team: 'Content QA',  avatar: 'R', color: '#0369A1' },
-  { name: 'Sneha T.',  team: 'Engineering', avatar: 'S', color: '#059669' },
-  { name: 'Amit K.',   team: 'Educator',    avatar: 'A', color: '#DC2626' },
+  { name: 'Priya S.',  team: 'Content QA',  avatar: 'P', color: P },
+  { name: 'Rahul M.',  team: 'Content QA',  avatar: 'R', color: EXPERT },
+  { name: 'Sneha T.',  team: 'Engineering', avatar: 'S', color: CALLED },
+  { name: 'Amit K.',   team: 'Educator',    avatar: 'A', color: '#0A6E8A' },
 ]
 
 function timeAgo(iso) {
@@ -1463,7 +1471,7 @@ function QueryDetailView({ query, onBack, onClose }) {
     ...(stage >= 4 ? [{ key: 'call_closed',  title: 'Your experience matters to us', desc: null }] : []),
   ]
 
-  const badgeMeta = stage >= 5 ? { bg: '#F5F3FF', color: '#7C3AED', border: '#DDD6FE' }
+  const badgeMeta = stage >= 5 ? { bg: '#E0F8FC', color: CALLED, border: '#A6E7F1' }
     : stage === 4 ? { bg: RED_BG, color: RED, border: RED_BORDER }
     : stage === 3 ? { bg: GREEN_BG, color: GREEN, border: GREEN_BORDER }
     : { bg: PL, color: P, border: PB }
@@ -1532,11 +1540,11 @@ function QueryDetailView({ query, onBack, onClose }) {
           </div>
         )}
         {stage === 5 && (
-          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: '#F5F3FF', border: `2px solid #DDD6FE`, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: '#E0F8FC', border: `2px solid #A6E7F1`, display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 28 }}>✨</span>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6' }}>Ek extra call bhi ho gaya!</div>
-              <div style={{ fontSize: 11, color: '#7C3AED', marginTop: 2 }}>Humein umeed hai ab sab clear ho gaya hoga</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#0A5C6E' }}>Ek extra call bhi ho gaya!</div>
+              <div style={{ fontSize: 11, color: CALLED, marginTop: 2 }}>Humein umeed hai ab sab clear ho gaya hoga</div>
             </div>
           </div>
         )}
@@ -1604,7 +1612,7 @@ function QueryDetailView({ query, onBack, onClose }) {
 }
 
 // ── Query Card ───────────────────────────────────────────────────────────────
-function QueryCard({ query, onClick, onLowRating }) {
+function QueryCard({ query, onClick, onLowRating, index = 0 }) {
   const meta = CATEGORY_META[query.category] || CATEGORY_META['Others']
   const stage = STAGE_FROM_STATUS[query.timeline_status] ?? query.demo_stage ?? 0
   const { setEscalationRating } = useQueries()
@@ -1618,8 +1626,8 @@ function QueryCard({ query, onClick, onLowRating }) {
     }
   }
 
-  const accentColor = stage >= 5 ? '#7C3AED' : stage === 4 ? RED : stage === 3 ? GREEN : stage === 2 ? P : stage === 1 ? ORANGE : T3
-  const badgeBg     = stage >= 5 ? '#F5F3FF' : stage === 4 ? RED_BG : stage === 3 ? GREEN_BG : stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2
+  const accentColor = stage >= 5 ? CALLED : stage === 4 ? RED : stage === 3 ? GREEN : stage === 2 ? EXPERT : stage === 1 ? ORANGE : PB
+  const badgeBg     = stage >= 5 ? '#E0F8FC' : stage === 4 ? RED_BG : stage === 3 ? GREEN_BG : stage === 2 ? '#EAE7FB' : stage === 1 ? ORANGE_BG : BG2
 
   return (
     <div
@@ -1633,7 +1641,9 @@ function QueryCard({ query, onClick, onLowRating }) {
         cursor: 'pointer',
         padding: '14px 14px 14px 12px',
         display: 'flex', gap: 12, alignItems: 'flex-start',
-        transition: 'transform 0.1s, box-shadow 0.1s',
+        opacity: 0,
+        animation: `qmsCardIn 0.42s cubic-bezier(0.4,0,0.2,1) ${Math.min(index * 0.06, 0.42)}s forwards`,
+        transition: 'transform 0.22s cubic-bezier(0.4,0,0.2,1), box-shadow 0.22s cubic-bezier(0.4,0,0.2,1)',
       }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 6px 0 ${accentColor}22, 0 4px 16px rgba(0,0,0,0.08)` }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 0 ${accentColor}22, 0 1px 8px rgba(0,0,0,0.05)` }}
@@ -1847,9 +1857,9 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
             </div>
           )
         ) : (
-          filtered.map(q => (
+          filtered.map((q, i) => (
             <QueryCard
-              key={q.id} query={q} onClick={() => onSelect(q)}
+              key={q.id} query={q} index={i} onClick={() => onSelect(q)}
               onLowRating={(qry, stars, saveFn) => setRatingPopup({ query: qry, stars, onSave: saveFn })}
             />
           ))
@@ -1880,19 +1890,19 @@ export default function QueryTracker({ onClose }) {
   const openQuery = (q) => { setSelected(q); setView('detail') }
 
   if (view === 'detail' && selected) return (
-    <div style={{ position: 'absolute', inset: 0, background: 'white', zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, background: 'white', zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <QueryDetailView query={selected} onBack={() => setView('queries')} onClose={onClose} />
     </div>
   )
 
   if (view === 'queries') return (
-    <div style={{ position: 'absolute', inset: 0, background: BG2, zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, background: BG2, zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <QueriesView queries={queries} onBack={() => setView('profile')} onClose={onClose} onSelect={openQuery} />
     </div>
   )
 
   return (
-    <div style={{ position: 'absolute', inset: 0, background: BG2, zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, background: BG2, zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <ProfileHome queries={queries} onOpenQueries={() => setView('queries')} onClose={onClose} />
     </div>
   )

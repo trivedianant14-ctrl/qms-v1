@@ -31,7 +31,7 @@ function SemiGauge({ pct }) {
   )
 }
 
-export default function Result({ navigate, answers, mode, viewSolution, setShowReattemptConfirm, showReattemptConfirm, handleReattempt, isReattempt }) {
+export default function Result({ navigate, answers, mode, viewSolution, setShowReattemptConfirm, showReattemptConfirm, handleReattempt, isReattempt, pyqBankIds = [], viewPYQBank }) {
   const [showAllWrong, setShowAllWrong] = useState(false)
   const [rating, setRating] = useState(0)
   const [feedbackNote, setFeedbackNote] = useState('')
@@ -211,19 +211,40 @@ export default function Result({ navigate, answers, mode, viewSolution, setShowR
             </div>
           </div>
 
-          {/* PYQ missed */}
-          {missedPYQs.length > 0 && (
-            <div style={{ background: 'white', border: `1px solid ${BD}`, borderLeft: '3px solid #E6A817', borderRadius: 14, padding: '13px 14px', marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>
-                {missedPYQs.length} Previous Year Question{missedPYQs.length > 1 ? 's' : ''} Missed
+          {/* PYQ bank — clickable, untimed storage of every PYQ attempted across all sessions */}
+          {pyqBankIds.length > 0 && (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => viewPYQBank()}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') viewPYQBank() }}
+              style={{ background: 'white', border: `1px solid ${BD}`, borderLeft: `3px solid ${missedPYQs.length > 0 ? '#E6A817' : GREEN_BD}`, borderRadius: 14, padding: '13px 14px', marginBottom: 12, cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>
+                  {missedPYQs.length > 0
+                    ? `${missedPYQs.length} Previous Year Question${missedPYQs.length > 1 ? 's' : ''} Missed`
+                    : `${pyqBankIds.length} Previous Year Question${pyqBankIds.length > 1 ? 's' : ''} Attempted`}
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M9 18l6-6-6-6"/></svg>
               </div>
-              <div style={{ fontSize: 12, color: T3, lineHeight: 1.5, marginBottom: 10 }}>These appeared in real exams — prioritise reviewing them.</div>
+              <div style={{ fontSize: 12, color: T3, lineHeight: 1.5, marginBottom: 10 }}>
+                {missedPYQs.length > 0 ? 'These appeared in real exams — prioritise reviewing them. ' : 'Great work on these — revisit anytime. '}
+                Tap to browse all {pyqBankIds.length} PYQ{pyqBankIds.length > 1 ? 's' : ''} you've attempted, untimed.
+              </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {missedPYQs.map(q => (
-                  <button key={q.id} onClick={viewSolution} style={{ background: BG2, border: `1px solid ${BD}`, borderRadius: 8, padding: '4px 10px', fontSize: 11, fontWeight: 600, color: T2, cursor: 'pointer' }}>
-                    Q{QUESTIONS.indexOf(q) + 1} · {q.pyqExam} {q.pyqYear}
-                  </button>
-                ))}
+                {QUESTIONS.filter(q => pyqBankIds.includes(q.id)).map(q => {
+                  const isMissed = missedPYQs.includes(q)
+                  return (
+                    <div
+                      key={q.id}
+                      onClick={e => { e.stopPropagation(); viewPYQBank(q.id) }}
+                      style={{ background: isMissed ? BG2 : GREEN_BG, border: `1px solid ${isMissed ? BD : GREEN_BD}`, borderRadius: 8, padding: '4px 10px', fontSize: 11, fontWeight: 600, color: isMissed ? T2 : GREEN, cursor: 'pointer' }}
+                    >
+                      Q{QUESTIONS.indexOf(q) + 1} · {q.pyqExam} {q.pyqYear}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
