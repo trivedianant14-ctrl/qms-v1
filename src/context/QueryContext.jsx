@@ -118,7 +118,7 @@ export function QueryProvider({ children }) {
       faculty_assigned: facultyAssigned, faculty_assigned_at: facultyAssignedAt,
       satisfaction_score: null, feedback_type: null,
       escalation_rating: null, escalation_review: null, escalation_resolved: false,
-      call_requested: false,
+      call_requested: false, call_missed: false, call_missed_count: 0, call_cancelled: false,
     }, ...prev])
     return id
   }
@@ -261,6 +261,20 @@ export function QueryProvider({ children }) {
     ))
   }
 
+  const markCallMissed = (ticketId) => {
+    setQueries(prev => prev.map(q =>
+      q.ticket_id === ticketId
+        ? { ...q, call_missed: true, call_missed_count: (q.call_missed_count || 0) + 1 }
+        : q
+    ))
+  }
+
+  const cancelCall = (ticketId) => {
+    setQueries(prev => prev.map(q =>
+      q.ticket_id === ticketId ? { ...q, call_cancelled: true } : q
+    ))
+  }
+
   const unresolvedNotifCount = queries.filter(
     q => q.timeline_status === 'resolved' && !resolvedAck.has(q.id)
   ).length
@@ -271,7 +285,7 @@ export function QueryProvider({ children }) {
       claimTicket, assignToFaculty, advanceStatus, resolveWithCode, resolveTicket,
       facultyResolve, approveResolution, requestRevision,
       addNote, escalateToEngineering, closeEscalation, recallFromFaculty,
-      setFeedback, setEscalationRating, setResolutionRating, setCallRequested,
+      setFeedback, setEscalationRating, setResolutionRating, setCallRequested, markCallMissed, cancelCall,
     }}>
       {children}
     </QueryContext.Provider>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useQueries } from '../context/QueryContext'
 import { useNotifications } from '../context/NotificationContext'
 
@@ -139,7 +139,7 @@ function EmojiRating({ rating, onRate }) {
 }
 
 function ThumbsFeedback({ resolvedAt, query }) {
-  const { setResolutionRating, queries } = useQueries()
+  const { setResolutionRating, queries, markCallMissed, setFeedback, cancelCall } = useQueries()
   const { queueNotification } = useNotifications()
   const queriesRef = useRef(queries)
   queriesRef.current = queries
@@ -147,7 +147,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
   const isHighRated = existingStars != null && existingStars >= 4
   const isLowRated = existingStars != null && existingStars <= 3
   // steps: 'prompt' | 'rate' | 'up_done' | 'call_confirm' | 'call_enter' | 'call_otp' | 'call_done'
-  //        'high_warn' | 'high_up' | 'low_confirm' | 're_rate'
+  //        'high_warn' | 'high_up' | 'low_confirm' | 're_rate' | 'call_missed' | 'call_cancelled'
   const [step, setStep] = useState('prompt')
   const [hoveredThumb, setHoveredThumb] = useState(null) // 'up' | 'down' | null
   const [rating, setRating] = useState(0)
@@ -175,6 +175,14 @@ function ThumbsFeedback({ resolvedAt, query }) {
   const remainingMs = expiresAt - Date.now()
   const remainingH = Math.max(0, Math.ceil(remainingMs / 3600000))
   const isExpired = remainingMs <= 0
+
+  // Silent expiry must be persisted distinctly from an explicit thumbs-up — otherwise
+  // resolution-quality reporting can't tell "confirmed helped" from "no one ever replied".
+  useEffect(() => {
+    if (isExpired && query.feedback_type == null) {
+      setFeedback(query.ticket_id, 'auto_closed')
+    }
+  }, [isExpired, query.feedback_type, query.ticket_id, setFeedback])
 
   const handleOtpChange = (idx, val) => {
     if (!/^\d?$/.test(val)) return
@@ -234,7 +242,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
             style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${P}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
           />
           <button
-            onClick={() => setStep('up_done')} disabled={!rateNote.trim()}
+            onClick={() => { setResolutionRating(query.ticket_id, rating, rateNote.trim()); setStep('up_done') }} disabled={!rateNote.trim()}
             style={{ width: '100%', padding: '11px', borderRadius: 10, background: rateNote.trim() ? P : BG2, color: rateNote.trim() ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: rateNote.trim() ? 'pointer' : 'default', marginBottom: 8 }}>
             Submit
           </button>
@@ -253,7 +261,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
             style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${rateNote.trim() ? P : ORANGE}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
           />
           <button
-            onClick={() => setStep('up_done')} disabled={!rateNote.trim()}
+            onClick={() => { setResolutionRating(query.ticket_id, rating, rateNote.trim()); setStep('up_done') }} disabled={!rateNote.trim()}
             style={{ width: '100%', padding: '11px', borderRadius: 10, background: rateNote.trim() ? P : BG2, color: rateNote.trim() ? 'white' : T3, border: 'none', fontSize: 12, fontWeight: 700, cursor: rateNote.trim() ? 'pointer' : 'default', marginBottom: 8 }}>
             Submit Feedback
           </button>
@@ -354,14 +362,27 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Update your rating</div>
       </div>
       <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>How do you feel about the resolution now?</div>
-      <EmojiRating rating={reRating} onRate={(n) => {
-        setReRating(n)
-        if (n >= 4) { setResolutionRating(query.ticket_id, n, ''); setStep('up_done') }
-      }} />
+      <EmojiRating rating={reRating} onRate={setReRating} />
       {reRating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: reRating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
           {EMOJI_LABELS[reRating]}
         </div>
+      )}
+      {reRating >= 4 && (
+        <>
+          <textarea
+            value={reNote}
+            onChange={e => setReNote(e.target.value)}
+            placeholder="Anything you'd like to add? (optional)"
+            rows={3}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${P}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
+          />
+          <button
+            onClick={() => { setResolutionRating(query.ticket_id, reRating, reNote.trim()); setStep('up_done') }}
+            style={{ width: '100%', padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+            Submit
+          </button>
+        </>
       )}
       {reRating > 0 && reRating <= 3 && (
         <>
@@ -401,7 +422,9 @@ function ThumbsFeedback({ resolvedAt, query }) {
           </button>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Pick a time slot</div>
-            <div style={{ fontSize: 10, color: T2 }}>We'll call you at your chosen time</div>
+            <div style={{ fontSize: 10, color: T2 }}>
+              {query.call_missed_count > 0 ? "Let's find a better time — we'll call you then" : "We'll call you at your chosen time"}
+            </div>
           </div>
         </div>
 
@@ -501,9 +524,61 @@ function ThumbsFeedback({ resolvedAt, query }) {
             </div>
           )}
         </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
+          {bookedSlot && (
+            <button onClick={() => { setSchedSlot(null); setStep('slot_pick') }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: P, fontSize: 11, fontWeight: 700, textDecoration: 'underline' }}>
+              Reschedule
+            </button>
+          )}
+          {bookedSlot && (
+            <button onClick={() => { cancelCall(query.ticket_id); setStep('call_cancelled') }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, fontSize: 11, textDecoration: 'underline' }}>
+              Cancel this call
+            </button>
+          )}
+          <button onClick={() => { markCallMissed(query.ticket_id); setStep('call_missed') }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, fontSize: 11, textDecoration: 'underline' }}>
+            Didn't get a call?
+          </button>
+        </div>
       </div>
     )
   }
+
+  // Student cancelled a booked call before it happened
+  if (step === 'call_cancelled') return (
+    <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
+      <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+      <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>Call cancelled</div>
+      <div style={{ fontSize: 12, color: T2, lineHeight: 1.6, marginBottom: 14 }}>
+        No worries — we won't call you at that time. Changed your mind?
+      </div>
+      <button onClick={() => setStep('call_confirm')}
+        style={{ width: '100%', padding: '12px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+        Request a call again
+      </button>
+    </div>
+  )
+
+  // No-show / missed-call — student reports the scheduled call never came through
+  if (step === 'call_missed') return (
+    <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
+      <div style={{ fontSize: 36, marginBottom: 10 }}>😞</div>
+      <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>Sorry we missed you</div>
+      <div style={{ fontSize: 12, color: T2, lineHeight: 1.6, marginBottom: 14 }}>
+        Looks like our call didn't reach you. Let's pick another time — we'll make sure someone calls you then.
+      </div>
+      <button onClick={() => { setSchedSlot(null); setStep('slot_pick') }}
+        style={{ width: '100%', padding: '12px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+        Reschedule the call
+      </button>
+      <button onClick={() => setStep('call_done')}
+        style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+        Actually, I did get it
+      </button>
+    </div>
+  )
 
   // "Is this the correct number?"
   if (step === 'call_confirm') return (
@@ -1748,11 +1823,29 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
       {/* Query list */}
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 14px 24px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 0' }}>
-            <div style={{ fontSize: 40, marginBottom: 10 }}>🔍</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>Kuch nahi mila</div>
-            <div style={{ fontSize: 12, color: T3, marginTop: 4 }}>Try a different search or filter</div>
-          </div>
+          sq ? (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <div style={{ fontSize: 40, marginBottom: 10 }}>🔍</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>Kuch nahi mila</div>
+              <div style={{ fontSize: 12, color: T3, marginTop: 4 }}>Try a different search or filter</div>
+            </div>
+          ) : queries.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <div style={{ fontSize: 40, marginBottom: 10 }}>🌱</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>No doubts raised yet</div>
+              <div style={{ fontSize: 12, color: T3, marginTop: 4, lineHeight: 1.6 }}>Tap "Having trouble? Report" on any question to raise your first one.</div>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <div style={{ fontSize: 40, marginBottom: 10 }}>{filter === 'resolved' ? '🎯' : '🎉'}</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>
+                {filter === 'resolved' ? 'Nothing solved yet' : 'Nothing in review right now'}
+              </div>
+              <div style={{ fontSize: 12, color: T3, marginTop: 4, lineHeight: 1.6 }}>
+                {filter === 'resolved' ? 'Solved doubts will show up here once the team responds.' : 'Everything you\'ve raised has already been looked at.'}
+              </div>
+            </div>
+          )
         ) : (
           filtered.map(q => (
             <QueryCard
