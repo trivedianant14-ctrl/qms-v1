@@ -2,15 +2,17 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useQueries } from '../context/QueryContext'
 import { useNotifications } from '../context/NotificationContext'
 
-// NPrep brand system: Midnight Blue / Clear Sky Blue / Ice Blue, plus a small
-// semantic status set kept separate from the 6-color brand palette and used
-// only inside status pills (per the brand's own "don't mix hues" rule).
-const P = '#131B63', PL = '#E5F0F8', PB = '#15CAE8', PD = '#0B1042'
-const T1 = '#131B63', T2 = '#5B6088', T3 = '#8790B8', BD = '#E1E6F2', BG2 = '#EDF5FA'
-const GREEN = '#16794C', GREEN_BG = '#E1F5EA', GREEN_BORDER = '#8FD6B2'
-const ORANGE = '#8A5A0F', ORANGE_BG = '#FCEFD7'
-const RED = '#B23A3A', RED_BG = '#FBE6E6', RED_BORDER = '#EFC0C0'
-const EXPERT = '#4B3B9E', CALLED = '#0E7C93'
+// NPrep app design system, sampled from the production homepage collaterals:
+// #008DFF action blue, #131B63 navy, near-black titles, #7F7F8A grey meta,
+// #888CB0 blue-grey labels, #F3F9FF page, #F1F4FF tiles, white cards/headers.
+const BLUE = '#008DFF', BLUE_TILE = '#F1F4FF'
+const P = '#131B63', PL = '#F1F4FF', PB = '#008DFF', PD = '#131B63'
+const T1 = '#16181D', T2 = '#62677D', T3 = '#888CB0', BD = '#E7EAF2', BG2 = '#F3F9FF'
+const GREY = '#7F7F8A'
+const GREEN = '#189A57', GREEN_BG = '#E9F8F0', GREEN_BORDER = '#BDE8D2'
+const ORANGE = '#C98A1B', ORANGE_BG = '#FDF4E3'
+const RED = '#E5484D', RED_BG = '#FDECED', RED_BORDER = '#F5C6C8'
+const EXPERT = '#131B63', CALLED = '#008DFF'
 
 // Category identity is icon + label only (no per-category hue) — status pills
 // carry the semantic color instead, so the palette never exceeds the brand's
@@ -29,7 +31,7 @@ const CATEGORY_META = {
 
 const STAGE_FROM_STATUS = { raised: 0, received: 1, assigned: 2, resolved: 3, escalated: 4, escalation_closed: 5 }
 const STAGE_LABELS = ['Sent', 'Team on it', 'Expert on it', 'Solved', 'Extra mile', 'Called']
-const STAGE_COLORS = [PB, ORANGE, EXPERT, GREEN, RED, CALLED]
+const STAGE_COLORS = [T3, ORANGE, P, GREEN, RED, BLUE]
 
 // Single, consistent doubt icon — categories no longer carry per-category color or
 // emoji, so one clean mark used everywhere is clearer than an empty badge.
@@ -238,7 +240,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
   if (isExpired) return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8 }}><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
-      <div style={{ fontSize: 13, fontWeight: 800, color: T1, marginBottom: 6 }}>Ticket auto-closed</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 6 }}>Ticket auto-closed</div>
       <div style={{ fontSize: 11, color: T2, lineHeight: 1.6 }}>The 48-hour response window has passed. This ticket has been automatically closed.</div>
       <div style={{ marginTop: 10, fontSize: 11, color: P }}>Still have a doubt? Raise a new query and our team will help.</div>
     </div>
@@ -246,7 +248,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
 
   if (step === 'up_done') return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
-      <div style={{ fontSize: 14, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Great, glad it helped!</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: '#14532D', marginBottom: 4 }}>Great, glad it helped!</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>Your ticket is now closed. Keep learning — NPrep's got your back.</div>
     </div>
   )
@@ -339,7 +341,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
 
   if (step === 'high_up') return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
-      <div style={{ fontSize: 14, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Glad it helped!</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: '#14532D', marginBottom: 4 }}>Glad it helped!</div>
       <div style={{ fontSize: 13, fontWeight: 700, color: PD, marginBottom: 8 }}>
         {ratingLabel(existingStars)}
       </div>
@@ -356,7 +358,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
           if (highUpNote.trim()) setResolutionRating(query.ticket_id, existingStars, highUpNote.trim())
           setStep('up_done')
         }}
-        style={{ width: '100%', padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+        style={{ width: '100%', padding: '11px', borderRadius: 24, background: BLUE, color: 'white', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
         Done
       </button>
     </div>
@@ -414,7 +416,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
           />
           <button
             onClick={() => { setResolutionRating(query.ticket_id, reRating, reNote.trim()); setStep('up_done') }}
-            style={{ width: '100%', padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+            style={{ width: '100%', padding: '11px', borderRadius: 24, background: BLUE, color: 'white', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginBottom: 8 }}>
             Submit
           </button>
         </>
@@ -473,13 +475,13 @@ function ThumbsFeedback({ resolvedAt, query }) {
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
                   padding: '10px 8px', borderRadius: 10,
-                  border: `2px solid ${active ? P : BD}`,
-                  background: active ? PL : 'white',
+                  border: `1.5px solid ${active ? BLUE : BD}`,
+                  background: active ? BLUE_TILE : 'white',
                   cursor: 'pointer',
                   transition: 'border-color 0.15s, background 0.15s',
                 }}>
-                <strong style={{ fontSize: 13, color: active ? PD : T1 }}>{slotDayLabel(date)}</strong>
-                <span style={{ fontSize: 10, color: active ? P : T2 }}>{slotDateSub(date)}</span>
+                <strong style={{ fontSize: 13, color: active ? BLUE : T1 }}>{slotDayLabel(date)}</strong>
+                <span style={{ fontSize: 10, color: active ? BLUE : T2 }}>{slotDateSub(date)}</span>
               </button>
             )
           })}
@@ -496,8 +498,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
                 onClick={() => !past && setSchedSlot(idx)}
                 style={{
                   padding: '10px 4px', borderRadius: 8, fontSize: 12, fontWeight: 700,
-                  border: `1.5px solid ${sel ? P : BD}`,
-                  background: sel ? P : past ? BG2 : 'white',
+                  border: `1.5px solid ${sel ? BLUE : BD}`,
+                  background: sel ? BLUE : past ? BG2 : 'white',
                   color: sel ? 'white' : past ? T3 : T1,
                   cursor: past ? 'not-allowed' : 'pointer',
                   textDecoration: past ? 'line-through' : 'none',
@@ -532,7 +534,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
     const bookedDate  = schedDays[schedDay]
     return (
       <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-        <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: T1, marginBottom: 6 }}>
           {usedOwnNumber ? "We've got you." : 'Got it!'}
         </div>
         <div style={{ fontSize: 12, color: T2, lineHeight: 1.7, marginBottom: 14 }}>
@@ -547,7 +549,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }} />
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#92400E' }}>Call scheduled</span>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#92400E' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>
                 {slotDayLabel(bookedDate)}, {slotDateSub(bookedDate)} · {bookedSlot.label}
               </div>
             </div>
@@ -583,12 +585,12 @@ function ThumbsFeedback({ resolvedAt, query }) {
   // Student cancelled a booked call before it happened
   if (step === 'call_cancelled') return (
     <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-      <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>Call cancelled</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: T1, marginBottom: 6 }}>Call cancelled</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.6, marginBottom: 14 }}>
         No worries — we won't call you at that time. Changed your mind?
       </div>
       <button onClick={() => setStep('call_confirm')}
-        style={{ width: '100%', padding: '12px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+        style={{ width: '100%', padding: '12px', borderRadius: 24, background: BLUE, color: 'white', border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
         Request a call again
       </button>
     </div>
@@ -597,12 +599,12 @@ function ThumbsFeedback({ resolvedAt, query }) {
   // No-show / missed-call — student reports the scheduled call never came through
   if (step === 'call_missed') return (
     <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-      <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>Sorry we missed you</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: T1, marginBottom: 6 }}>Sorry we missed you</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.6, marginBottom: 14 }}>
         Looks like our call didn't reach you. Let's pick another time — we'll make sure someone calls you then.
       </div>
       <button onClick={() => { setSchedSlot(null); setStep('slot_pick') }}
-        style={{ width: '100%', padding: '12px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+        style={{ width: '100%', padding: '12px', borderRadius: 24, background: BLUE, color: 'white', border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 8 }}>
         Reschedule the call
       </button>
       <button onClick={() => setStep('call_done')}
@@ -640,7 +642,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <button onClick={() => { setUsedOwnNumber(false); setStep('call_enter') }} style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
           No, use different
         </button>
-        <button onClick={() => { setUsedOwnNumber(true); setStep('slot_pick') }} style={{ padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+        <button onClick={() => { setUsedOwnNumber(true); setStep('slot_pick') }} style={{ padding: '11px', borderRadius: 24, background: BLUE, color: 'white', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
           Schedule a call
         </button>
       </div>
@@ -695,7 +697,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
             value={otp[idx]} maxLength={1} inputMode="numeric"
             onChange={e => handleOtpChange(idx, e.target.value)}
             onKeyDown={e => handleOtpKey(idx, e)}
-            style={{ width: 50, height: 56, textAlign: 'center', fontSize: 24, fontWeight: 800, color: otpError ? RED : T1, borderRadius: 10, border: `2px solid ${otpError ? RED_BORDER : otp[idx] ? P : BD}`, outline: 'none', fontFamily: 'inherit', background: otpError ? RED_BG : 'white', transition: 'border-color 0.15s' }}
+            style={{ width: 50, height: 56, textAlign: 'center', fontSize: 24, fontWeight: 700, color: otpError ? RED : T1, borderRadius: 10, border: `2px solid ${otpError ? RED_BORDER : otp[idx] ? P : BD}`, outline: 'none', fontFamily: 'inherit', background: otpError ? RED_BG : 'white', transition: 'border-color 0.15s' }}
           />
         ))}
       </div>
@@ -723,7 +725,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <button onClick={() => setStep('high_up')}
           onMouseEnter={() => setHoveredThumb('up')}
           onMouseLeave={() => setHoveredThumb(null)}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 14, border: `2px solid ${hoveredThumb === 'up' ? GREEN : GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer', transform: hoveredThumb === 'up' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)', boxShadow: hoveredThumb === 'up' ? '0 8px 20px rgba(34,197,94,0.3)' : '0 2px 0 #86EFAC', transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${hoveredThumb === 'up' ? GREEN : BD}`, background: 'white', cursor: 'pointer', transition: 'border-color 0.18s' }}>
           <ThumbUpIcon size={24} color={GREEN} />
           <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, this helped!</span>
           <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Glad we could help</span>
@@ -731,7 +733,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <button onClick={() => setStep('high_warn')}
           onMouseEnter={() => setHoveredThumb('down')}
           onMouseLeave={() => setHoveredThumb(null)}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 14, border: `2px solid ${hoveredThumb === 'down' ? RED : RED_BORDER}`, background: RED_BG, cursor: 'pointer', transform: hoveredThumb === 'down' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)', boxShadow: hoveredThumb === 'down' ? '0 8px 20px rgba(220,38,38,0.25)' : '0 2px 0 #FECACA', transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `1.5px solid ${hoveredThumb === 'down' ? RED : BD}`, background: 'white', cursor: 'pointer', transition: 'border-color 0.18s' }}>
           <ThumbDownIcon size={24} color={RED} />
           <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Want to talk it through</span>
           <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>We'll reach out personally</span>
@@ -777,12 +779,10 @@ function ThumbsFeedback({ resolvedAt, query }) {
           onMouseLeave={() => setHoveredThumb(null)}
           style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-            padding: '14px 10px', borderRadius: 14,
-            border: `2px solid ${hoveredThumb === 'up' ? GREEN : GREEN_BORDER}`,
-            background: GREEN_BG, cursor: 'pointer',
-            transform: hoveredThumb === 'up' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)',
-            boxShadow: hoveredThumb === 'up' ? `0 8px 20px rgba(34,197,94,0.3)` : '0 2px 0 #86EFAC',
-            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            padding: '14px 10px', borderRadius: 12,
+            border: `1.5px solid ${hoveredThumb === 'up' ? GREEN : BD}`,
+            background: 'white', cursor: 'pointer',
+            transition: 'border-color 0.18s',
           }}
         >
           <ThumbUpIcon size={24} color={GREEN} />
@@ -805,12 +805,10 @@ function ThumbsFeedback({ resolvedAt, query }) {
           onMouseLeave={() => setHoveredThumb(null)}
           style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-            padding: '14px 10px', borderRadius: 14,
-            border: `2px solid ${hoveredThumb === 'down' ? RED : RED_BORDER}`,
-            background: RED_BG, cursor: 'pointer',
-            transform: hoveredThumb === 'down' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)',
-            boxShadow: hoveredThumb === 'down' ? `0 8px 20px rgba(220,38,38,0.25)` : '0 2px 0 #FECACA',
-            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            padding: '14px 10px', borderRadius: 12,
+            border: `1.5px solid ${hoveredThumb === 'down' ? RED : BD}`,
+            background: 'white', cursor: 'pointer',
+            transition: 'border-color 0.18s',
           }}
         >
           <ThumbDownIcon size={24} color={RED} />
@@ -847,7 +845,7 @@ function EscalationRating({ query }) {
       <div style={{ fontSize: 15, fontWeight: 700, color: PD, marginBottom: 8 }}>
         {ratingLabel(rating)}
       </div>
-      <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Thanks for your feedback!</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#14532D', marginBottom: 4 }}>Thanks for your feedback!</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>Your rating helps us improve our support quality.</div>
     </div>
   )
@@ -872,7 +870,7 @@ function EscalationRating({ query }) {
             style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${P}`, fontSize: 12, color: T1, resize: 'none', fontFamily: 'inherit', outline: 'none', background: BG2, boxSizing: 'border-box', marginBottom: 10 }}
           />
           <button onClick={submit}
-            style={{ width: '100%', padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+            style={{ width: '100%', padding: '11px', borderRadius: 24, background: BLUE, color: 'white', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginBottom: 8 }}>
             Submit
           </button>
         </>
@@ -984,7 +982,7 @@ function CallRequestFlow({ agent, onClose }) {
   if (step === 'done') return (
     <div style={{ padding: '14px 14px 10px', borderRadius: 12, background: '#F0FDF4', border: '1.5px solid #86EFAC' }}>
       <div style={{ textAlign: 'center', marginBottom: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D', marginBottom: 3 }}>Call Requested!</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#14532D', marginBottom: 3 }}>Call Requested!</div>
         <div style={{ fontSize: 11, color: '#166534', lineHeight: 1.6 }}>
           {agent.name} from <strong>{agent.team}</strong> will call you on <strong>{finalPhone}</strong> within 24 hours.
         </div>
@@ -1013,7 +1011,7 @@ function CallRequestFlow({ agent, onClose }) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <button onClick={() => setStep('enter')} style={{ padding: '11px', borderRadius: 10, background: 'white', color: T2, border: `1px solid ${BD}`, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>No, use different</button>
-        <button onClick={() => setStep('done')} style={{ padding: '11px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Schedule a call</button>
+        <button onClick={() => setStep('done')} style={{ padding: '11px', borderRadius: 24, background: BLUE, color: 'white', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Schedule a call</button>
       </div>
     </div>
   )
@@ -1065,7 +1063,7 @@ function CallRequestFlow({ agent, onClose }) {
             value={otp[idx]} maxLength={1} inputMode="numeric"
             onChange={e => handleOtpChange(idx, e.target.value)}
             onKeyDown={e => handleOtpKey(idx, e)}
-            style={{ width: 50, height: 56, textAlign: 'center', fontSize: 24, fontWeight: 800, color: otpError ? RED : T1, borderRadius: 10, border: `2px solid ${otpError ? RED_BORDER : otp[idx] ? P : BD}`, outline: 'none', fontFamily: 'inherit', background: otpError ? RED_BG : 'white', transition: 'border-color 0.15s' }}
+            style={{ width: 50, height: 56, textAlign: 'center', fontSize: 24, fontWeight: 700, color: otpError ? RED : T1, borderRadius: 10, border: `2px solid ${otpError ? RED_BORDER : otp[idx] ? P : BD}`, outline: 'none', fontFamily: 'inherit', background: otpError ? RED_BG : 'white', transition: 'border-color 0.15s' }}
           />
         ))}
       </div>
@@ -1119,7 +1117,7 @@ function CallRequestSection({ agent }) {
         : (
           <button
             onClick={() => setShowCallFlow(true)}
-            style={{ width: '100%', padding: '12px', borderRadius: 10, background: P, color: 'white', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            style={{ width: '100%', padding: '12px', borderRadius: 24, background: BLUE, color: 'white', border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.64a19.79 19.79 0 01-2.93-8.63A2 2 0 012.11 0H5a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
@@ -1245,7 +1243,7 @@ function ResolutionRatingPopup({ popup, onSubmit, onClose }) {
         <div style={{ fontSize: 15, fontWeight: 700, color: PD, textAlign: 'center', marginBottom: 10 }}>
           {ratingLabel(popup.stars)}
         </div>
-        <div style={{ fontSize: 15, fontWeight: 800, color: T1, textAlign: 'center', marginBottom: 6 }}>Help us improve</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: T1, textAlign: 'center', marginBottom: 6 }}>Help us improve</div>
         <div style={{ fontSize: 12, color: T2, textAlign: 'center', lineHeight: 1.65, marginBottom: 16 }}>
           {msg}<br/>
           <span style={{ color: T3 }}>Was the explanation unclear? Did you disagree with the answer? Let us know — we'll try to reach out.</span>
@@ -1309,7 +1307,7 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
   return (
     <div style={{ display: 'flex', gap: 12, opacity: status === 'pending' ? 0.35 : 1 }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-        <div style={{ width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: status === 'done' ? GREEN : status === 'active' ? P : 'white', border: `2px solid ${status === 'done' ? GREEN : status === 'active' ? P : BD}`, boxShadow: status === 'active' ? `0 0 0 4px ${PL}` : 'none', animation: status === 'active' ? 'tl-pulse 2s ease-in-out infinite' : 'none', flexShrink: 0 }}>
+        <div style={{ width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: status === 'done' ? GREEN : status === 'active' ? BLUE : 'white', border: `2px solid ${status === 'done' ? GREEN : status === 'active' ? BLUE : BD}`, boxShadow: status === 'active' ? '0 0 0 4px #DCEEFF' : 'none', animation: status === 'active' ? 'tl-pulse 2s ease-in-out infinite' : 'none', flexShrink: 0 }}>
           {status === 'done'
             ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             : <div style={{ width: 7, height: 7, borderRadius: '50%', background: status === 'active' ? 'white' : BD }} />}
@@ -1342,13 +1340,13 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
         </p>
 
         {status === 'active' && step.key === 'assigned' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '8px 10px', background: PL, borderRadius: 8, border: `1px solid ${PB}` }}>
-            <div style={{ width: 26, height: 26, borderRadius: '50%', background: agent.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '8px 10px', background: BLUE_TILE, borderRadius: 10 }}>
+            <div style={{ width: 26, height: 26, borderRadius: '50%', background: P, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: 'white' }}>{agent.avatar}</span>
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: PD }}>{agent.name}</div>
-              <div style={{ fontSize: 10, color: P }}>{agent.team}</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: T1 }}>{agent.name}</div>
+              <div style={{ fontSize: 10, color: T3 }}>{agent.team}</div>
             </div>
             <div style={{ marginLeft: 'auto', width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'tl-pulse 1.5s ease-in-out infinite' }} />
           </div>
@@ -1402,24 +1400,28 @@ function ResolutionDetailView({ query, agent, onBack, onClose }) {
   const meta = CATEGORY_META[query.category] || CATEGORY_META['Others']
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header */}
-      <div style={{ background: `linear-gradient(140deg, ${GREEN}cc 0%, #166534 100%)`, padding: '12px 16px 16px', flexShrink: 0 }}>
+      {/* Header — white, app style */}
+      <div style={{ background: 'white', padding: '12px 16px 14px', flexShrink: 0, borderBottom: `1px solid ${BD}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+          <button onClick={onBack} style={{ background: 'white', border: `1px solid ${BD}`, cursor: 'pointer', width: 34, height: 34, borderRadius: '50%', color: T1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
           </button>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>Resolution</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>{ticketId(query.id)}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: T1 }}>Resolution</div>
+            <div style={{ fontSize: 11, color: GREY, marginTop: 1 }}>{ticketId(query.id)}</div>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'white', border: `1px solid ${BD}`, cursor: 'pointer', width: 34, height: 34, borderRadius: '50%', color: T1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
-        <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: '10px 12px', border: '1px solid rgba(255,255,255,0.25)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-            <DoubtIcon size={18} color="white" />
-            <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>{query.category}</span>
+        <div style={{ background: BLUE_TILE, borderRadius: 12, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 10, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <DoubtIcon size={18} color={P} />
           </div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{query.sub_option}</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 600, color: T3 }}>{query.category}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: T1, marginTop: 1 }}>{query.sub_option}</div>
+          </div>
         </div>
       </div>
 
@@ -1435,11 +1437,11 @@ function ResolutionDetailView({ query, agent, onBack, onClose }) {
         {/* Full resolution */}
         <div style={{ background: GREEN_BG, borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, padding: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Resolution</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Resolution</div>
           </div>
           <p style={{ fontSize: 13, color: '#14532D', lineHeight: 1.7, margin: 0 }}>{query.resolution_text}</p>
           <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 24, height: 24, borderRadius: '50%', background: GREEN, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'white', fontWeight: 800, flexShrink: 0 }}>
+            <div style={{ width: 24, height: 24, borderRadius: '50%', background: GREEN, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'white', fontWeight: 700, flexShrink: 0 }}>
               {agent.name?.[0] || 'T'}
             </div>
             <div>
@@ -1488,44 +1490,46 @@ function QueryDetailView({ query, onBack, onClose }) {
     ...(stage >= 4 ? [{ key: 'call_closed',  title: 'Your experience matters to us', desc: null }] : []),
   ]
 
-  const badgeMeta = stage >= 5 ? { bg: '#E0F8FC', color: CALLED, border: '#A6E7F1' }
-    : stage === 4 ? { bg: RED_BG, color: RED, border: RED_BORDER }
-    : stage === 3 ? { bg: GREEN_BG, color: GREEN, border: GREEN_BORDER }
-    : { bg: PL, color: P, border: PB }
+  const statusColor = STAGE_COLORS[stage] || T3
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header */}
-      <div style={{ background: `linear-gradient(140deg, ${badgeMeta.color}ee 0%, ${badgeMeta.color} 100%)`, padding: '12px 16px 16px', flexShrink: 0 }}>
+      {/* Header — white, app style */}
+      <div style={{ background: 'white', padding: '12px 16px 14px', flexShrink: 0, borderBottom: `1px solid ${BD}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+          <button onClick={onBack} style={{ background: 'white', border: `1px solid ${BD}`, cursor: 'pointer', width: 34, height: 34, borderRadius: '50%', color: T1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
           </button>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.9)', fontFamily: 'monospace' }}>{ticketId(query.id)}</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>Raised {timeAgo(query.timestamp)}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: T1 }}>{ticketId(query.id)}</div>
+            <div style={{ fontSize: 11, color: GREY, marginTop: 1 }}>Raised {timeAgo(query.timestamp)}</div>
           </div>
-          <div style={{ padding: '5px 12px', borderRadius: 20, fontSize: 11, fontWeight: 800, background: 'rgba(255,255,255,0.22)', color: 'white', border: '1.5px solid rgba(255,255,255,0.45)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 600, color: statusColor, flexShrink: 0 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor }} />
             {STAGE_LABELS[stage] || 'Unknown'}
-          </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          </span>
+          <button onClick={onClose} style={{ background: 'white', border: `1px solid ${BD}`, cursor: 'pointer', width: 34, height: 34, borderRadius: '50%', color: T1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
-        <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', borderRadius: 12, padding: '10px 12px', border: '1px solid rgba(255,255,255,0.25)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-            <DoubtIcon size={18} color="white" />
-            <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>{query.category}</span>
+        <div style={{ background: BLUE_TILE, borderRadius: 12, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 10, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <DoubtIcon size={18} color={P} />
           </div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{query.sub_option}</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 600, color: T3 }}>{query.category}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: T1, marginTop: 1 }}>{query.sub_option}</div>
+          </div>
         </div>
       </div>
 
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
         {/* Status banner */}
         {stage < 3 && (
-          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2, border: `2px solid ${stage === 2 ? PB : stage === 1 ? '#FED7AA' : BD}`, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: stage === 2 ? P : stage === 1 ? ORANGE : T3, flexShrink: 0 }} />
+          <div style={{ marginBottom: 16, padding: '11px 14px', borderRadius: 12, background: stage === 1 ? ORANGE_BG : BLUE_TILE, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: stage === 2 ? BLUE : stage === 1 ? ORANGE : T3, flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: stage === 2 ? PD : stage === 1 ? '#92400E' : T1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T1 }}>
                 {stage === 0 && 'Doubt bheja! Ab wait karo'}
                 {stage === 1 && 'Team dekh rahi hai isko'}
                 {stage === 2 && `${agent.name} personally le raha hai`}
@@ -1539,29 +1543,29 @@ function QueryDetailView({ query, onBack, onClose }) {
           </div>
         )}
         {stage === 3 && (
-          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: GREEN_BG, border: `2px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
+          <div style={{ marginBottom: 16, padding: '11px 14px', borderRadius: 12, background: GREEN_BG, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D' }}>Cleared!</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#14532D' }}>Cleared!</div>
               <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>Your doubt has been resolved</div>
             </div>
           </div>
         )}
         {stage === 4 && (
-          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: RED_BG, border: `2px solid ${RED_BORDER}`, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: RED, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }} />
+          <div style={{ marginBottom: 16, padding: '11px 14px', borderRadius: 12, background: RED_BG, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: RED, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: RED }}>Extra mile pe chal rahe hain!</div>
-              <div style={{ fontSize: 11, color: '#B91C1C', marginTop: 2 }}>Call schedule ho rahi hai — phone paas rakhna</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#A02F33' }}>Extra mile pe chal rahe hain!</div>
+              <div style={{ fontSize: 11, color: '#B95658', marginTop: 2 }}>Call schedule ho rahi hai — phone paas rakhna</div>
             </div>
           </div>
         )}
         {stage === 5 && (
-          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: '#E0F8FC', border: `2px solid #A6E7F1`, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: CALLED, flexShrink: 0 }} />
+          <div style={{ marginBottom: 16, padding: '11px 14px', borderRadius: 12, background: BLUE_TILE, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: BLUE, flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#0A5C6E' }}>Ek extra call bhi ho gaya!</div>
-              <div style={{ fontSize: 11, color: CALLED, marginTop: 2 }}>Humein umeed hai ab sab clear ho gaya hoga</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T1 }}>Ek extra call bhi ho gaya!</div>
+              <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>Humein umeed hai ab sab clear ho gaya hoga</div>
             </div>
           </div>
         )}
@@ -1574,27 +1578,13 @@ function QueryDetailView({ query, onBack, onClose }) {
               <span style={{ fontSize: 10, fontWeight: 700, color: P, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Question Context</span>
             </div>
             <div style={{ padding: '10px 12px', background: 'white' }}>
-              {(query.subject_name || query.test_name) && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: query.question_text ? 9 : 0 }}>
-                  {query.subject_name && (
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: PL, color: P, border: `1px solid ${PB}` }}>
-                      {query.subject_name}
-                    </span>
-                  )}
-                  {query.test_name && (
-                    <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 20, background: BG2, color: T2, border: `1px solid ${BD}` }}>
-                      {query.test_name}
-                    </span>
-                  )}
-                  {query.question_num && (
-                    <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 20, background: BG2, color: T3, border: `1px solid ${BD}` }}>
-                      Q{query.question_num}
-                    </span>
-                  )}
+              {(query.subject_name || query.test_name || query.question_num) && (
+                <div style={{ fontSize: 11, color: GREY, marginBottom: query.question_text ? 8 : 0 }}>
+                  {[query.subject_name, query.test_name, query.question_num ? `Q${query.question_num}` : null].filter(Boolean).join(' · ')}
                 </div>
               )}
               {query.question_text && (
-                <div style={{ fontSize: 11, color: T1, lineHeight: 1.6, fontStyle: 'italic', borderLeft: `3px solid ${PB}`, paddingLeft: 10 }}>
+                <div style={{ fontSize: 11.5, color: T1, lineHeight: 1.6, fontStyle: 'italic', borderLeft: `3px solid ${BLUE}`, paddingLeft: 10 }}>
                   "{query.question_text.length > 140 ? query.question_text.slice(0, 137) + '…' : query.question_text}"
                 </div>
               )}
@@ -1643,61 +1633,48 @@ function QueryCard({ query, onClick, onLowRating, index = 0 }) {
     }
   }
 
-  const accentColor = stage >= 5 ? CALLED : stage === 4 ? RED : stage === 3 ? GREEN : stage === 2 ? EXPERT : stage === 1 ? ORANGE : PB
-  const badgeBg     = stage >= 5 ? '#E0F8FC' : stage === 4 ? RED_BG : stage === 3 ? GREEN_BG : stage === 2 ? '#EAE7FB' : stage === 1 ? ORANGE_BG : BG2
+  const accentColor = STAGE_COLORS[stage] || T3
 
   return (
     <div
       onClick={onClick}
       style={{
         background: 'white',
-        borderRadius: 16,
-        border: `2px solid ${accentColor}22`,
-        borderLeftColor: accentColor, borderLeftWidth: 5,
-        boxShadow: `0 4px 0 ${accentColor}22, 0 1px 8px rgba(0,0,0,0.05)`,
+        borderRadius: 14,
+        border: `1px solid ${BD}`,
         cursor: 'pointer',
-        padding: '14px 14px 14px 12px',
+        padding: '13px 14px',
         display: 'flex', gap: 12, alignItems: 'flex-start',
         opacity: 0,
-        animation: `qmsCardIn 0.42s cubic-bezier(0.4,0,0.2,1) ${Math.min(index * 0.06, 0.42)}s forwards`,
-        transition: 'transform 0.22s cubic-bezier(0.4,0,0.2,1), box-shadow 0.22s cubic-bezier(0.4,0,0.2,1)',
+        animation: `qmsCardIn 0.42s cubic-bezier(0.4,0,0.2,1) ${Math.min(index * 0.05, 0.35)}s forwards`,
+        transition: 'border-color 0.18s',
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 6px 0 ${accentColor}22, 0 4px 16px rgba(0,0,0,0.08)` }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 0 ${accentColor}22, 0 1px 8px rgba(0,0,0,0.05)` }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9D4EA' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = BD }}
     >
-      <div style={{ width: 48, height: 48, borderRadius: 14, background: meta.bg, border: `2px solid ${accentColor}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <DoubtIcon size={22} color={accentColor} />
+      <div style={{ width: 40, height: 40, borderRadius: 12, background: BLUE_TILE, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <DoubtIcon size={20} color={P} />
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Status badge top-right */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6, marginBottom: 4 }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: T1, lineHeight: 1.3, flex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+          <span style={{ fontSize: 13.5, fontWeight: 600, color: T1, lineHeight: 1.35, flex: 1 }}>
             {query.sub_option}
           </span>
-          <span style={{ fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 20, background: badgeBg, color: accentColor, border: `1.5px solid ${accentColor}55`, flexShrink: 0, whiteSpace: 'nowrap' }}>
-            {STAGE_LABELS[stage] || '?'}
-          </span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><polyline points="9,18 15,12 9,6"/></svg>
         </div>
 
-        <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, color: meta.color, background: meta.bg, padding: '2px 7px', borderRadius: 6, marginBottom: 8 }}>
-          {query.category}
-        </span>
-
-        {/* Subject chip */}
-        {query.subject_name && (
-          <div style={{ marginBottom: 8 }}>
-            <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 20, background: PL, color: P, border: `1px solid ${PB}` }}>{query.subject_name}</span>
-          </div>
-        )}
+        <div style={{ fontSize: 11, color: GREY, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {query.category}{query.subject_name ? ` · ${query.subject_name}` : ''}
+        </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: T3, fontFamily: 'monospace' }}>{ticketId(query.id)}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <span style={{ fontSize: 10, color: T3 }}>{timeAgo(query.timestamp)}</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2.5" strokeLinecap="round"><polyline points="9,18 15,12 9,6"/></svg>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+          <span style={{ fontSize: 10.5, color: T3 }}>{ticketId(query.id)} · {timeAgo(query.timestamp)}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: accentColor }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: accentColor }} />
+            {STAGE_LABELS[stage] || '?'}
+          </span>
         </div>
       </div>
     </div>
@@ -1717,51 +1694,50 @@ function QueriesView({ queries, onClose, onSelect }) {
     : queries.filter(q => q.status === 'resolved')
 
   const STAT_ITEMS = [
-    { label: 'Raised',    value: queries.length, key: 'all',      color: P,      bg: PL,        border: PB },
-    { label: 'In review', value: activeCount,    key: 'active',   color: ORANGE, bg: ORANGE_BG, border: '#FED7AA' },
-    { label: 'Solved',    value: resolvedCount,  key: 'resolved', color: GREEN,  bg: GREEN_BG,  border: GREEN_BORDER },
+    { label: 'Raised',    value: queries.length, key: 'all' },
+    { label: 'In review', value: activeCount,    key: 'active' },
+    { label: 'Solved',    value: resolvedCount,  key: 'resolved' },
   ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header */}
-      <div style={{ background: `linear-gradient(140deg, ${P} 0%, ${PD} 100%)`, padding: '12px 16px 14px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 17, fontWeight: 900, color: 'white', letterSpacing: '-0.3px' }}>My Doubts</div>
-          </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-        </div>
+      {/* Header — white, app style */}
+      <div style={{ background: 'white', padding: '14px 16px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ flex: 1, fontSize: 17, fontWeight: 700, color: T1, letterSpacing: '-0.2px' }}>My Doubts</div>
+        <button onClick={onClose} style={{ background: 'white', border: `1px solid ${BD}`, cursor: 'pointer', width: 34, height: 34, borderRadius: '50%', color: T1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
-      {/* Stats strip — each card is the filter */}
+      {/* Stats strip — flat tabs, blue underline marks the active filter */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        {STAT_ITEMS.map((s, i) => {
+        {STAT_ITEMS.map(s => {
           const active = filter === s.key
           return (
             <button key={s.key} onClick={() => setFilter(s.key)}
-              style={{ padding: '12px 6px', textAlign: 'center', cursor: 'pointer', border: 'none', borderRight: i < 2 ? `1px solid ${BD}` : 'none', borderBottom: `3px solid ${active ? s.color : 'transparent'}`, background: active ? s.bg : 'white', transition: 'all 0.18s' }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: active ? s.color : T1, lineHeight: 1.1, transition: 'color 0.18s' }}>{s.value}</div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: active ? s.color : T3, marginTop: 2, transition: 'color 0.18s' }}>{s.label}</div>
+              style={{ padding: '8px 6px 10px', textAlign: 'center', cursor: 'pointer', border: 'none', background: 'white', position: 'relative', transition: 'all 0.18s' }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: active ? BLUE : P, lineHeight: 1.15, transition: 'color 0.18s' }}>{s.value}</div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: active ? BLUE : GREY, marginTop: 1, transition: 'color 0.18s' }}>{s.label}</div>
+              <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: 0, width: 40, height: 3, borderRadius: '3px 3px 0 0', background: active ? BLUE : 'transparent', transition: 'background 0.18s' }} />
             </button>
           )
         })}
       </div>
 
       {/* Query list */}
-      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 14px 24px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
+      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 24px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
         {filtered.length === 0 ? (
           queries.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '48px 0' }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>No doubts raised yet</div>
-              <div style={{ fontSize: 12, color: T3, marginTop: 4, lineHeight: 1.6 }}>Tap "Having trouble? Report" on any question to raise your first one.</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: T1 }}>No doubts raised yet</div>
+              <div style={{ fontSize: 12, color: GREY, marginTop: 4, lineHeight: 1.6 }}>Tap "Having trouble? Report" on any question to raise your first one.</div>
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '48px 0' }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: T1 }}>
                 {filter === 'resolved' ? 'Nothing solved yet' : 'Nothing in review right now'}
               </div>
-              <div style={{ fontSize: 12, color: T3, marginTop: 4, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 12, color: GREY, marginTop: 4, lineHeight: 1.6 }}>
                 {filter === 'resolved' ? 'Solved doubts will show up here once the team responds.' : 'Everything you\'ve raised has already been looked at.'}
               </div>
             </div>

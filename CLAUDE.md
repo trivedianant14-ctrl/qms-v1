@@ -17,8 +17,11 @@ const [screen, setScreen] = useState('home')
   NPrep app's sidebar. This supersedes the old "Profile button removed" lock below,
   which described a prior iteration and no longer applies.
 - `My Doubts` in the sidebar opens `<QueryTracker>` directly into the doubts list
-  (no intermediate profile screen) — restyled to the NPrep brand system (Midnight
-  Blue / Sky Blue / Ice Blue), no emoji, no search bar, recent-first.
+  (no intermediate profile screen) — restyled to the production NPrep app design
+  system sampled from the official homepage collaterals: #008DFF action blue,
+  #131B63 navy, white headers (no gradients), #F3F9FF page ground, #F1F4FF icon
+  tiles, Poppins. No emoji, no search bar, minimal badging (dot + text statuses,
+  no loud pills), recent-first.
 - Do not reintroduce the old avatar-circle "Profile" tab button or a separate
   `ProfileHome` menu screen — the sidebar is the single entry point now.
 
