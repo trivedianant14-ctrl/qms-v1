@@ -16,20 +16,49 @@ const EXPERT = '#4B3B9E', CALLED = '#0E7C93'
 // carry the semantic color instead, so the palette never exceeds the brand's
 // approved set on any one card.
 const CATEGORY_META = {
-  'Problem with the Answer':    { color: P, bg: PL, abbr: '❌' },
-  "Can't See Something":        { color: P, bg: PL, abbr: '🔍' },
-  'I Have a Doubt':             { color: P, bg: PL, abbr: '🤔' },
-  'Problem with this Question': { color: P, bg: PL, abbr: '⚠️' },
-  'Problem with the Audio Solution': { color: P, bg: PL, abbr: '🎧' },
-  Others:                       { color: P, bg: PL, abbr: '💬' },
-  'Wrong Answer':               { color: P, bg: PL, abbr: '❌' },
-  'Explanation Gap':            { color: P, bg: PL, abbr: '💡' },
-  'Not the Right Question':     { color: P, bg: PL, abbr: '⚠️' },
+  'Problem with the Answer':    { color: P, bg: PL },
+  "Can't See Something":        { color: P, bg: PL },
+  'I Have a Doubt':             { color: P, bg: PL },
+  'Problem with this Question': { color: P, bg: PL },
+  'Problem with the Audio Solution': { color: P, bg: PL },
+  Others:                       { color: P, bg: PL },
+  'Wrong Answer':               { color: P, bg: PL },
+  'Explanation Gap':            { color: P, bg: PL },
+  'Not the Right Question':     { color: P, bg: PL },
 }
 
 const STAGE_FROM_STATUS = { raised: 0, received: 1, assigned: 2, resolved: 3, escalated: 4, escalation_closed: 5 }
-const STAGE_LABELS = ['Sent! 📨', 'Team on it 👀', 'Expert on it 🎯', 'Solved! 🎉', 'Extra mile 🔥', 'Called! ✨']
+const STAGE_LABELS = ['Sent', 'Team on it', 'Expert on it', 'Solved', 'Extra mile', 'Called']
 const STAGE_COLORS = [PB, ORANGE, EXPERT, GREEN, RED, CALLED]
+
+// Single, consistent doubt icon — categories no longer carry per-category color or
+// emoji, so one clean mark used everywhere is clearer than an empty badge.
+function DoubtIcon({ size = 16, color = P }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.7" />
+      <circle cx="12" cy="17" r="0.6" fill={color} stroke="none" />
+      <circle cx="12" cy="12" r="9.5" />
+    </svg>
+  )
+}
+
+function ThumbUpIcon({ size = 28, color = GREEN }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 22V11" /><path d="M2 13h4v9H2z" />
+      <path d="M7 11l4-8a2 2 0 0 1 2 2v5h5.5a2 2 0 0 1 2 2.4l-1.4 7A2 2 0 0 1 17.1 21H7" />
+    </svg>
+  )
+}
+function ThumbDownIcon({ size = 28, color = RED }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 2v11" /><path d="M22 11h-4V2h4z" />
+      <path d="M17 13l-4 8a2 2 0 0 1-2-2v-5H5.5a2 2 0 0 1-2-2.4l1.4-7A2 2 0 0 1 6.9 3H17" />
+    </svg>
+  )
+}
 
 const AGENTS = [
   { name: 'Priya S.',  team: 'Content QA',  avatar: 'P', color: P },
@@ -97,11 +126,18 @@ function slotDateSub(date) {
 
 // ── Thumbs Feedback ──────────────────────────────────────────────────────────
 const EMOJI_OPTIONS = [
-  { value: 1, emoji: '😔', label: 'Not really' },
-  { value: 3, emoji: '😐', label: 'Somewhat' },
-  { value: 5, emoji: '😊', label: 'Completely!' },
+  { value: 1, label: 'Not really' },
+  { value: 3, label: 'Somewhat' },
+  { value: 5, label: 'Completely!' },
 ]
 const EMOJI_LABELS = { 1: 'Not really', 3: 'Somewhat', 5: 'Completely!' }
+// Text label for a previously-captured rating, used anywhere a screen needs to
+// restate "you rated this ___" without an emoji face.
+function ratingLabel(stars) {
+  if (stars >= 4) return 'Completely!'
+  if (stars === 3) return 'Somewhat'
+  return 'Not really'
+}
 
 function EmojiRating({ rating, onRate }) {
   const [hovered, setHovered] = useState(null)
@@ -114,8 +150,8 @@ function EmojiRating({ rating, onRate }) {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
-      {EMOJI_OPTIONS.map(({ value, emoji, label }) => {
+    <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 10 }}>
+      {EMOJI_OPTIONS.map(({ value, label }) => {
         const isSelected = rating === value
         const isHov = hovered === value
         return (
@@ -124,21 +160,15 @@ function EmojiRating({ rating, onRate }) {
             onMouseEnter={() => setHovered(value)}
             onMouseLeave={() => setHovered(null)}
             style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
               background: isSelected ? PL : isHov ? `${PL}88` : 'transparent',
-              border: `2px solid ${isSelected ? P : isHov ? PB : 'transparent'}`,
-              borderRadius: 14, padding: '10px 14px', cursor: 'pointer',
-              transform: isHov && !isSelected ? 'translateY(-3px) scale(1.06)' : 'translateY(0) scale(1)',
-              boxShadow: isHov ? `0 6px 18px rgba(83,74,183,0.18)` : 'none',
-              transition: 'all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              border: `1.5px solid ${isSelected ? P : isHov ? PB : BD}`,
+              borderRadius: 12, padding: '12px 10px', cursor: 'pointer',
+              transform: lastSelected === value ? 'scale(0.97)' : 'scale(1)',
+              transition: 'all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)',
             }}>
-            <span style={{
-              fontSize: isHov ? 36 : 30,
-              display: 'block',
-              transition: 'font-size 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              animation: lastSelected === value ? 'emojiPop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-            }}>{emoji}</span>
-            <span style={{ fontSize: 10, fontWeight: 600, color: isSelected ? PD : isHov ? P : T3, transition: 'color 0.15s' }}>{label}</span>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: isSelected ? P : isHov ? PB : BD, transition: 'background 0.15s' }} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: isSelected ? PD : isHov ? P : T3, transition: 'color 0.15s' }}>{label}</span>
           </button>
         )
       })}
@@ -207,7 +237,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
 
   if (isExpired) return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
-      <div style={{ fontSize: 28, marginBottom: 8 }}>🔒</div>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={T3} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8 }}><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
       <div style={{ fontSize: 13, fontWeight: 800, color: T1, marginBottom: 6 }}>Ticket auto-closed</div>
       <div style={{ fontSize: 11, color: T2, lineHeight: 1.6 }}>The 48-hour response window has passed. This ticket has been automatically closed.</div>
       <div style={{ marginTop: 10, fontSize: 11, color: P }}>Still have a doubt? Raise a new query and our team will help.</div>
@@ -216,7 +246,6 @@ function ThumbsFeedback({ resolvedAt, query }) {
 
   if (step === 'up_done') return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
-      <div style={{ fontSize: 36, marginBottom: 8 }}>🎉</div>
       <div style={{ fontSize: 14, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Great, glad it helped!</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>Your ticket is now closed. Keep learning — NPrep's got your back.</div>
     </div>
@@ -232,8 +261,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
       <div style={{ fontSize: 12, color: T2, marginBottom: 16, textAlign: 'center' }}>Did {agentForQuery(query)?.name || 'our team'} clear your doubt?</div>
       <EmojiRating rating={rating} onRate={(n) => {
         setRating(n)
-        // #11 — 😔 selected
-        if (n === 1) queueNotification('Oops, sorry yaar 🙏', 'Team ko pata lag gaya. Jaldi better kaate hain.')
+        // #11 — "Not really" selected
+        if (n === 1) queueNotification('Oops, sorry yaar', 'Team ko pata lag gaya. Jaldi better kaate hain.')
       }} />
       {rating > 0 && (
         <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: rating <= 3 ? ORANGE : GREEN, marginBottom: 10 }}>
@@ -291,9 +320,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>Still confused?</div>
       </div>
       <div style={{ background: ORANGE_BG, border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
-        <div style={{ fontSize: 18, marginBottom: 6 }}>⚠️</div>
         <div style={{ fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
-          You reacted with {existingStars >= 4 ? '😊' : existingStars === 3 ? '😐' : '😔'} to this resolution. Are you sure you didn't understand the topic?
+          You reacted "{ratingLabel(existingStars)}" to this resolution. Are you sure you didn't understand the topic?
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -311,10 +339,9 @@ function ThumbsFeedback({ resolvedAt, query }) {
 
   if (step === 'high_up') return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
-      <div style={{ fontSize: 36, marginBottom: 8 }}>🎉</div>
       <div style={{ fontSize: 14, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Glad it helped!</div>
-      <div style={{ fontSize: 48, textAlign: 'center', marginBottom: 8 }}>
-        {existingStars >= 4 ? '😊' : existingStars === 3 ? '😐' : '😔'}
+      <div style={{ fontSize: 13, fontWeight: 700, color: PD, marginBottom: 8 }}>
+        {ratingLabel(existingStars)}
       </div>
       <div style={{ fontSize: 11, color: T2, marginBottom: 14 }}>Your feedback is saved.</div>
       <textarea
@@ -345,7 +372,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
       </div>
       <div style={{ background: ORANGE_BG, border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
         <div style={{ fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
-          You previously reacted with {existingStars === 3 ? '😐' : '😔'} to this resolution. Did you fully understand after reviewing the explanation?
+          You previously reacted "{ratingLabel(existingStars)}" to this resolution. Did you fully understand after reviewing the explanation?
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -505,7 +532,6 @@ function ThumbsFeedback({ resolvedAt, query }) {
     const bookedDate  = schedDays[schedDay]
     return (
       <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-        <div style={{ fontSize: 36, marginBottom: 10 }}>📞</div>
         <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>
           {usedOwnNumber ? "We've got you." : 'Got it!'}
         </div>
@@ -557,7 +583,6 @@ function ThumbsFeedback({ resolvedAt, query }) {
   // Student cancelled a booked call before it happened
   if (step === 'call_cancelled') return (
     <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-      <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
       <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>Call cancelled</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.6, marginBottom: 14 }}>
         No worries — we won't call you at that time. Changed your mind?
@@ -572,7 +597,6 @@ function ThumbsFeedback({ resolvedAt, query }) {
   // No-show / missed-call — student reports the scheduled call never came through
   if (step === 'call_missed') return (
     <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-      <div style={{ fontSize: 36, marginBottom: 10 }}>😞</div>
       <div style={{ fontSize: 14, fontWeight: 800, color: T1, marginBottom: 6 }}>Sorry we missed you</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.6, marginBottom: 14 }}>
         Looks like our call didn't reach you. Let's pick another time — we'll make sure someone calls you then.
@@ -595,10 +619,12 @@ function ThumbsFeedback({ resolvedAt, query }) {
         <button onClick={() => setStep('prompt')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, display: 'flex', padding: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
         </button>
-        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>We're here for you 💙</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: T1 }}>We're here for you</div>
       </div>
       <div style={{ background: PL, borderRadius: 10, padding: '10px 12px', marginBottom: 14, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 18, lineHeight: 1.2 }}>📞</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={PD} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 1 }}>
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.64a19.79 19.79 0 01-2.93-8.63A2 2 0 012.11 0H5a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+        </svg>
         <div style={{ fontSize: 12, color: PD, lineHeight: 1.6 }}>
           Some things are better explained on a call. One of our team members will reach out to you personally and take you through this step by step.
           <span style={{ fontWeight: 700 }}> Is this the right number to reach you?</span>
@@ -689,8 +715,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
     <div>
       <div style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>Did the resolution help?</div>
       <div style={{ fontSize: 11, color: T2, marginBottom: 10 }}>Your feedback helps us improve.</div>
-      <div style={{ fontSize: 40, textAlign: 'center', marginBottom: 4 }}>
-        {existingStars >= 4 ? '😊' : existingStars === 3 ? '😐' : '😔'}
+      <div style={{ fontSize: 15, fontWeight: 700, textAlign: 'center', color: PD, marginBottom: 4 }}>
+        {ratingLabel(existingStars)}
       </div>
       <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 14 }}>You reacted to this from your queries list</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
@@ -698,7 +724,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
           onMouseEnter={() => setHoveredThumb('up')}
           onMouseLeave={() => setHoveredThumb(null)}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 14, border: `2px solid ${hoveredThumb === 'up' ? GREEN : GREEN_BORDER}`, background: GREEN_BG, cursor: 'pointer', transform: hoveredThumb === 'up' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)', boxShadow: hoveredThumb === 'up' ? '0 8px 20px rgba(34,197,94,0.3)' : '0 2px 0 #86EFAC', transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
-          <span style={{ fontSize: 28, display: 'block', animation: hoveredThumb === 'up' ? 'thumbWiggle 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none' }}>👍</span>
+          <ThumbUpIcon size={24} color={GREEN} />
           <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, this helped!</span>
           <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Glad we could help</span>
         </button>
@@ -706,7 +732,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
           onMouseEnter={() => setHoveredThumb('down')}
           onMouseLeave={() => setHoveredThumb(null)}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 14, border: `2px solid ${hoveredThumb === 'down' ? RED : RED_BORDER}`, background: RED_BG, cursor: 'pointer', transform: hoveredThumb === 'down' ? 'translateY(-4px) scale(1.04)' : 'translateY(0) scale(1)', boxShadow: hoveredThumb === 'down' ? '0 8px 20px rgba(220,38,38,0.25)' : '0 2px 0 #FECACA', transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
-          <span style={{ fontSize: 28, display: 'block', animation: hoveredThumb === 'down' ? 'thumbWiggle 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none' }}>👎</span>
+          <ThumbDownIcon size={24} color={RED} />
           <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Want to talk it through</span>
           <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>We'll reach out personally</span>
         </button>
@@ -729,8 +755,8 @@ function ThumbsFeedback({ resolvedAt, query }) {
       <div style={{ fontSize: 11, color: T2, marginBottom: isLowRated ? 8 : 12 }}>Tap to tell us more — we'll reach out personally</div>
       {isLowRated && (
         <>
-          <div style={{ fontSize: 32, textAlign: 'center', marginBottom: 3 }}>
-            {existingStars === 3 ? '😐' : '😔'}
+          <div style={{ fontSize: 14, fontWeight: 700, textAlign: 'center', color: ORANGE, marginBottom: 3 }}>
+            {ratingLabel(existingStars)}
           </div>
           <div style={{ textAlign: 'center', fontSize: 10, color: T3, marginBottom: 12 }}>You reacted to this from your queries list</div>
         </>
@@ -743,7 +769,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
             setTimeout(() => {
               const latest = queriesRef.current.find(q => q.ticket_id === qId)
               if (latest && latest.resolution_star == null) {
-                queueNotification('Ek kaam aur banta hai 😏', 'Rating mat bhoolna yaar — ek second ka kaam hai.')
+                queueNotification('Ek kaam aur banta hai', 'Rating mat bhoolna yaar — ek second ka kaam hai.')
               }
             }, 10000)
           }}
@@ -759,22 +785,19 @@ function ThumbsFeedback({ resolvedAt, query }) {
             transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          <span style={{
-            fontSize: 28, display: 'block',
-            animation: hoveredThumb === 'up' ? 'thumbWiggle 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-          }}>👍</span>
+          <ThumbUpIcon size={24} color={GREEN} />
           <span style={{ fontSize: 12, fontWeight: 700, color: '#14532D' }}>Yes, this helped!</span>
           <span style={{ fontSize: 10, color: '#166534', textAlign: 'center', lineHeight: 1.4 }}>Glad we could help</span>
         </button>
         <button
           onClick={() => {
             setStep('call_confirm')
-            queueNotification('Noted, bilkul noted 🤝', 'Call arrange ho rahi hai. Hum khud samjhaayenge.')
+            queueNotification('Noted, bilkul noted', 'Call arrange ho rahi hai. Hum khud samjhaayenge.')
             const qId = query.ticket_id
             setTimeout(() => {
               const latest = queriesRef.current.find(q => q.ticket_id === qId)
               if (latest && !latest.escalation_resolved) {
-                queueNotification('Call aane waali hai, ready raho 📞', 'Team ne slot book kar liya hai. Phone paas rakhna.')
+                queueNotification('Call aane waali hai, ready raho', 'Team ne slot book kar liya hai. Phone paas rakhna.')
               }
             }, 15000)
           }}
@@ -790,10 +813,7 @@ function ThumbsFeedback({ resolvedAt, query }) {
             transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          <span style={{
-            fontSize: 28, display: 'block',
-            animation: hoveredThumb === 'down' ? 'thumbWiggle 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-          }}>👎</span>
+          <ThumbDownIcon size={24} color={RED} />
           <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>Want to talk it through</span>
           <span style={{ fontSize: 10, color: '#B91C1C', textAlign: 'center', lineHeight: 1.4 }}>We'll reach out personally</span>
         </button>
@@ -824,9 +844,8 @@ function EscalationRating({ query }) {
 
   if (submitted) return (
     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
-      <div style={{ fontSize: 34, marginBottom: 8 }}>🎉</div>
-      <div style={{ fontSize: 48, marginBottom: 8 }}>
-        {rating === 5 ? '😊' : rating === 3 ? '😐' : '😔'}
+      <div style={{ fontSize: 15, fontWeight: 700, color: PD, marginBottom: 8 }}>
+        {ratingLabel(rating)}
       </div>
       <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D', marginBottom: 4 }}>Thanks for your feedback!</div>
       <div style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>Your rating helps us improve our support quality.</div>
@@ -965,7 +984,6 @@ function CallRequestFlow({ agent, onClose }) {
   if (step === 'done') return (
     <div style={{ padding: '14px 14px 10px', borderRadius: 12, background: '#F0FDF4', border: '1.5px solid #86EFAC' }}>
       <div style={{ textAlign: 'center', marginBottom: 12 }}>
-        <div style={{ fontSize: 30, marginBottom: 6 }}>📞</div>
         <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D', marginBottom: 3 }}>Call Requested!</div>
         <div style={{ fontSize: 11, color: '#166534', lineHeight: 1.6 }}>
           {agent.name} from <strong>{agent.team}</strong> will call you on <strong>{finalPhone}</strong> within 24 hours.
@@ -1224,8 +1242,8 @@ function ResolutionRatingPopup({ popup, onSubmit, onClose }) {
   return (
     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }}>
       <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: 18, padding: '22px 18px', width: '100%', boxShadow: '0 12px 40px rgba(0,0,0,0.25)' }}>
-        <div style={{ fontSize: 52, textAlign: 'center', marginBottom: 14 }}>
-          {popup.stars >= 4 ? '😊' : popup.stars === 3 ? '😐' : '😔'}
+        <div style={{ fontSize: 15, fontWeight: 700, color: PD, textAlign: 'center', marginBottom: 10 }}>
+          {ratingLabel(popup.stars)}
         </div>
         <div style={{ fontSize: 15, fontWeight: 800, color: T1, textAlign: 'center', marginBottom: 6 }}>Help us improve</div>
         <div style={{ fontSize: 12, color: T2, textAlign: 'center', lineHeight: 1.65, marginBottom: 16 }}>
@@ -1282,7 +1300,7 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
         {!isLast && <div style={{ width: 2, flex: 1, minHeight: 40, background: BD, marginTop: 2, borderRadius: 1 }} />}
       </div>
       <div style={{ paddingBottom: isLast ? 0 : 18, flex: 1, minWidth: 0 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: T1 }}>Our team will take it personally 🎯</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: T1 }}>Our team will take it personally</span>
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: '2px 0 0' }}>We'll find the right person just for this</p>
       </div>
     </div>
@@ -1317,7 +1335,7 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
 
         <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, margin: 0 }}>
           {step.key === 'assigned' && status !== 'pending'
-            ? (step.title.includes('🔧')
+            ? (step.technical
                 ? 'They\'ll get back to you as soon as it\'s ready'
                 : 'Carefully reviewed and responded just for you')
             : step.desc}
@@ -1340,7 +1358,7 @@ function TimelineStep({ step, idx, activeIdx, agent, stepTimestamps, isLast, que
           <div style={{ marginTop: 8, background: BG2, borderRadius: 9, border: `1px solid ${BD}`, padding: '10px 12px' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Your original report</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-              <div style={{ width: 16, height: 16, borderRadius: 4, background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 800, color: meta.color, flexShrink: 0 }}>{meta.abbr}</div>
+              <div style={{ width: 16, height: 16, borderRadius: 4, background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><DoubtIcon size={10} color={meta.color} /></div>
               <span style={{ fontSize: 11, fontWeight: 700, color: meta.color }}>{query.category}</span>
             </div>
             <div style={{ fontSize: 11, color: T1, fontWeight: 500, marginBottom: 4 }}>{query.sub_option}</div>
@@ -1398,7 +1416,7 @@ function ResolutionDetailView({ query, agent, onBack, onClose }) {
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: '10px 12px', border: '1px solid rgba(255,255,255,0.25)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-            <span style={{ fontSize: 18 }}>{meta.abbr}</span>
+            <DoubtIcon size={18} color="white" />
             <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>{query.category}</span>
           </div>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{query.sub_option}</div>
@@ -1417,7 +1435,6 @@ function ResolutionDetailView({ query, agent, onBack, onClose }) {
         {/* Full resolution */}
         <div style={{ background: GREEN_BG, borderRadius: 12, border: `1.5px solid ${GREEN_BORDER}`, padding: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-            <span style={{ fontSize: 16 }}>✅</span>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Resolution</div>
           </div>
           <p style={{ fontSize: 13, color: '#14532D', lineHeight: 1.7, margin: 0 }}>{query.resolution_text}</p>
@@ -1465,7 +1482,7 @@ function QueryDetailView({ query, onBack, onClose }) {
   const TIMELINE_STEPS = [
     { key: 'raised',      title: 'We heard you',                           desc: 'Your question is now with our team' },
     { key: 'received',    title: 'Our team is working on it',              desc: 'A team member has started working on this' },
-    { key: 'assigned',    title: stage >= 4 ? (agent.name ? `${agent.name} is working on this 🔧` : 'Our team is working on this 🔧') : (agent.name ? `${agent.name} took it personally 🎯` : 'Our expert took it personally 🎯'), desc: null },
+    { key: 'assigned',    title: stage >= 4 ? (agent.name ? `${agent.name} is working on this` : 'Our team is working on this') : (agent.name ? `${agent.name} took it personally` : 'Our expert took it personally'), technical: stage >= 4, desc: null },
     { key: 'resolved',    title: 'Your question deserved a proper answer', desc: "We've gone through this carefully for you" },
     ...(stage >= 4 ? [{ key: 'escalated',    title: 'Going the extra mile for you', desc: 'We want to make sure this is fully clear for you' }] : []),
     ...(stage >= 4 ? [{ key: 'call_closed',  title: 'Your experience matters to us', desc: null }] : []),
@@ -1495,7 +1512,7 @@ function QueryDetailView({ query, onBack, onClose }) {
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', borderRadius: 12, padding: '10px 12px', border: '1px solid rgba(255,255,255,0.25)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-            <span style={{ fontSize: 18 }}>{meta.abbr}</span>
+            <DoubtIcon size={18} color="white" />
             <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>{query.category}</span>
           </div>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{query.sub_option}</div>
@@ -1506,12 +1523,12 @@ function QueryDetailView({ query, onBack, onClose }) {
         {/* Status banner */}
         {stage < 3 && (
           <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: stage === 2 ? PL : stage === 1 ? ORANGE_BG : BG2, border: `2px solid ${stage === 2 ? PB : stage === 1 ? '#FED7AA' : BD}`, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 22, flexShrink: 0 }}>{stage === 2 ? '🎯' : stage === 1 ? '👀' : '📨'}</span>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: stage === 2 ? P : stage === 1 ? ORANGE : T3, flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 800, color: stage === 2 ? PD : stage === 1 ? '#92400E' : T1 }}>
-                {stage === 0 && 'Doubt bheja! Ab wait karo 📬'}
-                {stage === 1 && 'Team dekh rahi hai isko 👀'}
-                {stage === 2 && `${agent.name} personally le raha hai 🎯`}
+                {stage === 0 && 'Doubt bheja! Ab wait karo'}
+                {stage === 1 && 'Team dekh rahi hai isko'}
+                {stage === 2 && `${agent.name} personally le raha hai`}
               </div>
               <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>
                 {stage === 0 && '48 ghante ke andar jawab milega'}
@@ -1523,16 +1540,16 @@ function QueryDetailView({ query, onBack, onClose }) {
         )}
         {stage === 3 && (
           <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: GREEN_BG, border: `2px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 28 }}>🎉</span>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D' }}>Cleared! ✅</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#14532D' }}>Cleared!</div>
               <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>Your doubt has been resolved</div>
             </div>
           </div>
         )}
         {stage === 4 && (
           <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: RED_BG, border: `2px solid ${RED_BORDER}`, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 22, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }}>🔥</span>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: RED, animation: 'tl-pulse 1.5s ease-in-out infinite', flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 800, color: RED }}>Extra mile pe chal rahe hain!</div>
               <div style={{ fontSize: 11, color: '#B91C1C', marginTop: 2 }}>Call schedule ho rahi hai — phone paas rakhna</div>
@@ -1541,7 +1558,7 @@ function QueryDetailView({ query, onBack, onClose }) {
         )}
         {stage === 5 && (
           <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: '#E0F8FC', border: `2px solid #A6E7F1`, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 28 }}>✨</span>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: CALLED, flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#0A5C6E' }}>Ek extra call bhi ho gaya!</div>
               <div style={{ fontSize: 11, color: CALLED, marginTop: 2 }}>Humein umeed hai ab sab clear ho gaya hoga</div>
@@ -1648,9 +1665,8 @@ function QueryCard({ query, onClick, onLowRating, index = 0 }) {
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 6px 0 ${accentColor}22, 0 4px 16px rgba(0,0,0,0.08)` }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 0 ${accentColor}22, 0 1px 8px rgba(0,0,0,0.05)` }}
     >
-      {/* Big emoji icon */}
-      <div style={{ width: 48, height: 48, borderRadius: 14, background: meta.bg, border: `2px solid ${accentColor}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
-        {meta.abbr}
+      <div style={{ width: 48, height: 48, borderRadius: 14, background: meta.bg, border: `2px solid ${accentColor}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <DoubtIcon size={22} color={accentColor} />
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -1688,101 +1704,22 @@ function QueryCard({ query, onClick, onLowRating, index = 0 }) {
   )
 }
 
-// ── Profile Home (landing page) ──────────────────────────────────────────────
-function ProfileHome({ queries, onOpenQueries, onClose }) {
-  const activeCount = queries.filter(q => q.status !== 'resolved').length
-  const resolvedCount = queries.filter(q => q.status === 'resolved').length
-  const total = queries.length
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Hero header — gradient */}
-      <div style={{ background: `linear-gradient(140deg, ${P} 0%, ${PD} 100%)`, padding: '18px 16px 22px', flexShrink: 0, position: 'relative' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
-        </div>
-        {/* Avatar + name */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div style={{ width: 66, height: 66, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: '3px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: 'white' }}>A</span>
-            </div>
-            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 18, height: 18, borderRadius: '50%', background: GREEN, border: '2px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>Anant Trivedi</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', marginTop: 2 }}>NORCET Gold 2024 · STU-2024-1429</div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 6, padding: '3px 10px', background: 'rgba(255,255,255,0.2)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.35)' }}>
-              <span style={{ fontSize: 13 }}>⚡</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>Active learner</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Menu cards */}
-      <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
-        {/* Your Queries card */}
-        <button
-          onClick={onOpenQueries}
-          style={{ width: '100%', textAlign: 'left', background: 'white', border: `2px solid ${PB}`, borderRadius: 16, padding: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14, boxShadow: `0 4px 0 ${PB}`, transition: 'transform 0.1s, box-shadow 0.1s' }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 6px 0 ${PB}` }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 0 ${PB}` }}
-        >
-          <div style={{ width: 46, height: 46, borderRadius: 14, background: PL, border: `2px solid ${PB}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>📋</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: T1 }}>My Doubts</div>
-            <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>{total} total · {activeCount} in review · {resolvedCount} solved</div>
-          </div>
-          {activeCount > 0 && (
-            <div style={{ padding: '4px 10px', borderRadius: 20, background: ORANGE_BG, border: `1.5px solid ${ORANGE}`, fontSize: 11, fontWeight: 800, color: ORANGE, flexShrink: 0 }}>{activeCount} active</div>
-          )}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}><polyline points="9,18 15,12 9,6"/></svg>
-        </button>
-
-        {/* Collection card (disabled) */}
-        <div style={{ background: 'white', border: `2px solid ${BD}`, borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 14, opacity: 0.55 }}>
-          <div style={{ width: 46, height: 46, borderRadius: 14, background: BG2, border: `2px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>🔖</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: T1 }}>My Collection</div>
-            <div style={{ fontSize: 11, color: T2, marginTop: 2 }}>Bookmarks, notes & saved Qs</div>
-          </div>
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: BG2, color: T3, border: `1px solid ${BD}` }}>Soon</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Queries Sub-view ──────────────────────────────────────────────────────────
-function QueriesView({ queries, onBack, onClose, onSelect }) {
+// ── Queries View — the whole of My Doubts ────────────────────────────────────
+function QueriesView({ queries, onClose, onSelect }) {
   const [filter, setFilter] = useState('all')
-  const [search, setSearch] = useState('')
   const [ratingPopup, setRatingPopup] = useState(null)
 
   const activeCount = queries.filter(q => q.status !== 'resolved').length
   const resolvedCount = queries.filter(q => q.status === 'resolved').length
 
-  const byFilter = filter === 'all' ? queries
+  const filtered = filter === 'all' ? queries
     : filter === 'active' ? queries.filter(q => q.status !== 'resolved')
     : queries.filter(q => q.status === 'resolved')
 
-  const sq = search.trim().toLowerCase()
-  const filtered = sq
-    ? byFilter.filter(x =>
-        x.category?.toLowerCase().includes(sq) ||
-        x.sub_option?.toLowerCase().includes(sq) ||
-        x.query_text?.toLowerCase().includes(sq) ||
-        ticketId(x.id).toLowerCase().includes(sq)
-      )
-    : byFilter
-
   const STAT_ITEMS = [
-    { label: 'Raised',    emoji: '📤', value: queries.length, key: 'all',      color: P,      bg: PL,        border: PB },
-    { label: 'In review', emoji: '⏳', value: activeCount,    key: 'active',   color: ORANGE, bg: ORANGE_BG, border: '#FED7AA' },
-    { label: 'Solved',    emoji: '✅', value: resolvedCount,  key: 'resolved', color: GREEN,  bg: GREEN_BG,  border: GREEN_BORDER },
+    { label: 'Raised',    value: queries.length, key: 'all',      color: P,      bg: PL,        border: PB },
+    { label: 'In review', value: activeCount,    key: 'active',   color: ORANGE, bg: ORANGE_BG, border: '#FED7AA' },
+    { label: 'Solved',    value: resolvedCount,  key: 'resolved', color: GREEN,  bg: GREEN_BG,  border: GREEN_BORDER },
   ]
 
   return (
@@ -1790,12 +1727,8 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
       {/* Header */}
       <div style={{ background: `linear-gradient(140deg, ${P} 0%, ${PD} 100%)`, padding: '12px 16px 14px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15,18 9,12 15,6"/></svg>
-          </button>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 17, fontWeight: 900, color: 'white', letterSpacing: '-0.3px' }}>My Doubts</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 1 }}>{queries.length} total · {resolvedCount} cleared 🎯</div>
           </div>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', width: 30, height: 30, borderRadius: '50%', color: 'white', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
@@ -1808,7 +1741,6 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
           return (
             <button key={s.key} onClick={() => setFilter(s.key)}
               style={{ padding: '12px 6px', textAlign: 'center', cursor: 'pointer', border: 'none', borderRight: i < 2 ? `1px solid ${BD}` : 'none', borderBottom: `3px solid ${active ? s.color : 'transparent'}`, background: active ? s.bg : 'white', transition: 'all 0.18s' }}>
-              <div style={{ fontSize: 20 }}>{s.emoji}</div>
               <div style={{ fontSize: 22, fontWeight: 900, color: active ? s.color : T1, lineHeight: 1.1, transition: 'color 0.18s' }}>{s.value}</div>
               <div style={{ fontSize: 10, fontWeight: 700, color: active ? s.color : T3, marginTop: 2, transition: 'color 0.18s' }}>{s.label}</div>
             </button>
@@ -1816,38 +1748,16 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
         })}
       </div>
 
-      {/* Search bar — always visible */}
-      <div style={{ padding: '8px 14px', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: BG2, border: `2px solid ${search ? P : BD}`, borderRadius: 12, padding: '8px 11px' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={search ? P : T3} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}>
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search doubts..." style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 13, color: T1, fontFamily: 'inherit', fontWeight: 500 }} />
-          {search
-            ? <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T3, fontSize: 14, padding: 0, lineHeight: 1, display: 'flex' }}>✕</button>
-            : <span style={{ fontSize: 11, color: T3, flexShrink: 0, fontWeight: 600 }}>{filtered.length}</span>
-          }
-        </div>
-      </div>
-
       {/* Query list */}
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 14px 24px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
         {filtered.length === 0 ? (
-          sq ? (
+          queries.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '48px 0' }}>
-              <div style={{ fontSize: 40, marginBottom: 10 }}>🔍</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>Kuch nahi mila</div>
-              <div style={{ fontSize: 12, color: T3, marginTop: 4 }}>Try a different search or filter</div>
-            </div>
-          ) : queries.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 0' }}>
-              <div style={{ fontSize: 40, marginBottom: 10 }}>🌱</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>No doubts raised yet</div>
               <div style={{ fontSize: 12, color: T3, marginTop: 4, lineHeight: 1.6 }}>Tap "Having trouble? Report" on any question to raise your first one.</div>
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '48px 0' }}>
-              <div style={{ fontSize: 40, marginBottom: 10 }}>{filter === 'resolved' ? '🎯' : '🎉'}</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: T2 }}>
                 {filter === 'resolved' ? 'Nothing solved yet' : 'Nothing in review right now'}
               </div>
@@ -1884,26 +1794,19 @@ function QueriesView({ queries, onBack, onClose, onSelect }) {
 // ── Main Overlay ─────────────────────────────────────────────────────────────
 export default function QueryTracker({ onClose }) {
   const { queries } = useQueries()
-  const [view, setView] = useState('profile') // 'profile' | 'queries' | 'detail'
   const [selected, setSelected] = useState(null)
 
-  const openQuery = (q) => { setSelected(q); setView('detail') }
+  const openQuery = (q) => setSelected(q)
 
-  if (view === 'detail' && selected) return (
+  if (selected) return (
     <div style={{ position: 'absolute', inset: 0, background: 'white', zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-      <QueryDetailView query={selected} onBack={() => setView('queries')} onClose={onClose} />
-    </div>
-  )
-
-  if (view === 'queries') return (
-    <div style={{ position: 'absolute', inset: 0, background: BG2, zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-      <QueriesView queries={queries} onBack={() => setView('profile')} onClose={onClose} onSelect={openQuery} />
+      <QueryDetailView query={selected} onBack={() => setSelected(null)} onClose={onClose} />
     </div>
   )
 
   return (
     <div style={{ position: 'absolute', inset: 0, background: BG2, zIndex: 100, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-      <ProfileHome queries={queries} onOpenQueries={() => setView('queries')} onClose={onClose} />
+      <QueriesView queries={queries} onClose={onClose} onSelect={openQuery} />
     </div>
   )
 }

@@ -646,7 +646,7 @@ function SuccessScreen({ onDone, queryId }) {
           <div style={{ fontSize: 10, fontWeight: 700, color: '#131B63', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>YOUR QUERY ID</div>
           <div style={{ fontSize: 20, fontWeight: 900, color: '#131B63', letterSpacing: '1px', fontFamily: 'monospace' }}>{ticketDisplay}</div>
           <div style={{ fontSize: 11, color: '#5B6088', marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(19,27,99,0.12)' }}>
-            📱 We'll reach out on WhatsApp — once your doubt is resolved, our team will message you directly with the answer.
+            Track it anytime from the menu (☰) under My Doubts — we'll notify you the moment it's ready.
           </div>
         </div>
       )}

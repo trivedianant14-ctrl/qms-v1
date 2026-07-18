@@ -22,6 +22,7 @@ import { QueryProvider } from './context/QueryContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { AuthProvider } from './context/AuthContext'
 import QueryTracker from './components/QueryTracker'
+import Sidebar from './components/Sidebar'
 import NotificationToast from './components/NotificationToast'
 import ResolverDashboard from './pages/ResolverDashboard'
 import ManagerDashboard from './pages/ManagerDashboard'
@@ -46,6 +47,7 @@ const EXISTING_USER_SAVES = [
 function NprepPrototype() {
   const [screen, setScreen] = useState('solve')
   const [showTracker, setShowTracker] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(false)
   const [currentLiveTest, setCurrentLiveTest] = useState(null)
   const [liveTestInterface, setLiveTestInterface] = useState('nprep')
   const [mode, setMode] = useState('guide')
@@ -188,7 +190,7 @@ function NprepPrototype() {
   const lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null
 
   const sharedProps = {
-    navigate, onOpenProfile: () => setShowTracker(true), mode, setMode,
+    navigate, onOpenSidebar: () => setShowSidebar(true), mode, setMode,
     currentQ, setCurrentQ,
     answers, setAnswers,
     timerPerQ, setTimerPerQ,
@@ -229,6 +231,12 @@ function NprepPrototype() {
           <NotificationToast />
           {showTracker && (
             <QueryTracker onClose={() => setShowTracker(false)} />
+          )}
+          {showSidebar && (
+            <Sidebar
+              onClose={() => setShowSidebar(false)}
+              onOpenDoubts={() => { setShowSidebar(false); setShowTracker(true) }}
+            />
           )}
           <div key={screen} className={`screen-trans screen-${animDirRef.current}`}>
             {screen === 'home' && <Home {...sharedProps} />}

@@ -11,12 +11,16 @@ const [screen, setScreen] = useState('home')
 - The `/nprep` route opens to the QBank home screen (subjects list, session card, AIR 15 banner).
 - Do NOT change this to `'solve'`, `'subject'`, or any other value.
 
-### 2. Profile button — REMOVED  ← LOCKED
-- `showTracker` state does NOT exist in `NprepPrototype`.
-- `<QueryTracker>` is NOT rendered inside `NprepPrototype`.
-- The `tracker-tab-btn` button does NOT exist inside `NprepPrototype`.
-- `onOpenProfile` is NOT in `sharedProps`.
-- Do NOT add any of the above back.
+### 2. My Doubts sidebar — INTENTIONAL, LOCKED AS-IS
+- `NprepPrototype` renders a hamburger-triggered `<Sidebar>` (profile card + menu:
+  My Doubts / Subscription / Share App / Support / Settings), matching the real
+  NPrep app's sidebar. This supersedes the old "Profile button removed" lock below,
+  which described a prior iteration and no longer applies.
+- `My Doubts` in the sidebar opens `<QueryTracker>` directly into the doubts list
+  (no intermediate profile screen) — restyled to the NPrep brand system (Midnight
+  Blue / Sky Blue / Ice Blue), no emoji, no search bar, recent-first.
+- Do not reintroduce the old avatar-circle "Profile" tab button or a separate
+  `ProfileHome` menu screen — the sidebar is the single entry point now.
 
 ## Other locked rules
 - The `/nprep` route renders `<NprepPrototype />` directly — do NOT wrap it in `<RaiseAQueryLayout>`.

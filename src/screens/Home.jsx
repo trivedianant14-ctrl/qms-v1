@@ -24,7 +24,7 @@ const NavBar = ({ navigate }) => {
   )
 }
 
-export default function Home({ navigate, onOpenProfile, savedQs, bannerDismissed, setBannerDismissed, unsaveQuestion, isNewUser, toggleUserMode, todayQs: realTodayQs, overallAcc: realOverallAcc, sessions, lastSession }) {
+export default function Home({ navigate, onOpenSidebar, savedQs, bannerDismissed, setBannerDismissed, unsaveQuestion, isNewUser, toggleUserMode, todayQs: realTodayQs, overallAcc: realOverallAcc, sessions, lastSession }) {
   const hasSessions = sessions && sessions.length > 0
   const todayQs = isNewUser ? (hasSessions ? realTodayQs : 0) : 12
   const overallAcc = isNewUser ? (hasSessions ? realOverallAcc : 0) : 71
@@ -63,7 +63,9 @@ export default function Home({ navigate, onOpenProfile, savedQs, bannerDismissed
       {/* Header */}
       <div style={{ padding: '6px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, borderBottom: `1px solid ${BD}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={onOpenProfile} style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${P}, #8B82E0)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', flexShrink: 0 }}>A</button>
+          <button onClick={onOpenSidebar} style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', color: T1, flexShrink: 0 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+          </button>
           <span style={{ fontSize: 17, fontWeight: 700, color: T1 }}>Question Bank</span>
         </div>
         <button style={{ background: 'none', border: 'none', color: T2, display: 'flex' }}>
