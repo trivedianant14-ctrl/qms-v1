@@ -2,17 +2,12 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useQueries } from '../context/QueryContext'
 import { useNotifications } from '../context/NotificationContext'
 
-// NPrep app design system, sampled from the production homepage collaterals:
-// #008DFF action blue, #131B63 navy, near-black titles, #7F7F8A grey meta,
-// #888CB0 blue-grey labels, #F3F9FF page, #F1F4FF tiles, white cards/headers.
-const BLUE = '#008DFF', BLUE_TILE = '#F1F4FF'
-const P = '#131B63', PL = '#F1F4FF', PB = '#008DFF', PD = '#131B63'
-const T1 = '#16181D', T2 = '#62677D', T3 = '#888CB0', BD = '#E7EAF2', BG2 = '#F3F9FF'
-const GREY = '#7F7F8A'
-const GREEN = '#189A57', GREEN_BG = '#E9F8F0', GREEN_BORDER = '#BDE8D2'
-const ORANGE = '#C98A1B', ORANGE_BG = '#FDF4E3'
-const RED = '#E5484D', RED_BG = '#FDECED', RED_BORDER = '#F5C6C8'
-const EXPERT = '#131B63', CALLED = '#008DFF'
+import {
+  BLUE, BLUE_TILE, GREY,
+  P, PL, PB, PD, T1, T2, T3, BD, BG2,
+  GREEN, GREEN_BG, GREEN_BORDER, ORANGE, ORANGE_BG, RED, RED_BG, RED_BORDER,
+  EXPERT, CALLED,
+} from '../theme/nprepTokens'
 
 // Category identity is icon + label only (no per-category hue) — status pills
 // carry the semantic color instead, so the palette never exceeds the brand's
@@ -1644,7 +1639,6 @@ function QueryCard({ query, onClick, onLowRating, index = 0 }) {
         border: `1px solid ${BD}`,
         cursor: 'pointer',
         padding: '13px 14px',
-        display: 'flex', gap: 12, alignItems: 'flex-start',
         opacity: 0,
         animation: `qmsCardIn 0.42s cubic-bezier(0.4,0,0.2,1) ${Math.min(index * 0.05, 0.35)}s forwards`,
         transition: 'border-color 0.18s',
@@ -1652,11 +1646,7 @@ function QueryCard({ query, onClick, onLowRating, index = 0 }) {
       onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9D4EA' }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = BD }}
     >
-      <div style={{ width: 40, height: 40, borderRadius: 12, background: BLUE_TILE, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <DoubtIcon size={20} color={P} />
-      </div>
-
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
           <span style={{ fontSize: 13.5, fontWeight: 600, color: T1, lineHeight: 1.35, flex: 1 }}>
             {query.sub_option}

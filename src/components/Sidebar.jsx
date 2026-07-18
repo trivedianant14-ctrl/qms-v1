@@ -1,9 +1,8 @@
 import React from 'react'
 
-// NPrep app design system, sampled from the production homepage collaterals.
-const BLUE = '#008DFF', TILE = '#F1F4FF'
-const P = '#131B63', PD = '#131B63'
-const T1 = '#16181D', T2 = '#62677D', T3 = '#888CB0', BD = '#E7EAF2', GREY = '#7F7F8A'
+import { BLUE_TILE as TILE, P, T1, T2, BD, GREY } from '../theme/nprepTokens'
+
+// PRO badge amber — matches the app's GO PRO treatment, used only here.
 const ORANGE = '#F59E0B', ORANGE_BG = '#FEF3E2'
 
 const MENU_ITEMS = [
