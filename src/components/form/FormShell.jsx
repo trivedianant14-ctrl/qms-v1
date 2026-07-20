@@ -17,6 +17,11 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
   const openBlockingQuery = questionContext.questionId
     ? queries.find(q => q.question_ref === questionContext.questionId && q.timeline_status !== 'resolved')
     : null
+  // The audio category only exists where an audio solution exists — a question
+  // without one has nothing to report under it. All other categories always show.
+  const availableMainOptions = MAIN_OPTIONS.filter(
+    option => option.id !== 'audio-issue' || questionContext.hasAudio
+  )
   const [screen, setScreen] = useState('1')
   const [selectedOption, setSelectedOption] = useState(null)
   const [selectedSubOption, setSelectedSubOption] = useState(null)
@@ -143,7 +148,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
         </div>
         <div className="form-body">
 
-        {screen === '1' && <Screen1 selectedOption={selectedOption} onChoose={chooseMain} onOthers={() => setScreen('3')} />}
+        {screen === '1' && <Screen1 mainOptions={availableMainOptions} selectedOption={selectedOption} onChoose={chooseMain} onOthers={() => setScreen('3')} />}
         {['2A', '2B', '2C', '2D', '2E'].includes(screen) && (
           <SubOptionScreen
             screenKey={screen}
@@ -157,7 +162,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
             }}
           />
         )}
-        {screen === '3' && <OthersInterstitial onChoose={chooseMain} onNone={() => setScreen('4')} />}
+        {screen === '3' && <OthersInterstitial mainOptions={availableMainOptions} onChoose={chooseMain} onNone={() => setScreen('4')} />}
         {screen === '4' && (
           <OthersText
             value={othersText}
@@ -207,13 +212,13 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
   )
 }
 
-function Screen1({ selectedOption, onChoose, onOthers }) {
+function Screen1({ mainOptions, selectedOption, onChoose, onOthers }) {
   return (
     <>
       <h1 className="form-title">What's the issue?</h1>
       <p className="form-subtitle">Select the option that best describes your problem</p>
       <div className="main-options">
-        {MAIN_OPTIONS.map(option => (
+        {mainOptions.map(option => (
           <button
             key={option.id}
             type="button"
@@ -259,14 +264,14 @@ function SubOptionScreen({ screenKey, selectedSubOption, onSelect, onContinue })
   )
 }
 
-function OthersInterstitial({ onChoose, onNone }) {
+function OthersInterstitial({ mainOptions, onChoose, onNone }) {
   return (
     <div className="others-gate">
       <div className="warning-icon">!</div>
       <h1 className="form-title small">Before you continue -</h1>
       <p className="form-subtitle">Does your issue fit any of these?</p>
       <div className="chip-grid">
-        {MAIN_OPTIONS.map(option => (
+        {mainOptions.map(option => (
           <button className="chip" key={option.id} type="button" onClick={() => onChoose(option)}>
             {option.title}
           </button>

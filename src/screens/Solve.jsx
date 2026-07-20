@@ -572,6 +572,7 @@ export default function Solve({ navigate, mode, setMode, currentQ, setCurrentQ, 
                 questionNum: currentQ + 1,
                 subjectName: 'Applied Anatomy',
                 testName: 'QBank — Chapter Practice',
+                hasAudio: true,
               }}
               onClose={() => setShowReport(false)}
               onDone={() => setShowReport(false)}
