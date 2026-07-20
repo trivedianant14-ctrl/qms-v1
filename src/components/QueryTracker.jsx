@@ -27,6 +27,26 @@ const CATEGORY_META = {
 const STAGE_FROM_STATUS = { raised: 0, received: 1, assigned: 2, resolved: 3, escalated: 4, escalation_closed: 5 }
 const STAGE_LABELS = ['Sent', 'Team on it', 'Expert on it', 'Solved', 'Extra mile', 'Called']
 const STAGE_COLORS = [T3, ORANGE, P, GREEN, RED, BLUE]
+// Soft-tile backgrounds pair each status with the same tinted-container language
+// used everywhere else in the section (icon tiles, chips) — a status becomes a
+// small chip instead of a bare dot floating on the card.
+const STAGE_BG = [BD, ORANGE_BG, BLUE_TILE, GREEN_BG, RED_BG, '#E5F4FC']
+
+// A status chip — dot + label inside a soft tinted pill, used on both the card
+// footer and the detail header so a stage always reads the same way.
+function StatusBadge({ stage, size = 'sm' }) {
+  const color = STAGE_COLORS[stage] || T3
+  const bg = STAGE_BG[stage] || BD
+  const label = STAGE_LABELS[stage] || 'Unknown'
+  const padding = size === 'lg' ? '5px 12px 5px 9px' : '4px 10px 4px 8px'
+  const fontSize = size === 'lg' ? 12 : 10.5
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding, borderRadius: 20, background: bg, fontSize, fontWeight: 700, color, flexShrink: 0, whiteSpace: 'nowrap' }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }} />
+      {label}
+    </span>
+  )
+}
 
 // Single, consistent doubt icon — categories no longer carry per-category color or
 // emoji, so one clean mark used everywhere is clearer than an empty badge.
@@ -1485,8 +1505,6 @@ function QueryDetailView({ query, onBack, onClose }) {
     ...(stage >= 4 ? [{ key: 'call_closed',  title: 'Your experience matters to us', desc: null }] : []),
   ]
 
-  const statusColor = STAGE_COLORS[stage] || T3
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header — white, app style */}
@@ -1499,10 +1517,7 @@ function QueryDetailView({ query, onBack, onClose }) {
             <div style={{ fontSize: 14, fontWeight: 700, color: T1 }}>{ticketId(query.id)}</div>
             <div style={{ fontSize: 11, color: GREY, marginTop: 1 }}>Raised {timeAgo(query.timestamp)}</div>
           </div>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 600, color: statusColor, flexShrink: 0 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor }} />
-            {STAGE_LABELS[stage] || 'Unknown'}
-          </span>
+          <StatusBadge stage={stage} size="lg" />
           <button onClick={onClose} style={{ background: 'white', border: `1px solid ${BD}`, cursor: 'pointer', width: 34, height: 34, borderRadius: '50%', color: T1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -1628,8 +1643,6 @@ function QueryCard({ query, onClick, onLowRating, index = 0 }) {
     }
   }
 
-  const accentColor = STAGE_COLORS[stage] || T3
-
   return (
     <div
       onClick={onClick}
@@ -1661,10 +1674,7 @@ function QueryCard({ query, onClick, onLowRating, index = 0 }) {
         {/* Footer */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
           <span style={{ fontSize: 10.5, color: T3 }}>{ticketId(query.id)} · {timeAgo(query.timestamp)}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: accentColor }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: accentColor }} />
-            {STAGE_LABELS[stage] || '?'}
-          </span>
+          <StatusBadge stage={stage} />
         </div>
       </div>
     </div>
