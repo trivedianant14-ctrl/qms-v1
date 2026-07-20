@@ -1671,10 +1671,23 @@ function QueryCard({ query, onClick, onLowRating, index = 0 }) {
   )
 }
 
+// ── Zero-state icon — a calm, empty version of the doubt mark ────────────────
+function EmptyDoubtIcon() {
+  return (
+    <div style={{ width: 56, height: 56, margin: '0 auto 16px', borderRadius: '50%', background: BLUE_TILE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <DoubtIcon size={26} color={PB} />
+    </div>
+  )
+}
+
 // ── Queries View — the whole of My Doubts ────────────────────────────────────
-function QueriesView({ queries, onClose, onSelect }) {
+function QueriesView({ queries: realQueries, onClose, onSelect }) {
   const [filter, setFilter] = useState('all')
   const [ratingPopup, setRatingPopup] = useState(null)
+  // Prototype toggle strip — lets a demo preview the zero-state without
+  // needing an account that has genuinely never raised a doubt.
+  const [previewEmpty, setPreviewEmpty] = useState(false)
+  const queries = previewEmpty ? [] : realQueries
 
   const activeCount = queries.filter(q => q.status !== 'resolved').length
   const resolvedCount = queries.filter(q => q.status === 'resolved').length
@@ -1699,6 +1712,14 @@ function QueriesView({ queries, onClose, onSelect }) {
         </button>
       </div>
 
+      {/* Prototype toggle strip */}
+      <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', padding: '6px 16px', background: '#F5F5FB', borderBottom: `1px solid ${BD}` }}>
+        <div style={{ display: 'inline-flex', background: 'white', border: `1px solid ${BD}`, borderRadius: 20, padding: 3, gap: 2 }}>
+          <button onClick={() => previewEmpty && setPreviewEmpty(false)} style={{ padding: '4px 16px', borderRadius: 16, fontSize: 11, fontWeight: 600, background: !previewEmpty ? P : 'transparent', color: !previewEmpty ? 'white' : T3, border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}>Has doubts</button>
+          <button onClick={() => !previewEmpty && setPreviewEmpty(true)} style={{ padding: '4px 16px', borderRadius: 16, fontSize: 11, fontWeight: 600, background: previewEmpty ? P : 'transparent', color: previewEmpty ? 'white' : T3, border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}>Empty state</button>
+        </div>
+      </div>
+
       {/* Stats strip — flat tabs, blue underline marks the active filter */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'white', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
         {STAT_ITEMS.map(s => {
@@ -1718,9 +1739,10 @@ function QueriesView({ queries, onClose, onSelect }) {
       <div className="scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 24px', display: 'flex', flexDirection: 'column', gap: 10, background: BG2 }}>
         {filtered.length === 0 ? (
           queries.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <div style={{ textAlign: 'center', padding: '56px 24px 48px' }}>
+              <EmptyDoubtIcon />
               <div style={{ fontSize: 14, fontWeight: 600, color: T1 }}>No doubts raised yet</div>
-              <div style={{ fontSize: 12, color: GREY, marginTop: 4, lineHeight: 1.6 }}>Tap "Having trouble? Report" on any question to raise your first one.</div>
+              <div style={{ fontSize: 12, color: GREY, marginTop: 4, lineHeight: 1.6 }}>Anything you raise while practicing will show up here.</div>
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '48px 0' }}>
