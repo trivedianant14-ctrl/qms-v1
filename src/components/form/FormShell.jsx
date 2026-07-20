@@ -28,6 +28,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
   const [commentText, setCommentText] = useState('')
   const [referenceText, setReferenceText] = useState('')
   const [attachment, setAttachment] = useState(null)
+  const [voiceRecorded, setVoiceRecorded] = useState(false)
   const [othersText, setOthersText] = useState('')
   const [submittedId, setSubmittedId] = useState(null)
 
@@ -60,7 +61,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
     else if (screen === '3') setScreen('1')
   }
 
-  const submitStructured = ({ comment = commentText, reference = referenceText, media = attachment } = {}) => {
+  const submitStructured = ({ comment = commentText, reference = referenceText, media = attachment, voice = voiceRecorded } = {}) => {
     const config = SUB_OPTIONS[selectedOption.screenKey]
     const id = addQuery({
       category: config.category,
@@ -68,7 +69,8 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
       commentText: [
         comment && `Reason: ${comment}`,
         reference && `Reference: ${reference}`,
-        media && `Attachment: ${media.type} - ${media.name}`
+        media && `Attachment: ${media.type} - ${media.name}`,
+        voice && 'Attachment: Voice note'
       ].filter(Boolean).join('\n'),
       subjectName: questionContext.subjectName,
       testName: questionContext.testName,
@@ -158,6 +160,7 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
               setCommentText('')
               setReferenceText('')
               setAttachment(null)
+              setVoiceRecorded(false)
               setScreen('5')
             }}
           />
@@ -186,12 +189,14 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
               value={commentText}
               referenceValue={referenceText}
               attachment={attachment}
+              voiceRecorded={voiceRecorded}
               prompt={selectedSubOption?.prompt}
               onChange={setCommentText}
               onReferenceChange={setReferenceText}
               onAttachmentChange={setAttachment}
+              onVoiceChange={setVoiceRecorded}
               onSubmit={() => submitStructured()}
-              onSkip={() => submitStructured({ comment: '', reference: '', media: null })}
+              onSkip={() => submitStructured({ comment: '', reference: '', media: null, voice: false })}
             />
           )
           return (
@@ -199,8 +204,10 @@ export default function FormShell({ embedded = false, onClose, onDone, questionC
               value={commentText}
               prompt={selectedSubOption?.prompt}
               onChange={setCommentText}
+              voiceRecorded={voiceRecorded}
+              onVoiceChange={setVoiceRecorded}
               onSubmit={() => submitStructured({ comment: commentText, reference: '', media: null })}
-              onSkip={() => submitStructured({ comment: '', reference: '', media: null })}
+              onSkip={() => submitStructured({ comment: '', reference: '', media: null, voice: false })}
               showVoice={!isTextOnly}
             />
           )
@@ -329,10 +336,12 @@ function WrongAnswerEvidenceScreen({
   value,
   referenceValue,
   attachment,
+  voiceRecorded,
   prompt,
   onChange,
   onReferenceChange,
   onAttachmentChange,
+  onVoiceChange,
   onSubmit,
   onSkip
 }) {
@@ -401,14 +410,14 @@ function WrongAnswerEvidenceScreen({
           </div>
         )}
       </div>
-      <VoiceRecorder />
-      <button className="primary-btn" type="button" disabled={!value.trim() && !referenceValue.trim() && !attachment} onClick={onSubmit}>Submit query</button>
+      <VoiceRecorder onDurationChange={(seconds) => onVoiceChange(seconds > 0)} />
+      <button className="primary-btn" type="button" disabled={!value.trim() && !referenceValue.trim() && !attachment && !voiceRecorded} onClick={onSubmit}>Submit query</button>
       <button className="secondary-btn" type="button" onClick={onSkip}>Skip and submit</button>
     </>
   )
 }
 
-function CommentScreen({ value, prompt, onChange, onSubmit, onSkip, showVoice = true }) {
+function CommentScreen({ value, prompt, onChange, onSubmit, onSkip, showVoice = true, voiceRecorded, onVoiceChange }) {
   return (
     <>
       <div className="comment-title">
@@ -421,8 +430,8 @@ function CommentScreen({ value, prompt, onChange, onSubmit, onSkip, showVoice = 
         onChange={(event) => onChange(event.target.value)}
         style={{ minHeight: 100 }}
       />
-      {showVoice && <VoiceRecorder />}
-      <button className="primary-btn" type="button" disabled={!value.trim()} onClick={onSubmit}>Submit query</button>
+      {showVoice && <VoiceRecorder onDurationChange={(seconds) => onVoiceChange(seconds > 0)} />}
+      <button className="primary-btn" type="button" disabled={!value.trim() && !(showVoice && voiceRecorded)} onClick={onSubmit}>Submit query</button>
       <button className="secondary-btn" type="button" onClick={onSkip}>Skip and submit</button>
     </>
   )
