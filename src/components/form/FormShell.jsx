@@ -658,7 +658,7 @@ function SuccessScreen({ onDone, queryId }) {
 
   return (
     <div className="success-screen">
-      <div className="success-icon" style={{ background: '#E5F0F8', borderColor: '#15CAE8', color: '#131B63' }}>✓</div>
+      <div className="success-icon" style={{ background: '#E9F8F0', borderColor: '#189A57', color: '#189A57' }}>✓</div>
       <h1 className="form-title" style={{ marginTop: 16, color: '#131B63' }}>We've got this</h1>
       <p className="success-body">Our team will take a proper look and respond</p>
 
