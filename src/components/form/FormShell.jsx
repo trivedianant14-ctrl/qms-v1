@@ -585,14 +585,16 @@ const LOCKED_STATUS_LABELS = {
 function QuestionLockedScreen({ query, onDone }) {
   const { addNote } = useQueries()
   const [note, setNote] = useState('')
-  const [sent, setSent] = useState(false)
   const ticketDisplay = query.ticket_id ? `#${query.ticket_id}` : null
   const statusLabel = LOCKED_STATUS_LABELS[query.timeline_status] || 'In progress'
+  // Capped to one add-on note per open query — read from the query itself (not
+  // local state) so the limit holds even if the student closes and reopens
+  // this screen.
+  const studentNote = (query.notes || []).find(n => n.author === 'student')
 
   const handleSend = () => {
     if (!note.trim()) return
     addNote(query.ticket_id, note.trim(), 'student')
-    setSent(true)
   }
 
   return (
@@ -613,7 +615,7 @@ function QuestionLockedScreen({ query, onDone }) {
         )}
       </div>
 
-      {!sent ? (
+      {!studentNote ? (
         <div style={{ width: '100%', marginTop: 12 }}>
           <textarea
             value={note}
@@ -622,6 +624,7 @@ function QuestionLockedScreen({ query, onDone }) {
             rows={2}
             style={{ width: '100%', padding: '9px 11px', borderRadius: 10, border: '1.5px solid #E1E6F2', fontSize: 12, color: '#131B63', resize: 'none', fontFamily: 'inherit', outline: 'none', background: '#EDF5FA', boxSizing: 'border-box' }}
           />
+          <div style={{ marginTop: 4, fontSize: 10.5, color: '#8790B8' }}>You can add this once — make it count.</div>
           <button
             type="button"
             onClick={handleSend}
@@ -632,8 +635,12 @@ function QuestionLockedScreen({ query, onDone }) {
           </button>
         </div>
       ) : (
-        <div style={{ width: '100%', marginTop: 12, fontSize: 12, color: '#16794C', fontWeight: 600, textAlign: 'left' }}>
-          ✓ Added — the team will see this too.
+        <div style={{ width: '100%', marginTop: 12, textAlign: 'left' }}>
+          <div style={{ fontSize: 12, color: '#16794C', fontWeight: 600 }}>✓ Added — the team will see this too.</div>
+          <div style={{ marginTop: 8, background: '#EDF5FA', border: '1px solid #E1E6F2', borderRadius: 10, padding: '9px 11px', fontSize: 12, color: '#131B63', fontStyle: 'italic' }}>
+            "{studentNote.text}"
+          </div>
+          <div style={{ marginTop: 6, fontSize: 10.5, color: '#8790B8' }}>You've already added extra context here — that's the one add-on this query gets.</div>
         </div>
       )}
 
